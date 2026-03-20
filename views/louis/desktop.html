@@ -323,8 +323,8 @@ const DB_PATH     = 'sessions'; // Root-Pfad in Firebase
 const STATUS_OPTS = ['Offen','Reservierung','Abholung','Abgeschlossen'];
 const FB_MOEBEL   = 'https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app';
 
-/* ── Möbel-Katalog (identisch mit moebel.html) ── */
-const MOEBEL_KATALOG = [
+/* ── Möbel-Katalog — wird dynamisch aus Firebase geladen (Fallback: hardcodiert) ── */
+let MOEBEL_KATALOG = [
   { id:'schreibtisch_160', label:'Schreibtisch 160×80', subs:[
     { id:'weiss', label:'Weiß' }, { id:'grau', label:'Grau' },
     { id:'grau_manuel_rad', label:'Grau manuell Rädchen' }, { id:'grau_manuel_schr', label:'Grau manuell Schrauben' }, { id:'grau_auseinander', label:'Grau auseinandergebaut' },
@@ -400,6 +400,33 @@ function initFirebase() {
     isConfigured = true;
     setSyncStatus('syncing', 'Verbinde…');
 
+    // Zuerst Dropdown-Katalog aus Firebase laden (von moebel.html gepflegt)
+    db.ref('moebelDropdownKatalog').once('value', snapKat => {
+      const fbKat = snapKat.val();
+      if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
+        MOEBEL_KATALOG.length = 0;
+        fbKat.forEach(k => MOEBEL_KATALOG.push(k));
+      }
+      // Danach Session-Daten live hören
+      startSessionListener();
+    });
+
+    // Live-Update wenn Katalog in moebel.html geändert wird
+    db.ref('moebelDropdownKatalog').on('value', snapKat => {
+      const fbKat = snapKat.val();
+      if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
+        MOEBEL_KATALOG.length = 0;
+        fbKat.forEach(k => MOEBEL_KATALOG.push(k));
+        renderAll(); // Cards neu aufbauen mit aktuellem Katalog
+      }
+    });
+  } catch(e) {
+    setSyncStatus('error', 'Init-Fehler');
+    console.error(e);
+  }
+}
+
+function startSessionListener() {
     dbRef.on('value', snapshot => {
       const raw = snapshot.val();
       if (!raw) { uploadInitialData(); return; }
@@ -420,10 +447,6 @@ function initFirebase() {
       if (needsRender) renderAll();
       setSyncStatus('synced', 'Synchronisiert');
     }, err => setSyncStatus('error', 'Fehler: ' + err.message));
-  } catch(e) {
-    setSyncStatus('error', 'Init-Fehler');
-    console.error(e);
-  }
 }
 
 function uploadInitialData() {

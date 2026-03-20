@@ -87,6 +87,29 @@
   .edit-box input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,149,0,0.15); }
   .edit-box-actions { display:flex; gap:8px; margin-top:18px; }
   .edit-box-actions .btn { flex:1; justify-content:center; }
+  /* Katalog-Editor */
+  .kat-add-row { display:flex; gap:8px; align-items:center; padding:10px 20px; background:var(--surface2); border-top:1px solid var(--border); }
+  .kat-add-row input { flex:1; font-size:13px; font-family:var(--font); padding:7px 12px; border:1px solid var(--border-strong); border-radius:8px; outline:none; background:#fff; }
+  .kat-add-row input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,149,0,0.12); }
+  .add-sub-btn { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:#0071e3; background:none; border:none; cursor:pointer; padding:5px 8px; border-radius:7px; white-space:nowrap; }
+  .add-sub-btn:hover { background:#e8f1fb; }
+  .rm-row-btn { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:6px; background:none; border:none; cursor:pointer; color:var(--text-tertiary); font-size:14px; flex-shrink:0; }
+  .rm-row-btn:hover { background:#fff0f0; color:var(--danger); }
+  .rm-kat-btn { margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--danger); background:none; border:1px solid rgba(255,59,48,0.3); border-radius:8px; padding:4px 10px; cursor:pointer; }
+  .rm-kat-btn:hover { background:#fff0f0; }
+  .add-kat-card { background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); border:2px dashed var(--border-strong); display:flex; align-items:center; justify-content:center; gap:10px; padding:22px; cursor:pointer; transition:var(--tr); }
+  .add-kat-card:hover { border-color:var(--accent); background:var(--accent-light); }
+  .add-kat-card span { font-size:14px; font-weight:600; color:var(--text-secondary); }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); backdrop-filter:blur(4px); z-index:600; display:none; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal-box { background:#fff; border-radius:18px; padding:28px; width:380px; max-width:95vw; box-shadow:0 24px 60px rgba(0,0,0,0.2); }
+  .modal-box h3 { font-size:16px; font-weight:700; margin-bottom:16px; }
+  .modal-field { margin-bottom:14px; }
+  .modal-field label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary); margin-bottom:5px; }
+  .modal-field input { width:100%; font-size:14px; font-family:var(--font); padding:9px 12px; border:1.5px solid var(--border-strong); border-radius:9px; outline:none; }
+  .modal-field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,149,0,0.12); }
+  .modal-actions { display:flex; gap:8px; margin-top:18px; }
+  .modal-actions .btn { flex:1; justify-content:center; }
 </style>
 </head>
 <body>
@@ -103,6 +126,10 @@
   </div>
   <div class="nav-actions">
     <div class="sync-indicator" id="syncIndicator"><div class="dot"></div><span id="syncText">Verbinde…</span></div>
+    <button class="btn btn-ghost" onclick="openAddKatModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Kategorie
+    </button>
     <button class="btn btn-green" onclick="exportExcel()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Excel Export
@@ -131,6 +158,44 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- Modal: Neue Kategorie hinzufügen -->
+<div class="modal-overlay" id="addKatOverlay">
+  <div class="modal-box">
+    <h3>📦 Neue Kategorie</h3>
+    <div class="modal-field">
+      <label>Name der Kategorie</label>
+      <input type="text" id="newKatTitel" placeholder="z.B. Trennwände" />
+    </div>
+    <div class="modal-field">
+      <label>Emoji (optional)</label>
+      <input type="text" id="newKatEmoji" placeholder="z.B. 🧱" maxlength="4" style="font-size:22px;text-align:center;" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAddKatModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="confirmAddKat()">Hinzufügen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Neuen Eintrag hinzufügen -->
+<div class="modal-overlay" id="addSubOverlay">
+  <div class="modal-box">
+    <h3 id="addSubTitle">➕ Neuer Eintrag</h3>
+    <div class="modal-field">
+      <label>Bezeichnung</label>
+      <input type="text" id="newSubLabel" placeholder="z.B. Weiß 120×80" />
+    </div>
+    <div class="modal-field">
+      <label>Startbestand</label>
+      <input type="number" id="newSubAnzahl" placeholder="0" min="0" value="0" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAddSubModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="confirmAddSub()">Hinzufügen</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -284,32 +349,91 @@ function setSync(t, txt) {
 }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+/* ── Katalog in Firebase speichern/laden ── */
+function saveKatalog() {
+  if (!_db) return;
+  // Katalog als kompaktes Array in Firebase ablegen
+  const katalogData = KATEGORIEN.map(k => ({
+    id: k.id, titel: k.titel, emoji: k.emoji,
+    zeilen: k.zeilen.map(z => ({ id: z.id, label: z.label }))
+  }));
+  _db.ref('moebelKatalog').set(katalogData)
+    .catch(e => console.error('Katalog-Fehler', e));
+}
+
 /* ── Firebase ── */
 (function initFb(){
   try {
     const app = firebase.initializeApp(FB_CFG);
     _db = firebase.database(app);
-    _db.ref('moebel').on('value', snap => {
-      const fbData = snap.val();
-      if (fbData) {
-        KATEGORIEN.forEach(kat => {
-          if (fbData[kat.id]) {
-            kat.zeilen.forEach(z => {
-              if (fbData[kat.id][z.id] !== undefined) {
-                const fb = fbData[kat.id][z.id];
-                if (!_data[kat.id]) _data[kat.id] = {};
-                if (!_data[kat.id][z.id]) _data[kat.id][z.id] = { anzahl: z.start, notiz:'', updatedAt:'' };
-                _data[kat.id][z.id].anzahl    = fb.anzahl    != null ? fb.anzahl    : _data[kat.id][z.id].anzahl;
-                _data[kat.id][z.id].notiz     = fb.notiz     != null ? fb.notiz     : '';
-                _data[kat.id][z.id].updatedAt = fb.updatedAt != null ? fb.updatedAt : '';
+
+    // Erst Katalog laden, dann Bestandsdaten
+    _db.ref('moebelKatalog').once('value', snapKat => {
+      const fbKat = snapKat.val();
+      if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
+        // Katalog aus Firebase übernehmen (neue Kategorien/Einträge)
+        fbKat.forEach(fbK => {
+          const existing = KATEGORIEN.find(k => k.id === fbK.id);
+          if (existing) {
+            // Neue Zeilen ergänzen (vorhandene behalten, fehlende hinzufügen)
+            fbK.zeilen.forEach(fbZ => {
+              if (!existing.zeilen.find(z => z.id === fbZ.id)) {
+                existing.zeilen.push({ id: fbZ.id, label: fbZ.label, farbe: '#aeaeb2', rand: null, start: 0 });
               }
+            });
+            // Zeilen die in Firebase fehlen → entfernen
+            existing.zeilen = existing.zeilen.filter(z => fbK.zeilen.find(fbZ => fbZ.id === z.id));
+          } else {
+            // Komplett neue Kategorie
+            KATEGORIEN.push({
+              id: fbK.id, titel: fbK.titel, emoji: fbK.emoji || '📦',
+              zeilen: fbK.zeilen.map(z => ({ id: z.id, label: z.label, farbe: '#aeaeb2', rand: null, start: 0 }))
             });
           }
         });
+        // Kategorien die in Firebase nicht mehr existieren → entfernen
+        for (let i = KATEGORIEN.length - 1; i >= 0; i--) {
+          if (!fbKat.find(fbK => fbK.id === KATEGORIEN[i].id)) {
+            KATEGORIEN.splice(i, 1);
+          }
+        }
+      } else {
+        // Erster Start: Katalog initial in Firebase speichern
+        saveKatalog();
       }
-      renderAll();
-      setSync('synced', 'Live ✓');
-    }, () => { setSync('error','Firebase Fehler'); renderAll(); });
+
+      // Initialisiere _data für alle (inkl. neue) Kategorien
+      KATEGORIEN.forEach(kat => {
+        if (!_data[kat.id]) _data[kat.id] = {};
+        kat.zeilen.forEach(z => {
+          if (!_data[kat.id][z.id]) _data[kat.id][z.id] = { anzahl: z.start || 0, notiz: '', updatedAt: '' };
+        });
+      });
+
+      // Jetzt Bestandsdaten live hören
+      _db.ref('moebel').on('value', snap => {
+        const fbData = snap.val();
+        if (fbData) {
+          KATEGORIEN.forEach(kat => {
+            if (fbData[kat.id]) {
+              kat.zeilen.forEach(z => {
+                if (fbData[kat.id][z.id] !== undefined) {
+                  const fb = fbData[kat.id][z.id];
+                  if (!_data[kat.id]) _data[kat.id] = {};
+                  if (!_data[kat.id][z.id]) _data[kat.id][z.id] = { anzahl: 0, notiz:'', updatedAt:'' };
+                  _data[kat.id][z.id].anzahl    = fb.anzahl    != null ? fb.anzahl    : _data[kat.id][z.id].anzahl;
+                  _data[kat.id][z.id].notiz     = fb.notiz     != null ? fb.notiz     : '';
+                  _data[kat.id][z.id].updatedAt = fb.updatedAt != null ? fb.updatedAt : '';
+                }
+              });
+            }
+          });
+        }
+        _domBuilt = false; // DOM neu aufbauen bei Katalogänderungen
+        renderAll();
+        setSync('synced', 'Live ✓');
+      }, () => { setSync('error','Firebase Fehler'); renderAll(); });
+    });
   } catch(e) { setSync('error','Init-Fehler'); console.error(e); renderAll(); }
 })();
 
@@ -327,8 +451,10 @@ function buildDOM() {
   KATEGORIEN.forEach(kat => {
     const rows = kat.zeilen.map(z => {
       const ds = z.farbe ? `background:${z.farbe};${z.rand?'border:1.5px solid '+z.rand+';':''}` : '';
-      return `<tr>
-        <td><span class="fchip"><span class="fdot" style="${ds}"></span>${esc(z.label)}</span></td>
+      return `<tr id="row-${kat.id}-${z.id}">
+        <td>
+          <span class="fchip"><span class="fdot" style="${ds}"></span>${esc(z.label)}</span>
+        </td>
         <td>
           <div class="stepper">
             <button class="s-btn" onclick="change('${kat.id}','${z.id}',-1)">−</button>
@@ -339,6 +465,9 @@ function buildDOM() {
         <td><span class="sbadge leer" id="b-${kat.id}-${z.id}">Leer</span></td>
         <td><input class="notiz" id="n-${kat.id}-${z.id}" placeholder="Notiz…" oninput="noteChange('${kat.id}','${z.id}',this.value)" /></td>
         <td><span class="ts" id="t-${kat.id}-${z.id}">–</span></td>
+        <td style="padding:8px 12px;">
+          <button class="rm-row-btn" onclick="removeZeile('${kat.id}','${z.id}')" title="Eintrag löschen">×</button>
+        </td>
       </tr>`;
     }).join('');
 
@@ -349,6 +478,10 @@ function buildDOM() {
         <span class="kat-emoji">${kat.emoji}</span>
         <span class="kat-title">${esc(kat.titel)}</span>
         <span class="kat-gesamtbadge" id="kat-tot-${kat.id}">–</span>
+        <button class="rm-kat-btn" onclick="removeKat('${kat.id}')">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Kategorie löschen
+        </button>
       </div>
       <div class="tbl-wrap">
         <table class="mtbl">
@@ -358,9 +491,18 @@ function buildDOM() {
             <th style="min-width:110px">Status</th>
             <th style="min-width:180px">Notiz</th>
             <th style="min-width:110px">Geändert</th>
+            <th style="width:40px"></th>
           </tr></thead>
-          <tbody>${rows}</tbody>
+          <tbody id="tbody-${kat.id}">${rows}</tbody>
         </table>
+      </div>
+      <div class="kat-add-row">
+        <input type="text" placeholder="Neuer Eintrag (z.B. Weiß 140×80)…" id="subInput-${kat.id}" onkeydown="if(event.key==='Enter')addZeileInline('${kat.id}')" />
+        <input type="number" min="0" placeholder="Anzahl" id="subAnzahl-${kat.id}" style="width:90px;flex:none" onkeydown="if(event.key==='Enter')addZeileInline('${kat.id}')" />
+        <button class="add-sub-btn" onclick="addZeileInline('${kat.id}')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Hinzufügen
+        </button>
       </div>`;
     container.appendChild(card);
   });
@@ -433,6 +575,97 @@ function noteChange(katId, zeilId, val) {
   scheduleSave();
 }
 
+/* ── Katalog-Editor: Zeile hinzufügen ── */
+function addZeileInline(katId) {
+  const labelEl  = document.getElementById(`subInput-${katId}`);
+  const anzahlEl = document.getElementById(`subAnzahl-${katId}`);
+  const label = labelEl.value.trim();
+  if (!label) { labelEl.focus(); labelEl.style.borderColor='var(--danger)'; setTimeout(()=>labelEl.style.borderColor='',1200); return; }
+  const kat = KATEGORIEN.find(k => k.id === katId);
+  if (!kat) return;
+  // ID aus Label ableiten
+  const id = label.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,40) + '_' + Date.now().toString(36);
+  const anzahl = Math.max(0, parseInt(anzahlEl.value)||0);
+  kat.zeilen.push({ id, label, farbe:'#aeaeb2', rand:null, start: anzahl });
+  if (!_data[katId]) _data[katId] = {};
+  _data[katId][id] = { anzahl, notiz:'', updatedAt: nowStr() };
+  labelEl.value = ''; anzahlEl.value = '';
+  saveKatalog();
+  scheduleSave();
+  _domBuilt = false;
+  renderAll();
+  toast(`"${label}" zu ${kat.titel} hinzugefügt ✓`);
+  // Katalog auch in Firebase-Pfad schreiben damit Louis/Rohat ihn laden können
+  syncKatalogToDropdown();
+}
+
+/* ── Katalog-Editor: Zeile löschen ── */
+function removeZeile(katId, zeilId) {
+  const kat = KATEGORIEN.find(k => k.id === katId);
+  if (!kat) return;
+  const z = kat.zeilen.find(z => z.id === zeilId);
+  if (!z) return;
+  if (!confirm(`Eintrag "${z.label}" wirklich löschen? Der Bestandswert geht verloren.`)) return;
+  kat.zeilen = kat.zeilen.filter(z => z.id !== zeilId);
+  if (_data[katId]) delete _data[katId][zeilId];
+  if (_db) _db.ref(`moebel/${katId}/${zeilId}`).remove();
+  saveKatalog();
+  _domBuilt = false;
+  renderAll();
+  toast(`"${z.label}" gelöscht ✓`);
+  syncKatalogToDropdown();
+}
+
+/* ── Katalog-Editor: Kategorie löschen ── */
+function removeKat(katId) {
+  const kat = KATEGORIEN.find(k => k.id === katId);
+  if (!kat) return;
+  if (!confirm(`Kategorie "${kat.titel}" mit allen ${kat.zeilen.length} Einträgen löschen? Nicht rückgängig machbar.`)) return;
+  const idx = KATEGORIEN.findIndex(k => k.id === katId);
+  KATEGORIEN.splice(idx, 1);
+  if (_data[katId]) { delete _data[katId]; if (_db) _db.ref(`moebel/${katId}`).remove(); }
+  saveKatalog();
+  _domBuilt = false;
+  renderAll();
+  toast(`"${kat.titel}" gelöscht ✓`);
+  syncKatalogToDropdown();
+}
+
+/* ── Modal: Neue Kategorie ── */
+function openAddKatModal() {
+  document.getElementById('newKatTitel').value = '';
+  document.getElementById('newKatEmoji').value = '';
+  document.getElementById('addKatOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('newKatTitel').focus(), 80);
+}
+function closeAddKatModal() { document.getElementById('addKatOverlay').classList.remove('open'); }
+function confirmAddKat() {
+  const titel = document.getElementById('newKatTitel').value.trim();
+  if (!titel) { document.getElementById('newKatTitel').focus(); return; }
+  const emoji = document.getElementById('newKatEmoji').value.trim() || '📦';
+  const id = titel.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,30) + '_' + Date.now().toString(36);
+  KATEGORIEN.push({ id, titel, emoji, zeilen: [] });
+  if (!_data[id]) _data[id] = {};
+  saveKatalog();
+  _domBuilt = false;
+  renderAll();
+  closeAddKatModal();
+  toast(`Kategorie "${titel}" hinzugefügt ✓`);
+  syncKatalogToDropdown();
+}
+
+/* ── Dropdown-Katalog für Louis/Rohat synchronisieren ── */
+// Schreibt einen kompakten Katalog in Firebase den Louis/Rohat beim Start laden
+function syncKatalogToDropdown() {
+  if (!_db) return;
+  const katalog = KATEGORIEN.map(k => ({
+    id: k.id,
+    label: k.titel,
+    subs: k.zeilen.map(z => ({ id: z.id, label: z.label }))
+  }));
+  _db.ref('moebelDropdownKatalog').set(katalog);
+}
+
 function scheduleSave() { clearTimeout(_saveTimer); _saveTimer = setTimeout(save, 700); }
 
 function save() {
@@ -470,6 +703,13 @@ document.getElementById('editInput').addEventListener('keydown', e => {
 });
 document.getElementById('editOverlay').addEventListener('click', e => {
   if (e.target===document.getElementById('editOverlay')) closeEdit();
+});
+document.getElementById('addKatOverlay').addEventListener('click', e => {
+  if (e.target===document.getElementById('addKatOverlay')) closeAddKatModal();
+});
+document.getElementById('newKatTitel').addEventListener('keydown', e => {
+  if (e.key==='Enter') confirmAddKat();
+  if (e.key==='Escape') closeAddKatModal();
 });
 
 /* ── Excel Export ── */

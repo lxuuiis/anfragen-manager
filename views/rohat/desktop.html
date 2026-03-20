@@ -284,7 +284,7 @@ const STATUS_OPTS = ['Offen','Reservierung','Abholung','Abgeschlossen'];
 const FB_MOEBEL   = 'https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app';
 
 /* ── Möbel-Katalog (identisch mit moebel.html) ── */
-const MOEBEL_KATALOG = [
+let MOEBEL_KATALOG = [
   { id:'schreibtisch_160', label:'Schreibtisch 160×80', subs:[
     { id:'weiss', label:'Weiß' }, { id:'grau', label:'Grau' },
     { id:'grau_manuel_rad', label:'Grau manuell Rädchen' }, { id:'grau_manuel_schr', label:'Grau manuell Schrauben' }, { id:'grau_auseinander', label:'Grau auseinandergebaut' },
@@ -375,48 +375,71 @@ function initFirebase() {
     dbRef = db.ref(DB_PATH);
     isConfigured = true;
     setSyncStatus('syncing', 'Verbinde…');
-    dbRef.on('value', snapshot => {
-      const raw = snapshot.val();
-      const all = raw ? Object.values(raw) : [];
-      const rohatSessions = all.filter(s => s.owner === OWNER);
-      // Einmalig Initialdaten hochladen wenn noch keine Rohat-Sessions vorhanden
-      if (rohatSessions.length === 0 && INITIAL_DATA.length > 0) {
-        const updates = {};
-        INITIAL_DATA.forEach(s => { updates[DB_PATH + '/' + s.id] = s; });
-        firebase.database().ref().update(updates);
-        sessions = INITIAL_DATA;
-        renderAll();
-      } else {
-        // Für jede Session: lokale Version behalten wenn sie dirty ist
-        let needsRender = false;
-        rohatSessions.forEach(incoming => {
-          const sid = String(incoming.id);
-          if (_dirtyIds.has(sid)) return; // Lokale Änderung noch nicht gespeichert → ignorieren
-          const existing = sessions.find(s => String(s.id) === sid);
-          if (JSON.stringify(existing) !== JSON.stringify(incoming)) {
-            // Externe Änderung → übernehmen
-            const idx = sessions.findIndex(s => String(s.id) === sid);
-            if (idx >= 0) sessions[idx] = incoming; else sessions.push(incoming);
-            needsRender = true;
-          }
-        });
-        // Neu hinzugekommene Sessions
-        rohatSessions.forEach(incoming => {
-          if (!sessions.find(s => String(s.id) === String(incoming.id))) {
-            sessions.push(incoming);
-            needsRender = true;
-          }
-        });
-        // Gelöschte Sessions
-        const incomingIds = rohatSessions.map(s => String(s.id));
-        const before = sessions.length;
-        sessions = sessions.filter(s => incomingIds.includes(String(s.id)) || _dirtyIds.has(String(s.id)));
-        if (sessions.length !== before) needsRender = true;
-        if (needsRender) { renderAll(); }
+
+    // Katalog zuerst laden, dann Session-Listener starten
+    db.ref('moebelDropdownKatalog').once('value', snapKat => {
+      const fbKat = snapKat.val();
+      if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
+        MOEBEL_KATALOG.length = 0;
+        fbKat.forEach(k => MOEBEL_KATALOG.push(k));
       }
-      setSyncStatus('synced', 'Synchronisiert');
-    }, err => setSyncStatus('error', 'Fehler: ' + err.message));
+      startSessionListener();
+    });
+
+    // Live-Updates wenn Katalog in moebel.html geändert wird
+    db.ref('moebelDropdownKatalog').on('value', snapKat => {
+      const fbKat = snapKat.val();
+      if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
+        MOEBEL_KATALOG.length = 0;
+        fbKat.forEach(k => MOEBEL_KATALOG.push(k));
+        renderAll();
+      }
+    });
   } catch(e) { setSyncStatus('error', 'Init-Fehler'); console.error(e); }
+}
+
+function startSessionListener() {
+  dbRef.on('value', snapshot => {
+    const raw = snapshot.val();
+    const all = raw ? Object.values(raw) : [];
+    const rohatSessions = all.filter(s => s.owner === OWNER);
+    // Einmalig Initialdaten hochladen wenn noch keine Rohat-Sessions vorhanden
+    if (rohatSessions.length === 0 && INITIAL_DATA.length > 0) {
+      const updates = {};
+      INITIAL_DATA.forEach(s => { updates[DB_PATH + '/' + s.id] = s; });
+      firebase.database().ref().update(updates);
+      sessions = INITIAL_DATA;
+      renderAll();
+    } else {
+      // Für jede Session: lokale Version behalten wenn sie dirty ist
+      let needsRender = false;
+      rohatSessions.forEach(incoming => {
+        const sid = String(incoming.id);
+        if (_dirtyIds.has(sid)) return; // Lokale Änderung noch nicht gespeichert → ignorieren
+        const existing = sessions.find(s => String(s.id) === sid);
+        if (JSON.stringify(existing) !== JSON.stringify(incoming)) {
+          // Externe Änderung → übernehmen
+          const idx = sessions.findIndex(s => String(s.id) === sid);
+          if (idx >= 0) sessions[idx] = incoming; else sessions.push(incoming);
+          needsRender = true;
+        }
+      });
+      // Neu hinzugekommene Sessions
+      rohatSessions.forEach(incoming => {
+        if (!sessions.find(s => String(s.id) === String(incoming.id))) {
+          sessions.push(incoming);
+          needsRender = true;
+        }
+      });
+      // Gelöschte Sessions
+      const incomingIds = rohatSessions.map(s => String(s.id));
+      const before = sessions.length;
+      sessions = sessions.filter(s => incomingIds.includes(String(s.id)) || _dirtyIds.has(String(s.id)));
+      if (sessions.length !== before) needsRender = true;
+      if (needsRender) { renderAll(); }
+    }
+    setSyncStatus('synced', 'Synchronisiert');
+  }, err => setSyncStatus('error', 'Fehler: ' + err.message));
 }
 
 function saveSid(sid) {
