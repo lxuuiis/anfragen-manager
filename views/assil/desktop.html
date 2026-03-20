@@ -384,115 +384,17 @@
     </div>
   </div>
 
-  <!-- Möbel Übersicht -->
-  <div class="moebel-section" id="moebelSection">
-    <div class="moebel-section-header" onclick="document.getElementById('moebelSection').classList.toggle('collapsed')">
-      <svg class="moebel-section-toggle" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-      <h2>🪑 Möbel Übersicht</h2>
-      <span style="font-size:11px;color:var(--text-tertiary);font-weight:500">Verfügbare Bestände eintragen</span>
+  <!-- Möbel Übersicht Link -->
+  <a href="moebel.html" style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid rgba(0,0,0,0.1);border-radius:14px;padding:16px 22px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.06);transition:0.18s ease;margin-top:28px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(0,0,0,0.10)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.06)'">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:40px;height:40px;border-radius:10px;background:#fff8e6;display:flex;align-items:center;justify-content:center;font-size:20px;">🪑</div>
+      <div>
+        <div style="font-size:15px;font-weight:700;letter-spacing:-0.2px;">Möbel Übersicht</div>
+        <div style="font-size:12px;color:#6e6e73;margin-top:2px;">Bestände eintragen, verwalten &amp; Excel exportieren</div>
+      </div>
     </div>
-    <div class="moebel-section-body">
-
-      <!-- STÜHLE -->
-      <div class="moebel-table-card">
-        <div class="moebel-table-card-head">
-          <div class="moebel-table-card-title">
-            <span class="moebel-icon">🪑</span>
-            Stühle
-          </div>
-          <span class="moebel-total-badge" id="stuehle-total">0 gesamt</span>
-        </div>
-        <table class="moebel-sub-table">
-          <thead><tr><th>Farbe</th><th>Verfügbar</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><span class="moebel-color-dot" style="background:#f5f5f5;border:1px solid #ccc"></span><span class="moebel-sub-label">Weiß</span></td>
-              <td><div class="moebel-anzahl-wrap">
-                <div class="moebel-stepper">
-                  <button class="moebel-stepper-btn" onclick="moebelChange('stuehle','weiss',-1)">−</button>
-                  <span class="moebel-stepper-val" id="val-stuehle-weiss">0</span>
-                  <button class="moebel-stepper-btn" onclick="moebelChange('stuehle','weiss',1)">+</button>
-                </div>
-              </div></td>
-            </tr>
-            <tr>
-              <td><span class="moebel-color-dot" style="background:#8e8e93"></span><span class="moebel-sub-label">Grau</span></td>
-              <td><div class="moebel-anzahl-wrap">
-                <div class="moebel-stepper">
-                  <button class="moebel-stepper-btn" onclick="moebelChange('stuehle','grau',-1)">−</button>
-                  <span class="moebel-stepper-val" id="val-stuehle-grau">0</span>
-                  <button class="moebel-stepper-btn" onclick="moebelChange('stuehle','grau',1)">+</button>
-                </div>
-              </div></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- TISCHE -->
-      <div class="moebel-table-card">
-        <div class="moebel-table-card-head">
-          <div class="moebel-table-card-title">
-            <span class="moebel-icon">🪑</span>
-            Tische
-          </div>
-          <span class="moebel-total-badge" id="tische-total">0 gesamt</span>
-        </div>
-        <table class="moebel-sub-table">
-          <thead><tr><th>Farbe</th><th>Verfügbar</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><span class="moebel-color-dot" style="background:#f5f5f5;border:1px solid #ccc"></span><span class="moebel-sub-label">Weiß</span></td>
-              <td><div class="moebel-anzahl-wrap">
-                <div class="moebel-stepper">
-                  <button class="moebel-stepper-btn" onclick="moebelChange('tische','weiss',-1)">−</button>
-                  <span class="moebel-stepper-val" id="val-tische-weiss">0</span>
-                  <button class="moebel-stepper-btn" onclick="moebelChange('tische','weiss',1)">+</button>
-                </div>
-              </div></td>
-            </tr>
-            <tr>
-              <td><span class="moebel-color-dot" style="background:#8e8e93"></span><span class="moebel-sub-label">Grau</span></td>
-              <td><div class="moebel-anzahl-wrap">
-                <div class="moebel-stepper">
-                  <button class="moebel-stepper-btn" onclick="moebelChange('tische','grau',-1)">−</button>
-                  <span class="moebel-stepper-val" id="val-tische-grau">0</span>
-                  <button class="moebel-stepper-btn" onclick="moebelChange('tische','grau',1)">+</button>
-                </div>
-              </div></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- ROLLCONTAINER -->
-      <div class="moebel-table-card">
-        <div class="moebel-table-card-head">
-          <div class="moebel-table-card-title">
-            <span class="moebel-icon">📦</span>
-            Rollcontainer
-          </div>
-          <span class="moebel-total-badge" id="rollcontainer-total">0 gesamt</span>
-        </div>
-        <table class="moebel-sub-table">
-          <thead><tr><th>Typ</th><th>Verfügbar</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><span class="moebel-sub-label">Standard</span></td>
-              <td><div class="moebel-anzahl-wrap">
-                <div class="moebel-stepper">
-                  <button class="moebel-stepper-btn" onclick="moebelChange('rollcontainer','standard',-1)">−</button>
-                  <span class="moebel-stepper-val" id="val-rollcontainer-standard">0</span>
-                  <button class="moebel-stepper-btn" onclick="moebelChange('rollcontainer','standard',1)">+</button>
-                </div>
-              </div></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-    </div>
-  </div>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aeaeb2" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </a>
 
 </main>
 
