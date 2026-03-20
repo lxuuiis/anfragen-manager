@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Anfragen Manager &middot; &Uuml;bersicht</title>
+<title>Anfragen Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <style>
@@ -19,14 +19,14 @@
     --assil: #ff9500; --assil-light: #fff8e6;
     --radius: 14px; --radius-sm: 10px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
-    --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
     --tr: 0.18s cubic-bezier(0.4,0,0.2,1);
   }
   body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
   /* NAV */
   nav { background: rgba(255,255,255,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 200; padding: 0 28px; height: 52px; display: flex; align-items: center; justify-content: space-between; }
-  .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+  .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; letter-spacing: -0.3px; text-decoration: none; color: var(--text); }
   .sync-badge { display: flex; align-items: center; gap: 5px; font-size: 12px; padding: 4px 10px; border-radius: 20px; color: var(--text-tertiary); }
   .sync-badge.synced { color: var(--success); }
   .sync-badge.error  { color: var(--danger); }
@@ -34,19 +34,15 @@
 
   /* MAIN */
   main { max-width: 1100px; margin: 0 auto; padding: 28px 18px 80px; display: flex; flex-direction: column; gap: 28px; }
-
-  /* SECTION HEADER */
   .sec-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); margin-bottom: 12px; display: flex; align-items: center; gap: 7px; }
 
   /* PERSON CARDS */
   .person-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
   @media (max-width:720px) { .person-grid { grid-template-columns: 1fr; } }
   @media (max-width:960px) and (min-width:721px) { .person-grid { grid-template-columns: 1fr 1fr; } }
-
   .pcard { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); border: 1px solid var(--border); padding: 20px 22px 18px; display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden; transition: transform var(--tr), box-shadow var(--tr); }
-  .pcard::before { content:''; position: absolute; top:0; left:0; right:0; height:3px; background: var(--c); }
+  .pcard::before { content:""; position: absolute; top:0; left:0; right:0; height:3px; background: var(--c); }
   .pcard:hover { transform: translateY(-3px); box-shadow: 0 6px 28px rgba(0,0,0,0.10); }
-
   .pcard-top { display: flex; align-items: flex-start; justify-content: space-between; }
   .pcard-icon { width: 42px; height: 42px; border-radius: 50%; background: var(--cl); display: flex; align-items: center; justify-content: center; font-size: 20px; }
   .pcard-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: var(--cl); color: var(--c); }
@@ -59,12 +55,11 @@
   .plink { display: flex; align-items: center; justify-content: space-between; background: var(--cl); border-radius: 10px; padding: 9px 13px; font-size: 13px; font-weight: 600; color: var(--c); text-decoration: none; transition: filter var(--tr); }
   .plink:hover { filter: brightness(0.94); }
   .plink span { display: flex; align-items: center; gap: 6px; }
-
   .card-louis { --c: var(--louis); --cl: var(--louis-light); }
   .card-rohat { --c: var(--rohat); --cl: var(--rohat-light); }
   .card-assil { --c: var(--assil); --cl: var(--assil-light); }
 
-  /* ABHOLUNGEN */
+  /* PANEL */
   .panel { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
   .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
   .panel-head:hover { background: var(--surface2); }
@@ -74,8 +69,8 @@
   .panel.closed .panel-body { display: none; }
   .panel-body { padding: 0 20px 18px; }
 
+  /* ABHOLUNGEN */
   .total-badge { background: var(--purple-light); color: var(--purple); font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
-
   .abh-day { margin-top: 16px; }
   .day-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
   .today-chip { background: var(--danger); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
@@ -88,34 +83,10 @@
   .owner-chip { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; }
   .owner-chip.louis { background: var(--louis-light); color: var(--louis); }
   .owner-chip.rohat { background: var(--rohat-light); color: var(--rohat); }
-
-  /* pulsierender Punkt */
+  .abh-name-link { cursor: pointer; text-decoration: none; color: inherit; border-radius: 5px; padding: 1px 3px; margin: -1px -3px; transition: background var(--tr); }
+  .abh-name-link:hover { background: rgba(124,58,237,0.12); }
   .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--danger); flex-shrink: 0; animation: blink 1.4s ease-in-out infinite; }
   @keyframes blink { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.35;transform:scale(1.6);} }
-
-  /* ARCHIV */
-  .archiv-count { background: var(--surface2); border: 1px solid var(--border-strong); color: var(--text-secondary); font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px; }
-  .archiv-filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 4px; padding-top: 14px; }
-  .fb { background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 20px; padding: 4px 13px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font); color: var(--text-secondary); transition: var(--tr); }
-  .fb.on      { color:#fff; border-color:transparent; background: #1d1d1f; }
-  .fb.on.louis { background: var(--louis); }
-  .fb.on.rohat { background: var(--rohat); }
-  .archiv-list { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; }
-  .archiv-empty { font-size: 13px; color: var(--text-tertiary); text-align: center; padding: 24px; }
-
-  .a-card { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); overflow: hidden; animation: fadein 0.2s ease; }
-  @keyframes fadein { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-  .a-card-head { background: var(--surface2); padding: 9px 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
-  .a-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .a-datum { font-size: 12px; font-weight: 600; }
-  .a-done  { font-size: 11px; color: var(--success); font-weight: 600; }
-  .a-am    { font-size: 11px; color: var(--text-tertiary); }
-  .a-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .a-table th { padding: 6px 11px; text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-secondary); background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
-  .a-table td { padding: 7px 11px; border-bottom: 1px solid var(--border); }
-  .a-table tr:last-child td { border-bottom: none; }
-  .a-table tr:hover td { background: #fafafa; }
-  .a-table .nm { font-weight: 500; }
 
   /* WARNUNGEN */
   .warn-section { display: flex; flex-direction: column; gap: 8px; }
@@ -130,13 +101,32 @@
   .warn-owner { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; }
   .warn-owner.louis { background: var(--louis-light); color: var(--louis); }
   .warn-owner.rohat { background: var(--rohat-light); color: var(--rohat); }
-  .warn-empty { font-size: 13px; color: var(--text-tertiary); text-align: center; padding: 18px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .warn-empty { font-size: 13px; color: var(--text-tertiary); padding: 18px; display: flex; align-items: center; justify-content: center; gap: 6px; }
   .warn-count { background: #fff3cc; border: 1px solid #ffe08a; color: #b07800; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
   .warn-count.has-danger { background: #fff0f0; border-color: rgba(255,59,48,0.3); color: var(--danger); }
 
-  /* KLICKBARE NAMEN in Abholungen */
-  .abh-name-link { cursor: pointer; text-decoration: none; color: inherit; border-radius: 5px; padding: 1px 3px; margin: -1px -3px; transition: background var(--tr); }
-  .abh-name-link:hover { background: rgba(124,58,237,0.12); }
+  /* ARCHIV */
+  .archiv-count { background: var(--surface2); border: 1px solid var(--border-strong); color: var(--text-secondary); font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px; }
+  .archiv-filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 4px; padding-top: 14px; }
+  .fb { background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 20px; padding: 4px 13px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font); color: var(--text-secondary); transition: var(--tr); }
+  .fb.on { color:#fff; border-color:transparent; background: #1d1d1f; }
+  .fb.on.louis { background: var(--louis); }
+  .fb.on.rohat { background: var(--rohat); }
+  .archiv-list { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; }
+  .archiv-empty { font-size: 13px; color: var(--text-tertiary); text-align: center; padding: 24px; }
+  .a-card { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); overflow: hidden; animation: fadein 0.2s ease; }
+  @keyframes fadein { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  .a-card-head { background: var(--surface2); padding: 9px 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+  .a-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .a-datum { font-size: 12px; font-weight: 600; }
+  .a-done  { font-size: 11px; color: var(--success); font-weight: 600; }
+  .a-am    { font-size: 11px; color: var(--text-tertiary); }
+  .a-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .a-table th { padding: 6px 11px; text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-secondary); background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .a-table td { padding: 7px 11px; border-bottom: 1px solid var(--border); }
+  .a-table tr:last-child td { border-bottom: none; }
+  .a-table tr:hover td { background: #fafafa; }
+  .a-table .nm { font-weight: 500; }
 
   /* TOAST */
   #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: rgba(29,29,31,0.92); backdrop-filter: blur(12px); color:#fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; white-space: nowrap; }
@@ -146,11 +136,11 @@
 <body>
 
 <nav>
-  <div class="nav-brand">
+  <a class="nav-brand" href="/">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
     Anfragen Manager
-  </div>
-  <div class="sync-badge" id="syncBadge"><div class="dot"></div><span id="syncTxt">Verbinde&hellip;</span></div>
+  </a>
+  <div class="sync-badge" id="syncBadge"><div class="dot"></div><span id="syncTxt">Verbinde&#x2026;</span></div>
 </nav>
 
 <main>
@@ -165,25 +155,16 @@
 
       <!-- Louis -->
       <div class="pcard card-louis">
-        <div class="pcard-top">
-          <div class="pcard-icon">&#x1F454;</div>
-          <span class="pcard-badge">Aktiv</span>
-        </div>
-        <div><div class="pcard-name">Louis</div><div class="pcard-sub" id="l-sub">L&auml;dt&hellip;</div></div>
+        <div class="pcard-top"><div class="pcard-icon">&#x1F454;</div><span class="pcard-badge">Aktiv</span></div>
+        <div><div class="pcard-name">Louis</div><div class="pcard-sub" id="l-sub">L&#228;dt&#8230;</div></div>
         <div class="pcard-stats" id="l-stats"></div>
         <div class="pcard-links">
           <a href="views/louis/desktop.html" class="plink">
-            <span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
-              Desktop-Ansicht
-            </span>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>Desktop-Ansicht</span>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
           <a href="views/louis/mobile.html" class="plink">
-            <span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-              Mobile-Ansicht
-            </span>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Mobile-Ansicht</span>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
         </div>
@@ -191,25 +172,16 @@
 
       <!-- Rohat -->
       <div class="pcard card-rohat">
-        <div class="pcard-top">
-          <div class="pcard-icon">&#x1F33F;</div>
-          <span class="pcard-badge">Aktiv</span>
-        </div>
-        <div><div class="pcard-name">Rohat</div><div class="pcard-sub" id="r-sub">L&auml;dt&hellip;</div></div>
+        <div class="pcard-top"><div class="pcard-icon">&#x1F33F;</div><span class="pcard-badge">Aktiv</span></div>
+        <div><div class="pcard-name">Rohat</div><div class="pcard-sub" id="r-sub">L&#228;dt&#8230;</div></div>
         <div class="pcard-stats" id="r-stats"></div>
         <div class="pcard-links">
           <a href="views/rohat/desktop.html" class="plink">
-            <span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
-              Desktop-Ansicht
-            </span>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>Desktop-Ansicht</span>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
           <a href="views/rohat/mobile.html" class="plink">
-            <span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-              Mobile-Ansicht
-            </span>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Mobile-Ansicht</span>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
         </div>
@@ -217,18 +189,12 @@
 
       <!-- Assil -->
       <div class="pcard card-assil">
-        <div class="pcard-top">
-          <div class="pcard-icon">&#x1F4CB;</div>
-          <span class="pcard-badge">&Uuml;bersicht</span>
-        </div>
-        <div><div class="pcard-name">Assil</div><div class="pcard-sub" id="a-sub">L&auml;dt&hellip;</div></div>
+        <div class="pcard-top"><div class="pcard-icon">&#x1F4CB;</div><span class="pcard-badge">&#220;bersicht</span></div>
+        <div><div class="pcard-name">Assil</div><div class="pcard-sub" id="a-sub">L&#228;dt&#8230;</div></div>
         <div class="pcard-stats" id="a-stats"></div>
         <div class="pcard-links">
           <a href="views/assil/desktop.html" class="plink">
-            <span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
-              Gesamt-&Uuml;bersicht
-            </span>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>Gesamt-&#220;bersicht</span>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
         </div>
@@ -252,11 +218,7 @@
         </span>
         <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <div class="panel-body" id="warnBody">
-        <div class="warn-section" id="warnList">
-          <p class="warn-empty">Lädt…</p>
-        </div>
-      </div>
+      <div class="panel-body"><div class="warn-section" id="warnList"><p class="warn-empty">L&#228;dt&#8230;</p></div></div>
     </div>
   </div>
 
@@ -270,14 +232,12 @@
       <div class="panel-head" onclick="this.parentElement.classList.toggle('closed')">
         <span class="panel-title">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Alle Abholungen &amp; Termine
+          Alle Abholungen
           <span class="total-badge" id="abhTotal">0</span>
         </span>
         <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <div class="panel-body" id="abhBody">
-        <p style="font-size:13px;color:var(--text-tertiary);padding:18px 0;text-align:center">L&auml;dt&hellip;</p>
-      </div>
+      <div class="panel-body" id="abhBody"><p style="font-size:13px;color:var(--text-tertiary);padding:18px 0;text-align:center">L&#228;dt&#8230;</p></div>
     </div>
   </div>
 
@@ -292,17 +252,17 @@
         <span class="panel-title">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
           Abgeschlossene Anfragen
-          <span class="archiv-count" id="archivCount">0 Eintr&auml;ge</span>
+          <span class="archiv-count" id="archivCount">0 Eintr&#228;ge</span>
         </span>
         <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="panel-body">
         <div class="archiv-filters">
-          <button class="fb on" id="fb-all"   onclick="setFilter('all',this)">Alle</button>
-          <button class="fb louis"             onclick="setFilter('louis',this)">Louis</button>
-          <button class="fb rohat"             onclick="setFilter('rohat',this)">Rohat</button>
+          <button class="fb on" onclick="setFilter('all',this)">Alle</button>
+          <button class="fb louis" onclick="setFilter('louis',this)">Louis</button>
+          <button class="fb rohat" onclick="setFilter('rohat',this)">Rohat</button>
         </div>
-        <div class="archiv-list" id="archivList"><p class="archiv-empty">L&auml;dt&hellip;</p></div>
+        <div class="archiv-list" id="archivList"><p class="archiv-empty">L&#228;dt&#8230;</p></div>
       </div>
     </div>
   </div>
@@ -324,77 +284,55 @@ const FB_CFG = {
   appId:             "1:55315892331:web:9889b92c74e535a85a892e"
 };
 
-// Pfade zu den Desktop-Ansichten (relativ zu index.html)
 const VIEW_URLS = {
-  louis: 'views/louis/desktop.html',
-  rohat: 'views/rohat/desktop.html'
+  louis: '../../views/louis/desktop.html',
+  rohat: '../../views/rohat/desktop.html'
 };
 
-let _sessions = [];
-let _archiv   = [];
-let _filter   = 'all';
+let _sessions = [], _archiv = [], _filter = 'all';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function esc(v) { return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
 
 function datumSort(d) {
   if (!d) return Infinity;
   const p = String(d).split('.');
   if (p.length < 2) return Infinity;
-  const dd = parseInt(p[0])||0, mm = parseInt(p[1])||0, yy = parseInt(p[2])||2026;
-  return yy*10000 + mm*100 + dd;
+  return (parseInt(p[2])||2026)*10000 + (parseInt(p[1])||0)*100 + (parseInt(p[0])||0);
 }
 
 function isToday(datum) {
   if (!datum) return false;
   const p = String(datum).split('.');
   const n = new Date();
-  return parseInt(p[0]) === n.getDate() &&
-         parseInt(p[1]) === (n.getMonth()+1) &&
-         (!p[2] || parseInt(p[2]) === n.getFullYear());
+  return parseInt(p[0])===n.getDate() && parseInt(p[1])===(n.getMonth()+1) && (!p[2]||parseInt(p[2])===n.getFullYear());
 }
 
-function ownerLabel(o) { return o === 'louis' ? 'Louis' : o === 'rohat' ? 'Rohat' : o || '–'; }
-
-function setSyncStatus(type, txt) {
-  const b = document.getElementById('syncBadge');
-  b.className = 'sync-badge ' + type;
-  document.getElementById('syncTxt').textContent = txt;
-}
-
-// Prüft ob ein Datum (TT.MM.JJJJ) mehr als `days` Tage in der Vergangenheit liegt
 function olderThanDays(datum, days) {
   if (!datum) return false;
   const p = String(datum).split('.');
   if (p.length < 3) return false;
   const d = new Date(parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0]));
-  const diff = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
-  return diff >= days;
+  return (Date.now() - d.getTime()) / 86400000 >= days;
 }
 
-// Navigiert zur Tabelle und hebt den Namen hervor (via URL-Hash)
-function goToRow(owner, personName) {
-  const url = VIEW_URLS[owner];
-  if (!url) return;
-  // Encode den Namen als Hash-Parameter
-  window.location.href = url + '#highlight=' + encodeURIComponent(personName);
+function ownerLabel(o) { return o==='louis'?'Louis':o==='rohat'?'Rohat':o||'–'; }
+
+function setSyncStatus(type, txt) {
+  document.getElementById('syncBadge').className = 'sync-badge ' + type;
+  document.getElementById('syncTxt').textContent = txt;
 }
 
-// ─── Firebase ─────────────────────────────────────────────────────────────────
-(function initFB() {
+// Firebase
+(function() {
   try {
     const app = firebase.initializeApp(FB_CFG);
     const db  = firebase.database(app);
     setSyncStatus('', 'Verbinde…');
-
     db.ref('sessions').on('value', snap => {
       _sessions = snap.val() ? Object.values(snap.val()) : [];
-      renderPersonCards();
-      renderWarnungen();
-      renderAbholungen();
+      renderPersonCards(); renderWarnungen(); renderAbholungen();
       setSyncStatus('synced', 'Live ✓');
     }, () => setSyncStatus('error', 'Fehler'));
-
     db.ref('archiv').on('value', snap => {
       _archiv = snap.val() ? Object.values(snap.val()) : [];
       renderArchiv();
@@ -402,483 +340,181 @@ function goToRow(owner, personName) {
   } catch(e) { setSyncStatus('error', 'Init-Fehler'); console.error(e); }
 })();
 
-// ─── Person-Karten ────────────────────────────────────────────────────────────
+// Person-Karten
 function renderPersonCards() {
-  ['louis','rohat'].forEach(function(owner) {
-    const ss = _sessions.filter(function(x){ return x.owner === owner; });
-    const total = ss.length;
-    const offen = ss.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status === 'Offen'; }).length; }, 0);
-    const res   = ss.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status === 'Reservierung'; }).length; }, 0);
-    const abh   = ss.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status === 'Abholung'; }).length; }, 0);
-    var pre = owner === 'louis' ? 'l' : 'r';
-    document.getElementById(pre+'-sub').textContent = total + ' Termin' + (total!==1?'e':'');
+  ['louis','rohat'].forEach(owner => {
+    const ss = _sessions.filter(x => x.owner===owner);
+    const pre = owner==='louis' ? 'l' : 'r';
+    const offen = ss.reduce((n,x) => n+(x.personen||[]).filter(p=>p.name&&p.name.trim()&&p.status==='Offen').length, 0);
+    const res   = ss.reduce((n,x) => n+(x.personen||[]).filter(p=>p.name&&p.name.trim()&&p.status==='Reservierung').length, 0);
+    const abh   = ss.reduce((n,x) => n+(x.personen||[]).filter(p=>p.name&&p.name.trim()&&p.status==='Abholung').length, 0);
+    document.getElementById(pre+'-sub').textContent = ss.length+' Termin'+(ss.length!==1?'e':'');
     document.getElementById(pre+'-stats').innerHTML =
-      '<div class="stat-pill"><span class="stat-dot" style="background:#b07800"></span>' + offen + ' Offen</div>' +
-      '<div class="stat-pill"><span class="stat-dot" style="background:#0071e3"></span>' + res + ' Reserv.</div>' +
-      '<div class="stat-pill"><span class="stat-dot" style="background:#7c3aed"></span>' + abh + ' Abholung</div>';
+      '<div class="stat-pill"><span class="stat-dot" style="background:#b07800"></span>'+offen+' Offen</div>'+
+      '<div class="stat-pill"><span class="stat-dot" style="background:#0071e3"></span>'+res+' Reserv.</div>'+
+      '<div class="stat-pill"><span class="stat-dot" style="background:#7c3aed"></span>'+abh+' Abholung</div>';
   });
-  var total = _sessions.length;
-  var aOffen = _sessions.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status==='Offen'; }).length; }, 0);
-  var aAbh   = _sessions.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status==='Abholung'; }).length; }, 0);
-  document.getElementById('a-sub').textContent = total + ' Termine gesamt';
+  const tot   = _sessions.length;
+  const aOff  = _sessions.reduce((n,x)=>n+(x.personen||[]).filter(p=>p.name&&p.name.trim()&&p.status==='Offen').length,0);
+  const aAbh  = _sessions.reduce((n,x)=>n+(x.personen||[]).filter(p=>p.name&&p.name.trim()&&p.status==='Abholung').length,0);
+  document.getElementById('a-sub').textContent = tot+' Termine gesamt';
   document.getElementById('a-stats').innerHTML =
-    '<div class="stat-pill"><span class="stat-dot" style="background:#b07800"></span>' + aOffen + ' Offen</div>' +
-    '<div class="stat-pill"><span class="stat-dot" style="background:#7c3aed"></span>' + aAbh + ' Abholung</div>';
+    '<div class="stat-pill"><span class="stat-dot" style="background:#b07800"></span>'+aOff+' Offen</div>'+
+    '<div class="stat-pill"><span class="stat-dot" style="background:#7c3aed"></span>'+aAbh+' Abholung</div>';
 }
 
-// ─── Warnungen ────────────────────────────────────────────────────────────────
+// Warnungen
 function renderWarnungen() {
-  var warnings = [];
-
-  _sessions.forEach(function(s) {
-    (s.personen || []).forEach(function(p) {
-      if (!p.name || !p.name.trim()) return;
-      if (p.status !== 'Reservierung') return;
-
-      // Termin-Datum als Referenz nehmen (wann wurde der Termin angelegt / wann war er)
-      // Wir nutzen s.datum als Zeitstempel des Termins
-      var refDatum = s.datum; // TT.MM.JJJJ
-
-      if (!olderThanDays(refDatum, 1)) return; // Noch keine 24h vergangen → keine Warnung
-
-      var feJa = p.fe === 'Ja';
-      var fwJa = p.fw === 'Ja';
-
+  const warnings = [];
+  _sessions.forEach(s => {
+    (s.personen||[]).forEach(p => {
+      if (!p.name||!p.name.trim()||p.status!=='Reservierung') return;
+      if (!olderThanDays(s.datum, 1)) return;
+      const feJa = p.fe==='Ja', fwJa = p.fw==='Ja';
+      const termin = s.datum+(s.uhrzeit?' · '+s.uhrzeit:'');
       if (!feJa && !fwJa) {
-        // Beide nicht Ja → "Bist du sicher, dass das Formular noch nicht da ist?"
-        warnings.push({
-          name:    p.name,
-          owner:   s.owner || '',
-          termin:  s.datum + (s.uhrzeit ? ' · ' + s.uhrzeit : ''),
-          type:    'keins',
-          msg:     'Bist du sicher, dass das Formular noch nicht da ist?',
-          level:   'warn'
-        });
+        warnings.push({ name:p.name, owner:s.owner||'', termin, msg:'Bist du sicher, dass das Formular noch nicht da ist?', level:'warn' });
       } else if (feJa && !fwJa) {
-        // Formular erhalten, aber nicht weitergeleitet → "Wurde das Formular nicht weitergeleitet?"
-        warnings.push({
-          name:    p.name,
-          owner:   s.owner || '',
-          termin:  s.datum + (s.uhrzeit ? ' · ' + s.uhrzeit : ''),
-          type:    'nichtWeitergeleitet',
-          msg:     'Wurde das Formular nicht weitergeleitet?',
-          level:   'danger'
-        });
+        warnings.push({ name:p.name, owner:s.owner||'', termin, msg:'Wurde das Formular nicht weitergeleitet?', level:'danger' });
       }
     });
   });
 
-  var countEl = document.getElementById('warnCount');
-  var listEl  = document.getElementById('warnList');
-  var panelEl = document.getElementById('warnPanel');
-
+  const countEl = document.getElementById('warnCount');
+  const listEl  = document.getElementById('warnList');
+  const panelEl = document.getElementById('warnPanel');
   countEl.textContent = warnings.length;
+  const hasDanger = warnings.some(w => w.level==='danger');
+  countEl.className = 'warn-count'+(hasDanger?' has-danger':'');
 
-  // Panel-Badge Farbe
-  var hasDanger = warnings.some(function(w){ return w.level === 'danger'; });
-  countEl.className = 'warn-count' + (hasDanger ? ' has-danger' : '');
-
-  // Panel offen wenn es Warnungen gibt, geschlossen wenn keine
-  if (warnings.length === 0) {
+  if (!warnings.length) {
     panelEl.classList.add('closed');
-    listEl.innerHTML = '<p class="warn-empty"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Alles in Ordnung – keine offenen Hinweise.</p>';
+    listEl.innerHTML = '<p class="warn-empty"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Alles in Ordnung</p>';
     return;
   }
-
-  // Panel öffnen wenn Warnungen vorhanden
   panelEl.classList.remove('closed');
 
-  listEl.innerHTML = warnings.map(function(w) {
-    var icon = w.level === 'danger' ? '🔴' : '⚠️';
-    var cls  = w.level === 'danger' ? 'warn-card danger' : 'warn-card';
-    var dest = VIEW_URLS[w.owner] ? (VIEW_URLS[w.owner] + '#highlight=' + encodeURIComponent(w.name)) : '#';
-    return '<a class="' + cls + '" href="' + dest + '">' +
-      '<span class="warn-icon">' + icon + '</span>' +
+  listEl.innerHTML = warnings.map(w => {
+    const icon = w.level==='danger' ? '&#x1F534;' : '&#x26A0;&#xFE0F;';
+    const cls  = 'warn-card'+(w.level==='danger'?' danger':'');
+    const dest = VIEW_URLS[w.owner] ? VIEW_URLS[w.owner]+'#highlight='+encodeURIComponent(w.name) : '#';
+    return '<a class="'+cls+'" href="'+dest+'">' +
+      '<span class="warn-icon">'+icon+'</span>' +
       '<div class="warn-body">' +
-        '<div class="warn-name">' + esc(w.name) + '</div>' +
-        '<div class="warn-msg">' + esc(w.msg) + ' <span style="color:var(--text-tertiary)">· Termin: ' + esc(w.termin) + '</span></div>' +
+        '<div class="warn-name">'+esc(w.name)+'</div>' +
+        '<div class="warn-msg">'+esc(w.msg)+' <span style="color:var(--text-tertiary)">· Termin: '+esc(w.termin)+'</span></div>' +
       '</div>' +
-      '<span class="warn-owner ' + esc(w.owner) + '">' + ownerLabel(w.owner) + '</span>' +
+      '<span class="warn-owner '+esc(w.owner)+'">'+ownerLabel(w.owner)+'</span>' +
     '</a>';
   }).join('');
 }
 
-// ─── Abholungen ───────────────────────────────────────────────────────────────
+// Abholungen
 function renderAbholungen() {
-  var byDate = {};
-  var noDatum = [];
-
-  _sessions.forEach(function(s) {
-    (s.personen || []).forEach(function(p) {
-      if (!p.name || !p.name.trim() || p.status !== 'Abholung') return;
-      var entry = {
-        name:   p.name,
-        zeit:   p.abh_zeit  || '',
-        datum:  p.abh_datum || '',
-        termin: esc(s.datum) + (s.uhrzeit ? ' · ' + esc(s.uhrzeit) : ''),
-        owner:  s.owner || '',
-        sid:    s.id
-      };
-      if (p.abh_datum && p.abh_datum.trim()) {
-        if (!byDate[p.abh_datum]) byDate[p.abh_datum] = [];
+  const byDate = {}, noDatum = [];
+  _sessions.forEach(s => {
+    (s.personen||[]).forEach(p => {
+      if (!p.name||!p.name.trim()||p.status!=='Abholung') return;
+      const entry = { name:p.name, zeit:p.abh_zeit||'', termin:esc(s.datum)+(s.uhrzeit?' · '+esc(s.uhrzeit):''), owner:s.owner||'' };
+      if (p.abh_datum&&p.abh_datum.trim()) {
+        if (!byDate[p.abh_datum]) byDate[p.abh_datum]=[];
         byDate[p.abh_datum].push(entry);
-      } else {
-        noDatum.push(entry);
-      }
+      } else { noDatum.push(entry); }
     });
   });
-
-  var dates = Object.keys(byDate).sort(function(a,b){ return datumSort(a) - datumSort(b); });
-  var total = dates.reduce(function(n,k){ return n + byDate[k].length; }, 0) + noDatum.length;
+  const dates = Object.keys(byDate).sort((a,b) => datumSort(a)-datumSort(b));
+  const total = dates.reduce((n,k)=>n+byDate[k].length,0)+noDatum.length;
   document.getElementById('abhTotal').textContent = total;
+  if (!total) { document.getElementById('abhBody').innerHTML='<p style="font-size:13px;color:var(--text-tertiary);padding:18px 0;text-align:center">Keine Abholungen eingetragen.</p>'; return; }
 
-  if (!total) {
-    document.getElementById('abhBody').innerHTML = '<p style="font-size:13px;color:var(--text-tertiary);padding:18px 0;text-align:center">Keine Abholungen eingetragen.</p>';
-    return;
-  }
-
-  var html = '';
-
-  dates.forEach(function(datum) {
-    var today = isToday(datum);
-    var items = byDate[datum].slice().sort(function(a,b){ return (a.zeit||'').localeCompare(b.zeit||''); });
-    html += '<div class="abh-day">';
-    html += '<div class="day-label">';
+  let html = '';
+  dates.forEach(datum => {
+    const today = isToday(datum);
+    const items = byDate[datum].slice().sort((a,b)=>(a.zeit||'').localeCompare(b.zeit||''));
+    html += '<div class="abh-day"><div class="day-label">';
     if (today) html += '<div class="pulse"></div>';
-    html += '&#x1F4C5; ' + esc(datum);
+    html += '&#x1F4C5; '+esc(datum);
     if (today) html += ' <span class="today-chip">Heute</span>';
     html += '</div><div class="abh-rows">';
-    items.forEach(function(e) {
-      var dest = VIEW_URLS[e.owner] ? (VIEW_URLS[e.owner] + '#highlight=' + encodeURIComponent(e.name)) : '#';
-      html += '<div class="abh-row' + (today ? ' is-today' : '') + '">';
-      html += '<span class="zeit-tag">' + (e.zeit ? esc(e.zeit) + ' Uhr' : '–') + '</span>';
-      html += '<a class="abh-name abh-name-link" href="' + dest + '" title="Zur Tabelle von ' + ownerLabel(e.owner) + '">' + esc(e.name) + '</a>';
-      html += '<span class="abh-termin">Termin: ' + e.termin + '</span>';
-      html += '<span class="owner-chip ' + esc(e.owner) + '">' + ownerLabel(e.owner) + '</span>';
-      if (today) html += '<div class="pulse"></div>';
-      html += '</div>';
+    items.forEach(e => {
+      const dest = VIEW_URLS[e.owner] ? VIEW_URLS[e.owner]+'#highlight='+encodeURIComponent(e.name) : '#';
+      html += '<div class="abh-row'+(today?' is-today':'')+'">'+
+        '<span class="zeit-tag">'+(e.zeit?esc(e.zeit)+' Uhr':'–')+'</span>'+
+        '<a class="abh-name abh-name-link" href="'+dest+'" title="Zur Tabelle von '+ownerLabel(e.owner)+'">'+esc(e.name)+'</a>'+
+        '<span class="abh-termin">Termin: '+e.termin+'</span>'+
+        '<span class="owner-chip '+esc(e.owner)+'">'+ownerLabel(e.owner)+'</span>'+
+        (today?'<div class="pulse"></div>':'')+
+      '</div>';
     });
     html += '</div></div>';
   });
-
   if (noDatum.length) {
-    html += '<div class="abh-day">';
-    html += '<div class="day-label">&#x1F4C5; Datum noch offen</div>';
-    html += '<div class="abh-rows">';
-    noDatum.forEach(function(e) {
-      var dest = VIEW_URLS[e.owner] ? (VIEW_URLS[e.owner] + '#highlight=' + encodeURIComponent(e.name)) : '#';
-      html += '<div class="abh-row">';
-      html += '<span class="zeit-tag" style="background:var(--text-tertiary)">– offen –</span>';
-      html += '<a class="abh-name abh-name-link" href="' + dest + '" title="Zur Tabelle von ' + ownerLabel(e.owner) + '">' + esc(e.name) + '</a>';
-      html += '<span class="abh-termin">Termin: ' + e.termin + '</span>';
-      html += '<span class="owner-chip ' + esc(e.owner) + '">' + ownerLabel(e.owner) + '</span>';
-      html += '</div>';
+    html += '<div class="abh-day"><div class="day-label">&#x1F4C5; Datum noch offen</div><div class="abh-rows">';
+    noDatum.forEach(e => {
+      const dest = VIEW_URLS[e.owner] ? VIEW_URLS[e.owner]+'#highlight='+encodeURIComponent(e.name) : '#';
+      html += '<div class="abh-row">'+
+        '<span class="zeit-tag" style="background:var(--text-tertiary)">– offen –</span>'+
+        '<a class="abh-name abh-name-link" href="'+dest+'">'+esc(e.name)+'</a>'+
+        '<span class="abh-termin">Termin: '+e.termin+'</span>'+
+        '<span class="owner-chip '+esc(e.owner)+'">'+ownerLabel(e.owner)+'</span>'+
+      '</div>';
     });
     html += '</div></div>';
   }
-
   document.getElementById('abhBody').innerHTML = html;
 }
 
-// ─── Archiv ───────────────────────────────────────────────────────────────────
+// Archiv
 function setFilter(f, btn) {
   _filter = f;
-  document.querySelectorAll('.fb').forEach(function(b) { b.classList.remove('on','louis','rohat'); });
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('on','louis','rohat'));
   btn.classList.add('on');
-  if (f !== 'all') btn.classList.add(f);
+  if (f!=='all') btn.classList.add(f);
   renderArchiv();
 }
 
 function renderArchiv() {
-  var countEl = document.getElementById('archivCount');
-  var listEl  = document.getElementById('archivList');
-  if (!countEl || !listEl) return;
+  const countEl = document.getElementById('archivCount');
+  const listEl  = document.getElementById('archivList');
+  if (!countEl||!listEl) return;
+  countEl.textContent = _archiv.length+' Eintr'+(_archiv.length===1?'ag':'äge');
+  const data = _filter==='all' ? _archiv : _archiv.filter(e=>e.owner===_filter);
+  if (!data.length) { listEl.innerHTML='<p class="archiv-empty">Keine Eintr&#228;ge vorhanden.</p>'; return; }
 
-  countEl.textContent = _archiv.length + ' Eintr' + (_archiv.length === 1 ? 'ag' : 'äge');
-  var data = _filter === 'all' ? _archiv : _archiv.filter(function(e){ return e.owner === _filter; });
-
-  if (!data.length) {
-    listEl.innerHTML = '<p class="archiv-empty">Keine Eintr&auml;ge vorhanden.</p>';
-    return;
-  }
-
-  var grouped = {};
-  data.slice().sort(function(a,b){ return (b.archiviertAm||'').localeCompare(a.archiviertAm||''); })
-    .forEach(function(e) {
-      var key = (e.archiviertAm||'') + '|' + (e.terminDatum||'') + '|' + (e.terminUhrzeit||'') + '|' + (e.owner||'');
-      if (!grouped[key]) grouped[key] = { archiviertAm: e.archiviertAm, terminDatum: e.terminDatum, terminUhrzeit: e.terminUhrzeit, owner: e.owner, items: [] };
-      grouped[key].items.push(e);
-    });
-
-  var html = '';
-  Object.values(grouped).forEach(function(g) {
-    var rows = g.items.map(function(e) {
-      return '<tr>' +
-        '<td class="nm">' + esc(e.name||'–') + '</td>' +
-        '<td>' + esc(e.fe||'–') + '</td>' +
-        '<td>' + esc(e.fw||'–') + '</td>' +
-        '<td>' + (e.tische||0) + ' · ' + (e.stuehle||0) + '</td>' +
-        '<td>' + esc(e.abh_datum||'–') + (e.abh_zeit ? ' ' + esc(e.abh_zeit) + ' Uhr' : '') + '</td>' +
-        '<td>' + esc(e.bem||'–') + '</td>' +
-        '</tr>';
-    }).join('');
-
-    html += '<div class="a-card">' +
-      '<div class="a-card-head">' +
-        '<div class="a-card-meta">' +
-          '<span class="a-datum">&#x1F4C5; ' + esc(g.terminDatum||'–') + ' · ' + esc(g.terminUhrzeit||'') + '</span>' +
-          '<span class="owner-chip ' + esc(g.owner) + '">' + ownerLabel(g.owner) + '</span>' +
-          '<span class="a-done">✓ Abgeschlossen</span>' +
-        '</div>' +
-        '<span class="a-am">Archiviert: ' + esc(g.archiviertAm||'–') + '</span>' +
-      '</div>' +
-      '<table class="a-table">' +
-        '<thead><tr><th>Name</th><th>Form. erh.</th><th>Form. weit.</th><th>Ti · St</th><th>Abholung</th><th>Bemerkung</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody>' +
-      '</table>' +
-    '</div>';
+  const grouped = {};
+  data.slice().sort((a,b)=>(b.archiviertAm||'').localeCompare(a.archiviertAm||'')).forEach(e => {
+    const key = (e.archiviertAm||'')+'|'+(e.terminDatum||'')+'|'+(e.terminUhrzeit||'')+'|'+(e.owner||'');
+    if (!grouped[key]) grouped[key]={...e, items:[]};
+    grouped[key].items.push(e);
   });
 
-  listEl.innerHTML = html;
+  listEl.innerHTML = Object.values(grouped).map(g => {
+    const rows = g.items.map(e =>
+      '<tr><td class="nm">'+esc(e.name||'–')+'</td><td>'+esc(e.fe||'–')+'</td><td>'+esc(e.fw||'–')+'</td>'+
+      '<td>'+(e.tische||0)+' · '+(e.stuehle||0)+'</td>'+
+      '<td>'+esc(e.abh_datum||'–')+(e.abh_zeit?' '+esc(e.abh_zeit)+' Uhr':'')+'</td>'+
+      '<td>'+esc(e.bem||'–')+'</td></tr>'
+    ).join('');
+    return '<div class="a-card">'+
+      '<div class="a-card-head">'+
+        '<div class="a-card-meta">'+
+          '<span class="a-datum">&#x1F4C5; '+esc(g.terminDatum||'–')+' · '+esc(g.terminUhrzeit||'')+'</span>'+
+          '<span class="owner-chip '+esc(g.owner)+'">'+ownerLabel(g.owner)+'</span>'+
+          '<span class="a-done">&#x2713; Abgeschlossen</span>'+
+        '</div>'+
+        '<span class="a-am">Archiviert: '+esc(g.archiviertAm||'–')+'</span>'+
+      '</div>'+
+      '<table class="a-table"><thead><tr><th>Name</th><th>Form. erh.</th><th>Form. weit.</th><th>Ti · St</th><th>Abholung</th><th>Bemerkung</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div>';
+  }).join('');
 }
 
-// ─── Toast ────────────────────────────────────────────────────────────────────
-var _tt;
+// Toast
+let _tt;
 function toast(msg) {
-  var el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  clearTimeout(_tt); _tt = setTimeout(function(){ el.classList.remove('show'); }, 2400);
-}
-</script>
-  apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
-  authDomain:        "manager-3cf2b.firebaseapp.com",
-  databaseURL:       "https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId:         "manager-3cf2b",
-  storageBucket:     "manager-3cf2b.firebasestorage.app",
-  messagingSenderId: "55315892331",
-  appId:             "1:55315892331:web:9889b92c74e535a85a892e"
-};
-
-let _sessions = [];
-let _archiv   = [];
-let _filter   = 'all';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
-
-function datumSort(d) {
-  if (!d) return Infinity;
-  const p = String(d).split('.');
-  if (p.length < 2) return Infinity;
-  const dd = parseInt(p[0])||0, mm = parseInt(p[1])||0, yy = parseInt(p[2])||2026;
-  return yy*10000 + mm*100 + dd;
-}
-
-function isToday(datum) {
-  if (!datum) return false;
-  const p = String(datum).split('.');
-  const n = new Date();
-  return parseInt(p[0]) === n.getDate() &&
-         parseInt(p[1]) === (n.getMonth()+1) &&
-         (!p[2] || parseInt(p[2]) === n.getFullYear());
-}
-
-function ownerLabel(o) { return o === 'louis' ? 'Louis' : o === 'rohat' ? 'Rohat' : o || '–'; }
-
-function setSyncStatus(type, txt) {
-  const b = document.getElementById('syncBadge');
-  b.className = 'sync-badge ' + type;
-  document.getElementById('syncTxt').textContent = txt;
-}
-
-// ─── Firebase ─────────────────────────────────────────────────────────────────
-(function initFB() {
-  try {
-    const app = firebase.initializeApp(FB_CFG);
-    const db  = firebase.database(app);
-    setSyncStatus('', 'Verbinde…');
-
-    db.ref('sessions').on('value', snap => {
-      _sessions = snap.val() ? Object.values(snap.val()) : [];
-      renderPersonCards();
-      renderAbholungen();
-      setSyncStatus('synced', 'Live ✓');
-    }, () => setSyncStatus('error', 'Fehler'));
-
-    db.ref('archiv').on('value', snap => {
-      _archiv = snap.val() ? Object.values(snap.val()) : [];
-      renderArchiv();
-    });
-  } catch(e) { setSyncStatus('error', 'Init-Fehler'); console.error(e); }
-})();
-
-// ─── Person-Karten ────────────────────────────────────────────────────────────
-function renderPersonCards() {
-  ['louis','rohat'].forEach(function(owner) {
-    const ss = _sessions.filter(function(x){ return x.owner === owner; });
-    const total = ss.length;
-    const offen = ss.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status === 'Offen'; }).length; }, 0);
-    const res   = ss.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status === 'Reservierung'; }).length; }, 0);
-    const abh   = ss.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status === 'Abholung'; }).length; }, 0);
-    var pre = owner === 'louis' ? 'l' : 'r';
-    document.getElementById(pre+'-sub').textContent = total + ' Termin' + (total!==1?'e':'');
-    document.getElementById(pre+'-stats').innerHTML =
-      '<div class="stat-pill"><span class="stat-dot" style="background:#b07800"></span>' + offen + ' Offen</div>' +
-      '<div class="stat-pill"><span class="stat-dot" style="background:#0071e3"></span>' + res + ' Reserv.</div>' +
-      '<div class="stat-pill"><span class="stat-dot" style="background:#7c3aed"></span>' + abh + ' Abholung</div>';
-  });
-  var total = _sessions.length;
-  var aOffen = _sessions.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status==='Offen'; }).length; }, 0);
-  var aAbh   = _sessions.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status==='Abholung'; }).length; }, 0);
-  document.getElementById('a-sub').textContent = total + ' Termine gesamt';
-  document.getElementById('a-stats').innerHTML =
-    '<div class="stat-pill"><span class="stat-dot" style="background:#b07800"></span>' + aOffen + ' Offen</div>' +
-    '<div class="stat-pill"><span class="stat-dot" style="background:#7c3aed"></span>' + aAbh + ' Abholung</div>';
-}
-
-// ─── Abholungen ───────────────────────────────────────────────────────────────
-function renderAbholungen() {
-  var byDate = {};
-  var noDatum = [];
-
-  _sessions.forEach(function(s) {
-    (s.personen || []).forEach(function(p) {
-      if (!p.name || !p.name.trim() || p.status !== 'Abholung') return;
-      var entry = {
-        name:   p.name,
-        zeit:   p.abh_zeit  || '',
-        datum:  p.abh_datum || '',
-        termin: esc(s.datum) + (s.uhrzeit ? ' · ' + esc(s.uhrzeit) : ''),
-        owner:  s.owner || ''
-      };
-      if (p.abh_datum && p.abh_datum.trim()) {
-        if (!byDate[p.abh_datum]) byDate[p.abh_datum] = [];
-        byDate[p.abh_datum].push(entry);
-      } else {
-        noDatum.push(entry);
-      }
-    });
-  });
-
-  var dates = Object.keys(byDate).sort(function(a,b){ return datumSort(a) - datumSort(b); });
-  var total = dates.reduce(function(n,k){ return n + byDate[k].length; }, 0) + noDatum.length;
-  document.getElementById('abhTotal').textContent = total;
-
-  if (!total) {
-    document.getElementById('abhBody').innerHTML = '<p style="font-size:13px;color:var(--text-tertiary);padding:18px 0;text-align:center">Keine Abholungen eingetragen.</p>';
-    return;
-  }
-
-  var html = '';
-
-  dates.forEach(function(datum) {
-    var today = isToday(datum);
-    var items = byDate[datum].slice().sort(function(a,b){ return (a.zeit||'').localeCompare(b.zeit||''); });
-    html += '<div class="abh-day">';
-    html += '<div class="day-label">';
-    if (today) html += '<div class="pulse"></div>';
-    html += '&#x1F4C5; ' + esc(datum);
-    if (today) html += ' <span class="today-chip">Heute</span>';
-    html += '</div><div class="abh-rows">';
-    items.forEach(function(e) {
-      html += '<div class="abh-row' + (today ? ' is-today' : '') + '">';
-      html += '<span class="zeit-tag">' + (e.zeit ? esc(e.zeit) + ' Uhr' : '–') + '</span>';
-      html += '<span class="abh-name">' + esc(e.name) + '</span>';
-      html += '<span class="abh-termin">Termin: ' + e.termin + '</span>';
-      html += '<span class="owner-chip ' + esc(e.owner) + '">' + ownerLabel(e.owner) + '</span>';
-      if (today) html += '<div class="pulse"></div>';
-      html += '</div>';
-    });
-    html += '</div></div>';
-  });
-
-  if (noDatum.length) {
-    html += '<div class="abh-day">';
-    html += '<div class="day-label">&#x1F4C5; Datum noch offen</div>';
-    html += '<div class="abh-rows">';
-    noDatum.forEach(function(e) {
-      html += '<div class="abh-row">';
-      html += '<span class="zeit-tag" style="background:var(--text-tertiary)">– offen –</span>';
-      html += '<span class="abh-name">' + esc(e.name) + '</span>';
-      html += '<span class="abh-termin">Termin: ' + e.termin + '</span>';
-      html += '<span class="owner-chip ' + esc(e.owner) + '">' + ownerLabel(e.owner) + '</span>';
-      html += '</div>';
-    });
-    html += '</div></div>';
-  }
-
-  document.getElementById('abhBody').innerHTML = html;
-}
-
-// ─── Archiv ───────────────────────────────────────────────────────────────────
-function setFilter(f, btn) {
-  _filter = f;
-  document.querySelectorAll('.fb').forEach(function(b) { b.classList.remove('on','louis','rohat'); });
-  btn.classList.add('on');
-  if (f !== 'all') btn.classList.add(f);
-  renderArchiv();
-}
-
-function renderArchiv() {
-  var countEl = document.getElementById('archivCount');
-  var listEl  = document.getElementById('archivList');
-  if (!countEl || !listEl) return;
-
-  countEl.textContent = _archiv.length + ' Eintr' + (_archiv.length === 1 ? 'ag' : 'äge');
-  var data = _filter === 'all' ? _archiv : _archiv.filter(function(e){ return e.owner === _filter; });
-
-  if (!data.length) {
-    listEl.innerHTML = '<p class="archiv-empty">Keine Eintr&auml;ge vorhanden.</p>';
-    return;
-  }
-
-  // Gruppieren
-  var grouped = {};
-  data.slice().sort(function(a,b){ return (b.archiviertAm||'').localeCompare(a.archiviertAm||''); })
-    .forEach(function(e) {
-      var key = (e.archiviertAm||'') + '|' + (e.terminDatum||'') + '|' + (e.terminUhrzeit||'') + '|' + (e.owner||'');
-      if (!grouped[key]) grouped[key] = { archiviertAm: e.archiviertAm, terminDatum: e.terminDatum, terminUhrzeit: e.terminUhrzeit, owner: e.owner, items: [] };
-      grouped[key].items.push(e);
-    });
-
-  var html = '';
-  Object.values(grouped).forEach(function(g) {
-    var rows = g.items.map(function(e) {
-      return '<tr>' +
-        '<td class="nm">' + esc(e.name||'–') + '</td>' +
-        '<td>' + esc(e.fe||'–') + '</td>' +
-        '<td>' + esc(e.fw||'–') + '</td>' +
-        '<td>' + (e.tische||0) + ' · ' + (e.stuehle||0) + '</td>' +
-        '<td>' + esc(e.abh_datum||'–') + (e.abh_zeit ? ' ' + esc(e.abh_zeit) + ' Uhr' : '') + '</td>' +
-        '<td>' + esc(e.bem||'–') + '</td>' +
-        '</tr>';
-    }).join('');
-
-    html += '<div class="a-card">' +
-      '<div class="a-card-head">' +
-        '<div class="a-card-meta">' +
-          '<span class="a-datum">&#x1F4C5; ' + esc(g.terminDatum||'–') + ' · ' + esc(g.terminUhrzeit||'') + '</span>' +
-          '<span class="owner-chip ' + esc(g.owner) + '">' + ownerLabel(g.owner) + '</span>' +
-          '<span class="a-done">✓ Abgeschlossen</span>' +
-        '</div>' +
-        '<span class="a-am">Archiviert: ' + esc(g.archiviertAm||'–') + '</span>' +
-      '</div>' +
-      '<table class="a-table">' +
-        '<thead><tr><th>Name</th><th>Form. erh.</th><th>Form. weit.</th><th>Ti · St</th><th>Abholung</th><th>Bemerkung</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody>' +
-      '</table>' +
-    '</div>';
-  });
-
-  listEl.innerHTML = html;
-}
-
-// ─── Toast ────────────────────────────────────────────────────────────────────
-var _tt;
-function toast(msg) {
-  var el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  clearTimeout(_tt); _tt = setTimeout(function(){ el.classList.remove('show'); }, 2400);
+  const el = document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),2400);
 }
 </script>
 </body>
