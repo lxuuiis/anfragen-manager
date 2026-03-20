@@ -777,7 +777,7 @@ function mpickRenderKat(m) {
   const col = document.getElementById('mpickKatCol');
   col.innerHTML = MOEBEL_KATALOG.map(k => {
     const active = k.id === m.kat ? ' active' : '';
-    return `<div class="mpick-kat-item${active}" onclick="mpickSelectKat('${esc(k.id)}')">${esc(k.label)}</div>`;
+    return `<div class="mpick-kat-item${active}" onmousedown="event.preventDefault();mpickSelectKat('${esc(k.id)}')">${esc(k.label)}</div>`;
   }).join('');
 }
 
@@ -787,7 +787,7 @@ function mpickRenderSub(m) {
   if (!katObj) { col.innerHTML = ''; return; }
   col.innerHTML = katObj.subs.map(s => {
     const active = s.id === m.sub ? ' active' : '';
-    return `<div class="mpick-sub-item${active}" onclick="mpickSelectSub('${esc(s.id)}')">${esc(s.label)}</div>`;
+    return `<div class="mpick-sub-item${active}" onmousedown="event.preventDefault();mpickSelectSub('${esc(s.id)}')">${esc(s.label)}</div>`;
   }).join('');
 }
 
@@ -821,11 +821,8 @@ function mpickSelectSub(subId) {
   s.personen[idx].moebel[mi].sub = subId;
   _dirtyIds.add(String(sid)); scheduleSave();
 
-  // Panel aktualisieren
-  const m = s.personen[idx].moebel[mi];
-  mpickRenderSub(m);
-
   // Trigger-Text aktualisieren
+  const m = s.personen[idx].moebel[mi];
   const posten = document.getElementById(`mp-${sid}-${idx}-${mi}`);
   if (posten) {
     const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
