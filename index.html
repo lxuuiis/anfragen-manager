@@ -117,6 +117,27 @@
   .a-table tr:hover td { background: #fafafa; }
   .a-table .nm { font-weight: 500; }
 
+  /* WARNUNGEN */
+  .warn-section { display: flex; flex-direction: column; gap: 8px; }
+  .warn-card { display: flex; align-items: flex-start; gap: 12px; background: #fffbf0; border: 1px solid #ffe08a; border-radius: 12px; padding: 12px 16px; cursor: pointer; transition: background var(--tr), transform var(--tr); text-decoration: none; color: inherit; }
+  .warn-card:hover { background: #fff3cc; transform: translateX(3px); }
+  .warn-card.danger { background: #fff5f5; border-color: rgba(255,59,48,0.35); }
+  .warn-card.danger:hover { background: #ffe8e8; }
+  .warn-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .warn-body { flex: 1; }
+  .warn-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .warn-msg  { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+  .warn-owner { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; }
+  .warn-owner.louis { background: var(--louis-light); color: var(--louis); }
+  .warn-owner.rohat { background: var(--rohat-light); color: var(--rohat); }
+  .warn-empty { font-size: 13px; color: var(--text-tertiary); text-align: center; padding: 18px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .warn-count { background: #fff3cc; border: 1px solid #ffe08a; color: #b07800; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
+  .warn-count.has-danger { background: #fff0f0; border-color: rgba(255,59,48,0.3); color: var(--danger); }
+
+  /* KLICKBARE NAMEN in Abholungen */
+  .abh-name-link { cursor: pointer; text-decoration: none; color: inherit; border-radius: 5px; padding: 1px 3px; margin: -1px -3px; transition: background var(--tr); }
+  .abh-name-link:hover { background: rgba(124,58,237,0.12); }
+
   /* TOAST */
   #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: rgba(29,29,31,0.92); backdrop-filter: blur(12px); color:#fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; white-space: nowrap; }
   #toast.show { transform: translateX(-50%) translateY(0); }
@@ -216,6 +237,29 @@
     </div>
   </div>
 
+  <!-- WARNUNGEN -->
+  <div>
+    <div class="sec-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Hinweise
+    </div>
+    <div class="panel" id="warnPanel">
+      <div class="panel-head" onclick="this.parentElement.classList.toggle('closed')">
+        <span class="panel-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Offene Hinweise
+          <span class="warn-count" id="warnCount">0</span>
+        </span>
+        <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="panel-body" id="warnBody">
+        <div class="warn-section" id="warnList">
+          <p class="warn-empty">Lädt…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ABHOLUNGEN -->
   <div>
     <div class="sec-label">
@@ -271,6 +315,341 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 const FB_CFG = {
+  apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
+  authDomain:        "manager-3cf2b.firebaseapp.com",
+  databaseURL:       "https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "manager-3cf2b",
+  storageBucket:     "manager-3cf2b.firebasestorage.app",
+  messagingSenderId: "55315892331",
+  appId:             "1:55315892331:web:9889b92c74e535a85a892e"
+};
+
+// Pfade zu den Desktop-Ansichten (relativ zu index.html)
+const VIEW_URLS = {
+  louis: 'views/louis/desktop.html',
+  rohat: 'views/rohat/desktop.html'
+};
+
+let _sessions = [];
+let _archiv   = [];
+let _filter   = 'all';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function datumSort(d) {
+  if (!d) return Infinity;
+  const p = String(d).split('.');
+  if (p.length < 2) return Infinity;
+  const dd = parseInt(p[0])||0, mm = parseInt(p[1])||0, yy = parseInt(p[2])||2026;
+  return yy*10000 + mm*100 + dd;
+}
+
+function isToday(datum) {
+  if (!datum) return false;
+  const p = String(datum).split('.');
+  const n = new Date();
+  return parseInt(p[0]) === n.getDate() &&
+         parseInt(p[1]) === (n.getMonth()+1) &&
+         (!p[2] || parseInt(p[2]) === n.getFullYear());
+}
+
+function ownerLabel(o) { return o === 'louis' ? 'Louis' : o === 'rohat' ? 'Rohat' : o || '–'; }
+
+function setSyncStatus(type, txt) {
+  const b = document.getElementById('syncBadge');
+  b.className = 'sync-badge ' + type;
+  document.getElementById('syncTxt').textContent = txt;
+}
+
+// Prüft ob ein Datum (TT.MM.JJJJ) mehr als `days` Tage in der Vergangenheit liegt
+function olderThanDays(datum, days) {
+  if (!datum) return false;
+  const p = String(datum).split('.');
+  if (p.length < 3) return false;
+  const d = new Date(parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0]));
+  const diff = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
+  return diff >= days;
+}
+
+// Navigiert zur Tabelle und hebt den Namen hervor (via URL-Hash)
+function goToRow(owner, personName) {
+  const url = VIEW_URLS[owner];
+  if (!url) return;
+  // Encode den Namen als Hash-Parameter
+  window.location.href = url + '#highlight=' + encodeURIComponent(personName);
+}
+
+// ─── Firebase ─────────────────────────────────────────────────────────────────
+(function initFB() {
+  try {
+    const app = firebase.initializeApp(FB_CFG);
+    const db  = firebase.database(app);
+    setSyncStatus('', 'Verbinde…');
+
+    db.ref('sessions').on('value', snap => {
+      _sessions = snap.val() ? Object.values(snap.val()) : [];
+      renderPersonCards();
+      renderWarnungen();
+      renderAbholungen();
+      setSyncStatus('synced', 'Live ✓');
+    }, () => setSyncStatus('error', 'Fehler'));
+
+    db.ref('archiv').on('value', snap => {
+      _archiv = snap.val() ? Object.values(snap.val()) : [];
+      renderArchiv();
+    });
+  } catch(e) { setSyncStatus('error', 'Init-Fehler'); console.error(e); }
+})();
+
+// ─── Person-Karten ────────────────────────────────────────────────────────────
+function renderPersonCards() {
+  ['louis','rohat'].forEach(function(owner) {
+    const ss = _sessions.filter(function(x){ return x.owner === owner; });
+    const total = ss.length;
+    const offen = ss.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status === 'Offen'; }).length; }, 0);
+    const res   = ss.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status === 'Reservierung'; }).length; }, 0);
+    const abh   = ss.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status === 'Abholung'; }).length; }, 0);
+    var pre = owner === 'louis' ? 'l' : 'r';
+    document.getElementById(pre+'-sub').textContent = total + ' Termin' + (total!==1?'e':'');
+    document.getElementById(pre+'-stats').innerHTML =
+      '<div class="stat-pill"><span class="stat-dot" style="background:#b07800"></span>' + offen + ' Offen</div>' +
+      '<div class="stat-pill"><span class="stat-dot" style="background:#0071e3"></span>' + res + ' Reserv.</div>' +
+      '<div class="stat-pill"><span class="stat-dot" style="background:#7c3aed"></span>' + abh + ' Abholung</div>';
+  });
+  var total = _sessions.length;
+  var aOffen = _sessions.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status==='Offen'; }).length; }, 0);
+  var aAbh   = _sessions.reduce(function(n,x){ return n + (x.personen||[]).filter(function(p){ return p.name && p.name.trim() && p.status==='Abholung'; }).length; }, 0);
+  document.getElementById('a-sub').textContent = total + ' Termine gesamt';
+  document.getElementById('a-stats').innerHTML =
+    '<div class="stat-pill"><span class="stat-dot" style="background:#b07800"></span>' + aOffen + ' Offen</div>' +
+    '<div class="stat-pill"><span class="stat-dot" style="background:#7c3aed"></span>' + aAbh + ' Abholung</div>';
+}
+
+// ─── Warnungen ────────────────────────────────────────────────────────────────
+function renderWarnungen() {
+  var warnings = [];
+
+  _sessions.forEach(function(s) {
+    (s.personen || []).forEach(function(p) {
+      if (!p.name || !p.name.trim()) return;
+      if (p.status !== 'Reservierung') return;
+
+      // Termin-Datum als Referenz nehmen (wann wurde der Termin angelegt / wann war er)
+      // Wir nutzen s.datum als Zeitstempel des Termins
+      var refDatum = s.datum; // TT.MM.JJJJ
+
+      if (!olderThanDays(refDatum, 1)) return; // Noch keine 24h vergangen → keine Warnung
+
+      var feJa = p.fe === 'Ja';
+      var fwJa = p.fw === 'Ja';
+
+      if (!feJa && !fwJa) {
+        // Beide nicht Ja → "Bist du sicher, dass das Formular noch nicht da ist?"
+        warnings.push({
+          name:    p.name,
+          owner:   s.owner || '',
+          termin:  s.datum + (s.uhrzeit ? ' · ' + s.uhrzeit : ''),
+          type:    'keins',
+          msg:     'Bist du sicher, dass das Formular noch nicht da ist?',
+          level:   'warn'
+        });
+      } else if (feJa && !fwJa) {
+        // Formular erhalten, aber nicht weitergeleitet → "Wurde das Formular nicht weitergeleitet?"
+        warnings.push({
+          name:    p.name,
+          owner:   s.owner || '',
+          termin:  s.datum + (s.uhrzeit ? ' · ' + s.uhrzeit : ''),
+          type:    'nichtWeitergeleitet',
+          msg:     'Wurde das Formular nicht weitergeleitet?',
+          level:   'danger'
+        });
+      }
+    });
+  });
+
+  var countEl = document.getElementById('warnCount');
+  var listEl  = document.getElementById('warnList');
+  var panelEl = document.getElementById('warnPanel');
+
+  countEl.textContent = warnings.length;
+
+  // Panel-Badge Farbe
+  var hasDanger = warnings.some(function(w){ return w.level === 'danger'; });
+  countEl.className = 'warn-count' + (hasDanger ? ' has-danger' : '');
+
+  // Panel offen wenn es Warnungen gibt, geschlossen wenn keine
+  if (warnings.length === 0) {
+    panelEl.classList.add('closed');
+    listEl.innerHTML = '<p class="warn-empty"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Alles in Ordnung – keine offenen Hinweise.</p>';
+    return;
+  }
+
+  // Panel öffnen wenn Warnungen vorhanden
+  panelEl.classList.remove('closed');
+
+  listEl.innerHTML = warnings.map(function(w) {
+    var icon = w.level === 'danger' ? '🔴' : '⚠️';
+    var cls  = w.level === 'danger' ? 'warn-card danger' : 'warn-card';
+    var dest = VIEW_URLS[w.owner] ? (VIEW_URLS[w.owner] + '#highlight=' + encodeURIComponent(w.name)) : '#';
+    return '<a class="' + cls + '" href="' + dest + '">' +
+      '<span class="warn-icon">' + icon + '</span>' +
+      '<div class="warn-body">' +
+        '<div class="warn-name">' + esc(w.name) + '</div>' +
+        '<div class="warn-msg">' + esc(w.msg) + ' <span style="color:var(--text-tertiary)">· Termin: ' + esc(w.termin) + '</span></div>' +
+      '</div>' +
+      '<span class="warn-owner ' + esc(w.owner) + '">' + ownerLabel(w.owner) + '</span>' +
+    '</a>';
+  }).join('');
+}
+
+// ─── Abholungen ───────────────────────────────────────────────────────────────
+function renderAbholungen() {
+  var byDate = {};
+  var noDatum = [];
+
+  _sessions.forEach(function(s) {
+    (s.personen || []).forEach(function(p) {
+      if (!p.name || !p.name.trim() || p.status !== 'Abholung') return;
+      var entry = {
+        name:   p.name,
+        zeit:   p.abh_zeit  || '',
+        datum:  p.abh_datum || '',
+        termin: esc(s.datum) + (s.uhrzeit ? ' · ' + esc(s.uhrzeit) : ''),
+        owner:  s.owner || '',
+        sid:    s.id
+      };
+      if (p.abh_datum && p.abh_datum.trim()) {
+        if (!byDate[p.abh_datum]) byDate[p.abh_datum] = [];
+        byDate[p.abh_datum].push(entry);
+      } else {
+        noDatum.push(entry);
+      }
+    });
+  });
+
+  var dates = Object.keys(byDate).sort(function(a,b){ return datumSort(a) - datumSort(b); });
+  var total = dates.reduce(function(n,k){ return n + byDate[k].length; }, 0) + noDatum.length;
+  document.getElementById('abhTotal').textContent = total;
+
+  if (!total) {
+    document.getElementById('abhBody').innerHTML = '<p style="font-size:13px;color:var(--text-tertiary);padding:18px 0;text-align:center">Keine Abholungen eingetragen.</p>';
+    return;
+  }
+
+  var html = '';
+
+  dates.forEach(function(datum) {
+    var today = isToday(datum);
+    var items = byDate[datum].slice().sort(function(a,b){ return (a.zeit||'').localeCompare(b.zeit||''); });
+    html += '<div class="abh-day">';
+    html += '<div class="day-label">';
+    if (today) html += '<div class="pulse"></div>';
+    html += '&#x1F4C5; ' + esc(datum);
+    if (today) html += ' <span class="today-chip">Heute</span>';
+    html += '</div><div class="abh-rows">';
+    items.forEach(function(e) {
+      var dest = VIEW_URLS[e.owner] ? (VIEW_URLS[e.owner] + '#highlight=' + encodeURIComponent(e.name)) : '#';
+      html += '<div class="abh-row' + (today ? ' is-today' : '') + '">';
+      html += '<span class="zeit-tag">' + (e.zeit ? esc(e.zeit) + ' Uhr' : '–') + '</span>';
+      html += '<a class="abh-name abh-name-link" href="' + dest + '" title="Zur Tabelle von ' + ownerLabel(e.owner) + '">' + esc(e.name) + '</a>';
+      html += '<span class="abh-termin">Termin: ' + e.termin + '</span>';
+      html += '<span class="owner-chip ' + esc(e.owner) + '">' + ownerLabel(e.owner) + '</span>';
+      if (today) html += '<div class="pulse"></div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+
+  if (noDatum.length) {
+    html += '<div class="abh-day">';
+    html += '<div class="day-label">&#x1F4C5; Datum noch offen</div>';
+    html += '<div class="abh-rows">';
+    noDatum.forEach(function(e) {
+      var dest = VIEW_URLS[e.owner] ? (VIEW_URLS[e.owner] + '#highlight=' + encodeURIComponent(e.name)) : '#';
+      html += '<div class="abh-row">';
+      html += '<span class="zeit-tag" style="background:var(--text-tertiary)">– offen –</span>';
+      html += '<a class="abh-name abh-name-link" href="' + dest + '" title="Zur Tabelle von ' + ownerLabel(e.owner) + '">' + esc(e.name) + '</a>';
+      html += '<span class="abh-termin">Termin: ' + e.termin + '</span>';
+      html += '<span class="owner-chip ' + esc(e.owner) + '">' + ownerLabel(e.owner) + '</span>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  document.getElementById('abhBody').innerHTML = html;
+}
+
+// ─── Archiv ───────────────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  _filter = f;
+  document.querySelectorAll('.fb').forEach(function(b) { b.classList.remove('on','louis','rohat'); });
+  btn.classList.add('on');
+  if (f !== 'all') btn.classList.add(f);
+  renderArchiv();
+}
+
+function renderArchiv() {
+  var countEl = document.getElementById('archivCount');
+  var listEl  = document.getElementById('archivList');
+  if (!countEl || !listEl) return;
+
+  countEl.textContent = _archiv.length + ' Eintr' + (_archiv.length === 1 ? 'ag' : 'äge');
+  var data = _filter === 'all' ? _archiv : _archiv.filter(function(e){ return e.owner === _filter; });
+
+  if (!data.length) {
+    listEl.innerHTML = '<p class="archiv-empty">Keine Eintr&auml;ge vorhanden.</p>';
+    return;
+  }
+
+  var grouped = {};
+  data.slice().sort(function(a,b){ return (b.archiviertAm||'').localeCompare(a.archiviertAm||''); })
+    .forEach(function(e) {
+      var key = (e.archiviertAm||'') + '|' + (e.terminDatum||'') + '|' + (e.terminUhrzeit||'') + '|' + (e.owner||'');
+      if (!grouped[key]) grouped[key] = { archiviertAm: e.archiviertAm, terminDatum: e.terminDatum, terminUhrzeit: e.terminUhrzeit, owner: e.owner, items: [] };
+      grouped[key].items.push(e);
+    });
+
+  var html = '';
+  Object.values(grouped).forEach(function(g) {
+    var rows = g.items.map(function(e) {
+      return '<tr>' +
+        '<td class="nm">' + esc(e.name||'–') + '</td>' +
+        '<td>' + esc(e.fe||'–') + '</td>' +
+        '<td>' + esc(e.fw||'–') + '</td>' +
+        '<td>' + (e.tische||0) + ' · ' + (e.stuehle||0) + '</td>' +
+        '<td>' + esc(e.abh_datum||'–') + (e.abh_zeit ? ' ' + esc(e.abh_zeit) + ' Uhr' : '') + '</td>' +
+        '<td>' + esc(e.bem||'–') + '</td>' +
+        '</tr>';
+    }).join('');
+
+    html += '<div class="a-card">' +
+      '<div class="a-card-head">' +
+        '<div class="a-card-meta">' +
+          '<span class="a-datum">&#x1F4C5; ' + esc(g.terminDatum||'–') + ' · ' + esc(g.terminUhrzeit||'') + '</span>' +
+          '<span class="owner-chip ' + esc(g.owner) + '">' + ownerLabel(g.owner) + '</span>' +
+          '<span class="a-done">✓ Abgeschlossen</span>' +
+        '</div>' +
+        '<span class="a-am">Archiviert: ' + esc(g.archiviertAm||'–') + '</span>' +
+      '</div>' +
+      '<table class="a-table">' +
+        '<thead><tr><th>Name</th><th>Form. erh.</th><th>Form. weit.</th><th>Ti · St</th><th>Abholung</th><th>Bemerkung</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>' +
+    '</div>';
+  });
+
+  listEl.innerHTML = html;
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+var _tt;
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(function(){ el.classList.remove('show'); }, 2400);
+}
+</script>
   apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
   authDomain:        "manager-3cf2b.firebaseapp.com",
   databaseURL:       "https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app",

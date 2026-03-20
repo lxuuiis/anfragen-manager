@@ -756,6 +756,53 @@ document.getElementById('newUhrzeit').addEventListener('keydown', e => { if (e.k
 document.getElementById('newDatum').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('newUhrzeit').focus(); });
 
 initFirebase();
+
+// ── Highlight via URL-Hash (#highlight=Name) ──────────────────────────────────
+(function handleHighlight() {
+  const hash = decodeURIComponent(window.location.hash || '');
+  if (!hash.startsWith('#highlight=')) return;
+  const targetName = hash.replace('#highlight=', '').trim().toLowerCase();
+  if (!targetName) return;
+
+  // Warten bis Firebase geladen hat, dann Zeile suchen und markieren
+  let attempts = 0;
+  const tryHighlight = setInterval(function() {
+    attempts++;
+    // Alle Name-Inputs durchsuchen
+    const inputs = document.querySelectorAll('td input[type=text]');
+    for (var i = 0; i < inputs.length; i++) {
+      if ((inputs[i].value || '').trim().toLowerCase() === targetName) {
+        clearInterval(tryHighlight);
+        const row = inputs[i].closest('tr');
+        const card = inputs[i].closest('.session-card');
+        // Session aufklappen falls collapsed
+        if (card && card.classList.contains('collapsed')) {
+          const sid = parseInt(card.dataset.id);
+          if (sid) toggleCollapse(sid);
+        }
+        // Scrollen
+        setTimeout(function() {
+          inputs[i].closest('tr').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Highlight-Animation
+          const tr = inputs[i].closest('tr');
+          tr.style.transition = 'background 0.3s';
+          tr.style.background = 'rgba(0,113,227,0.18)';
+          tr.style.outline = '2px solid #0071e3';
+          tr.style.borderRadius = '6px';
+          // Nach 5 Sekunden zurücksetzen
+          setTimeout(function() {
+            tr.style.background = '';
+            tr.style.outline = '';
+          }, 5000);
+          // Hash entfernen damit Reload nicht wieder highlightet
+          history.replaceState(null, '', window.location.pathname);
+        }, 300);
+        return;
+      }
+    }
+    if (attempts > 20) clearInterval(tryHighlight); // max 2s warten
+  }, 100);
+})();
 </script>
 </body>
 </html>

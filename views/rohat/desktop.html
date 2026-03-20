@@ -509,6 +509,45 @@ window.addEventListener('scroll', () => { document.querySelectorAll('.jn-dropdow
 document.getElementById('newUhrzeit').addEventListener('keydown',e=>{if(e.key==='Enter')addSession();});
 document.getElementById('newDatum').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('newUhrzeit').focus();});
 initFirebase();
+
+// ── Highlight via URL-Hash (#highlight=Name) ──────────────────────────────────
+(function handleHighlight() {
+  const hash = decodeURIComponent(window.location.hash || '');
+  if (!hash.startsWith('#highlight=')) return;
+  const targetName = hash.replace('#highlight=', '').trim().toLowerCase();
+  if (!targetName) return;
+
+  let attempts = 0;
+  const tryHighlight = setInterval(function() {
+    attempts++;
+    const inputs = document.querySelectorAll('td input[type=text]');
+    for (var i = 0; i < inputs.length; i++) {
+      if ((inputs[i].value || '').trim().toLowerCase() === targetName) {
+        clearInterval(tryHighlight);
+        const card = inputs[i].closest('.session-card');
+        if (card && card.classList.contains('collapsed')) {
+          const sid = parseInt(card.dataset.id);
+          if (sid) toggleCollapse(sid);
+        }
+        setTimeout(function() {
+          inputs[i].closest('tr').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const tr = inputs[i].closest('tr');
+          tr.style.transition = 'background 0.3s';
+          tr.style.background = 'rgba(52,199,89,0.18)';
+          tr.style.outline = '2px solid #34c759';
+          tr.style.borderRadius = '6px';
+          setTimeout(function() {
+            tr.style.background = '';
+            tr.style.outline = '';
+          }, 5000);
+          history.replaceState(null, '', window.location.pathname);
+        }, 300);
+        return;
+      }
+    }
+    if (attempts > 20) clearInterval(tryHighlight);
+  }, 100);
+})();
 </script>
 </body>
 </html>
