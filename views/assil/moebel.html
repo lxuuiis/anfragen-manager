@@ -12,7 +12,7 @@
     --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.14);
     --text: #1d1d1f; --text-secondary: #6e6e73; --text-tertiary: #aeaeb2;
     --accent: #ff9500; --accent-hover: #e08600; --accent-light: #fff8e6;
-    --danger: #ff3b30; --danger-light: #fff1f0;
+    --danger: #ff3b30;
     --success: #34c759; --warning: #ff9500;
     --radius: 14px; --radius-sm: 9px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
@@ -20,8 +20,6 @@
     --tr: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   }
   body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
-
-  /* ── NAV ── */
   nav { background: rgba(255,255,255,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 200; padding: 0 28px; height: 52px; display: flex; align-items: center; justify-content: space-between; }
   .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
   .owner-tag { background: #7c3aed; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
@@ -33,92 +31,62 @@
   .sync-indicator.syncing { color: var(--warning); }
   .sync-indicator.error { color: var(--danger); }
   .sync-indicator .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-  /* ── BUTTONS ── */
   .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: var(--tr); white-space: nowrap; }
   .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,149,0,0.35); }
+  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
   .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-strong); }
   .btn-ghost:hover { background: var(--surface2); color: var(--text); }
-  .btn-success { background: #34c759; color: #fff; }
-  .btn-success:hover { background: #28a347; transform: translateY(-1px); }
-
-  /* ── MAIN ── */
-  main { max-width: 1200px; margin: 0 auto; padding: 28px 20px 80px; display: flex; flex-direction: column; gap: 32px; }
-
-  /* ── PAGE HEADER ── */
-  .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-  .page-header-left h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.4px; }
-  .page-header-left p { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
-  .page-header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-
-  /* ── KATEGORIE SECTION ── */
-  .kat-section { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
-  .kat-header { display: flex; align-items: center; gap: 14px; padding: 16px 22px; border-bottom: 1px solid var(--border); background: var(--surface2); }
-  .kat-icon { font-size: 22px; }
-  .kat-title { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
-  .kat-total { font-size: 12px; font-weight: 700; padding: 3px 11px; border-radius: 20px; background: var(--accent-light); color: var(--accent); border: 1px solid rgba(255,149,0,0.2); margin-left: auto; }
-
-  /* ── GROSSE TABELLE ── */
-  .moebel-table-wrap { overflow-x: auto; }
-  .moebel-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  .moebel-table thead tr { background: #fafafa; }
-  .moebel-table thead th { padding: 11px 18px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
-  .moebel-table tbody tr { border-bottom: 1px solid var(--border); transition: background var(--tr); }
-  .moebel-table tbody tr:last-child { border-bottom: none; }
-  .moebel-table tbody tr:hover { background: #fffbf2; }
-  .moebel-table td { padding: 13px 18px; vertical-align: middle; }
-
-  /* Farb-Chip */
-  .farb-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
-  .farb-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
-
-  /* Stepper */
+  .btn-green { background: #34c759; color: #fff; }
+  .btn-green:hover { background: #28a347; transform: translateY(-1px); }
+  main { max-width: 1340px; margin: 0 auto; padding: 28px 20px 80px; display: flex; flex-direction: column; gap: 28px; }
+  .summary-strip { display: flex; gap: 10px; flex-wrap: wrap; }
+  .sum-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow); padding: 12px 16px; flex: 1; min-width: 110px; }
+  .sum-card .s-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); margin-bottom: 4px; }
+  .sum-card .s-num { font-size: 22px; font-weight: 700; line-height: 1; }
+  .sum-card .s-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .sum-card.warn .s-num { color: var(--danger); }
+  .sum-card.ok   .s-num { color: var(--success); }
+  .kat-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+  .kat-head { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .kat-emoji { font-size: 20px; }
+  .kat-title { font-size: 15px; font-weight: 700; }
+  .kat-gesamtbadge { margin-left: auto; font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 20px; background: var(--accent-light); color: var(--accent); border: 1px solid rgba(255,149,0,0.25); }
+  .tbl-wrap { overflow-x: auto; }
+  .mtbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .mtbl thead th { padding: 10px 16px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-secondary); background: #fafafa; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
+  .mtbl tbody tr { border-bottom: 1px solid var(--border); transition: background var(--tr); }
+  .mtbl tbody tr:last-child { border-bottom: none; }
+  .mtbl tbody tr:hover { background: #fffbf2; }
+  .mtbl td { padding: 11px 16px; vertical-align: middle; }
+  .fchip { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
+  .fdot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
   .stepper { display: inline-flex; align-items: center; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; background: var(--surface); }
-  .stepper-btn { background: none; border: none; width: 38px; height: 38px; font-size: 18px; font-weight: 700; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: var(--tr); }
-  .stepper-btn:hover { background: var(--surface2); color: var(--text); }
-  .stepper-btn:active { background: #e5e5ea; }
-  .stepper-val { min-width: 56px; text-align: center; font-size: 18px; font-weight: 700; color: var(--text); border-left: 1px solid var(--border); border-right: 1px solid var(--border); padding: 0 8px; line-height: 38px; }
-  .stepper-val.has-value { color: var(--accent); }
-  .stepper-val.zero { color: var(--text-tertiary); }
-
-  /* Status-Badge */
-  .status-badge { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
-  .status-badge.voll { background: #e8f8ee; color: #1a7a36; }
-  .status-badge.mittel { background: #fff8e6; color: #b07800; }
-  .status-badge.leer { background: #fff0f0; color: var(--danger); }
-
-  /* Notiz-Input */
-  .notiz-input { font-family: var(--font); font-size: 13px; color: var(--text); background: var(--surface2); border: 1px solid transparent; border-radius: 7px; padding: 7px 10px; outline: none; transition: var(--tr); width: 100%; min-width: 160px; }
-  .notiz-input:hover { border-color: var(--border-strong); background: #fff; }
-  .notiz-input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(255,149,0,0.12); }
-  .notiz-input::placeholder { color: var(--text-tertiary); }
-
-  /* Letzte Änderung */
-  .last-change { font-size: 11px; color: var(--text-tertiary); }
-
-  /* ── ZUSAMMENFASSUNG ── */
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-  .summary-card { background: var(--surface); border-radius: var(--radius-sm); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 16px 18px; }
-  .summary-card .s-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); margin-bottom: 6px; }
-  .summary-card .s-val { font-size: 28px; font-weight: 700; line-height: 1; }
-  .summary-card .s-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-
-  /* ── TOAST ── */
+  .s-btn { background: none; border: none; width: 36px; height: 36px; font-size: 17px; font-weight: 700; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: var(--tr); user-select: none; }
+  .s-btn:hover { background: #ebebef; color: var(--text); }
+  .s-btn:active { background: #e0e0e5; }
+  .s-val { min-width: 52px; text-align: center; font-size: 17px; font-weight: 700; border-left: 1px solid var(--border); border-right: 1px solid var(--border); padding: 0 6px; line-height: 36px; cursor: pointer; transition: color var(--tr); }
+  .s-val.pos { color: var(--success); }
+  .s-val.zero { color: var(--text-tertiary); }
+  .sbadge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .sbadge.viel   { background: #e8f8ee; color: #1a7a36; }
+  .sbadge.mittel { background: #fff8e6; color: #b07800; }
+  .sbadge.leer   { background: #fff0f0; color: var(--danger); }
+  .notiz { font-family: var(--font); font-size: 12px; color: var(--text); background: transparent; border: 1px solid transparent; border-radius: 7px; padding: 5px 8px; outline: none; transition: var(--tr); width: 100%; min-width: 140px; }
+  .notiz:hover { border-color: var(--border-strong); background: var(--surface2); }
+  .notiz:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(255,149,0,0.12); }
+  .notiz::placeholder { color: var(--text-tertiary); }
+  .ts { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; }
   #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: rgba(29,29,31,0.92); backdrop-filter: blur(12px); color:#fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; white-space: nowrap; }
   #toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* ── TRENNLINIE ── */
-  .kat-divider { display: flex; align-items: center; gap: 10px; padding: 0 22px; }
-  .kat-divider-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-tertiary); white-space: nowrap; }
-  .kat-divider-line { flex: 1; height: 1px; background: var(--border); }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 640px) {
-    .stepper-val { min-width: 44px; font-size: 16px; }
-    .stepper-btn { width: 34px; height: 34px; font-size: 16px; }
-    .moebel-table td, .moebel-table th { padding: 10px 12px; }
-  }
+  .edit-overlay { position: fixed; inset:0; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); z-index:500; display:none; align-items:center; justify-content:center; }
+  .edit-overlay.open { display:flex; }
+  .edit-box { background:#fff; border-radius:18px; padding:28px; width:320px; max-width:95vw; box-shadow:0 24px 60px rgba(0,0,0,0.2); }
+  .edit-box h3 { font-size:16px; font-weight:700; margin-bottom:6px; }
+  .edit-box p  { font-size:12px; color:var(--text-secondary); margin-bottom:18px; }
+  .edit-box input { width:100%; font-size:28px; font-weight:700; text-align:center; border:2px solid var(--border-strong); border-radius:10px; padding:12px; font-family:var(--font); outline:none; }
+  .edit-box input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,149,0,0.15); }
+  .edit-box-actions { display:flex; gap:8px; margin-top:18px; }
+  .edit-box-actions .btn { flex:1; justify-content:center; }
 </style>
 </head>
 <body>
@@ -129,182 +97,45 @@
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
       Übersicht
     </a>
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
     Möbel Übersicht
     <span class="owner-tag">Assil</span>
   </div>
   <div class="nav-actions">
     <div class="sync-indicator" id="syncIndicator"><div class="dot"></div><span id="syncText">Verbinde…</span></div>
-    <button class="btn btn-success" onclick="exportExcel()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    <button class="btn btn-green" onclick="exportExcel()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Excel Export
-    </button>
-    <button class="btn btn-ghost" onclick="resetAll()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.32"/></svg>
-      Alles zurücksetzen
     </button>
   </div>
 </nav>
 
 <main>
-
-  <!-- Zusammenfassung -->
   <div>
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-secondary);margin-bottom:12px;">Gesamt-Bestand</div>
-    <div class="summary-grid" id="summaryGrid">
-      <div class="summary-card"><div class="s-label">Stühle Weiß</div><div class="s-val" id="sum-stuehle-weiss">0</div><div class="s-sub">Verfügbar</div></div>
-      <div class="summary-card"><div class="s-label">Stühle Grau</div><div class="s-val" id="sum-stuehle-grau">0</div><div class="s-sub">Verfügbar</div></div>
-      <div class="summary-card"><div class="s-label">Tische Weiß</div><div class="s-val" id="sum-tische-weiss">0</div><div class="s-sub">Verfügbar</div></div>
-      <div class="summary-card"><div class="s-label">Tische Grau</div><div class="s-val" id="sum-tische-grau">0</div><div class="s-sub">Verfügbar</div></div>
-      <div class="summary-card"><div class="s-label">Rollcontainer</div><div class="s-val" id="sum-rollcontainer-standard">0</div><div class="s-sub">Verfügbar</div></div>
-    </div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-secondary);margin-bottom:10px;">Gesamt-Übersicht</div>
+    <div class="summary-strip" id="summaryStrip"></div>
   </div>
-
-  <!-- STÜHLE -->
-  <div class="kat-section">
-    <div class="kat-header">
-      <span class="kat-icon">🪑</span>
-      <span class="kat-title">Stühle</span>
-      <span class="kat-total" id="kat-total-stuehle">0 gesamt</span>
-    </div>
-    <div class="moebel-table-wrap">
-      <table class="moebel-table">
-        <thead>
-          <tr>
-            <th>Farbe / Typ</th>
-            <th>Verfügbar</th>
-            <th>Status</th>
-            <th>Notiz</th>
-            <th>Letzte Änderung</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="farb-chip"><span class="farb-dot" style="background:#f0f0f0;border:1.5px solid #ccc"></span>Weiß</span></td>
-            <td>
-              <div class="stepper">
-                <button class="stepper-btn" onclick="change('stuehle','weiss',-1)">−</button>
-                <span class="stepper-val zero" id="val-stuehle-weiss">0</span>
-                <button class="stepper-btn" onclick="change('stuehle','weiss',1)">+</button>
-              </div>
-            </td>
-            <td><span class="status-badge leer" id="badge-stuehle-weiss">Leer</span></td>
-            <td><input class="notiz-input" id="note-stuehle-weiss" placeholder="Notiz…" oninput="noteChange('stuehle','weiss',this.value)" /></td>
-            <td><span class="last-change" id="ts-stuehle-weiss">–</span></td>
-          </tr>
-          <tr>
-            <td><span class="farb-chip"><span class="farb-dot" style="background:#8e8e93"></span>Grau</span></td>
-            <td>
-              <div class="stepper">
-                <button class="stepper-btn" onclick="change('stuehle','grau',-1)">−</button>
-                <span class="stepper-val zero" id="val-stuehle-grau">0</span>
-                <button class="stepper-btn" onclick="change('stuehle','grau',1)">+</button>
-              </div>
-            </td>
-            <td><span class="status-badge leer" id="badge-stuehle-grau">Leer</span></td>
-            <td><input class="notiz-input" id="note-stuehle-grau" placeholder="Notiz…" oninput="noteChange('stuehle','grau',this.value)" /></td>
-            <td><span class="last-change" id="ts-stuehle-grau">–</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- TISCHE -->
-  <div class="kat-section">
-    <div class="kat-header">
-      <span class="kat-icon">🪑</span>
-      <span class="kat-title">Tische</span>
-      <span class="kat-total" id="kat-total-tische">0 gesamt</span>
-    </div>
-    <div class="moebel-table-wrap">
-      <table class="moebel-table">
-        <thead>
-          <tr>
-            <th>Farbe / Typ</th>
-            <th>Verfügbar</th>
-            <th>Status</th>
-            <th>Notiz</th>
-            <th>Letzte Änderung</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="farb-chip"><span class="farb-dot" style="background:#f0f0f0;border:1.5px solid #ccc"></span>Weiß</span></td>
-            <td>
-              <div class="stepper">
-                <button class="stepper-btn" onclick="change('tische','weiss',-1)">−</button>
-                <span class="stepper-val zero" id="val-tische-weiss">0</span>
-                <button class="stepper-btn" onclick="change('tische','weiss',1)">+</button>
-              </div>
-            </td>
-            <td><span class="status-badge leer" id="badge-tische-weiss">Leer</span></td>
-            <td><input class="notiz-input" id="note-tische-weiss" placeholder="Notiz…" oninput="noteChange('tische','weiss',this.value)" /></td>
-            <td><span class="last-change" id="ts-tische-weiss">–</span></td>
-          </tr>
-          <tr>
-            <td><span class="farb-chip"><span class="farb-dot" style="background:#8e8e93"></span>Grau</span></td>
-            <td>
-              <div class="stepper">
-                <button class="stepper-btn" onclick="change('tische','grau',-1)">−</button>
-                <span class="stepper-val zero" id="val-tische-grau">0</span>
-                <button class="stepper-btn" onclick="change('tische','grau',1)">+</button>
-              </div>
-            </td>
-            <td><span class="status-badge leer" id="badge-tische-grau">Leer</span></td>
-            <td><input class="notiz-input" id="note-tische-grau" placeholder="Notiz…" oninput="noteChange('tische','grau',this.value)" /></td>
-            <td><span class="last-change" id="ts-tische-grau">–</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ROLLCONTAINER -->
-  <div class="kat-section">
-    <div class="kat-header">
-      <span class="kat-icon">📦</span>
-      <span class="kat-title">Rollcontainer</span>
-      <span class="kat-total" id="kat-total-rollcontainer">0 gesamt</span>
-    </div>
-    <div class="moebel-table-wrap">
-      <table class="moebel-table">
-        <thead>
-          <tr>
-            <th>Typ</th>
-            <th>Verfügbar</th>
-            <th>Status</th>
-            <th>Notiz</th>
-            <th>Letzte Änderung</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="farb-chip">Standard</span></td>
-            <td>
-              <div class="stepper">
-                <button class="stepper-btn" onclick="change('rollcontainer','standard',-1)">−</button>
-                <span class="stepper-val zero" id="val-rollcontainer-standard">0</span>
-                <button class="stepper-btn" onclick="change('rollcontainer','standard',1)">+</button>
-              </div>
-            </td>
-            <td><span class="status-badge leer" id="badge-rollcontainer-standard">Leer</span></td>
-            <td><input class="notiz-input" id="note-rollcontainer-standard" placeholder="Notiz…" oninput="noteChange('rollcontainer','standard',this.value)" /></td>
-            <td><span class="last-change" id="ts-rollcontainer-standard">–</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
+  <div id="katContainer"></div>
 </main>
+
+<div class="edit-overlay" id="editOverlay">
+  <div class="edit-box">
+    <h3 id="editTitle">Bestand eingeben</h3>
+    <p id="editSub">Aktueller Wert:</p>
+    <input type="number" id="editInput" min="0" />
+    <div class="edit-box-actions">
+      <button class="btn btn-ghost" onclick="closeEdit()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="confirmEdit()">Übernehmen</button>
+    </div>
+  </div>
+</div>
 
 <div id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-/* ── Firebase Config ── */
+/* ── Firebase ── */
 const FB_CFG = {
   apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
   authDomain:        "manager-3cf2b.firebaseapp.com",
@@ -315,235 +146,378 @@ const FB_CFG = {
   appId:             "1:55315892331:web:9889b92c74e535a85a892e"
 };
 
-/* ── Datenstruktur ── */
-// _data[kategorie][sub] = { anzahl, notiz, updatedAt }
-let _data = {
-  stuehle:       { weiss: { anzahl:0, notiz:'', updatedAt:'' }, grau: { anzahl:0, notiz:'', updatedAt:'' } },
-  tische:        { weiss: { anzahl:0, notiz:'', updatedAt:'' }, grau: { anzahl:0, notiz:'', updatedAt:'' } },
-  rollcontainer: { standard: { anzahl:0, notiz:'', updatedAt:'' } }
-};
+/* ── Möbel-Katalog (vollständig aus Inventarliste) ── */
+// Wird auch in Louis/Rohat genutzt für Dropdown-Auswahl
+const KATEGORIEN = [
+  { id:'schreibtisch_160', titel:'Schreibtisch 160×80 höhenverstellbar', emoji:'🖥️', zeilen:[
+    { id:'weiss',            label:'Weiß',                        farbe:'#f0f0f0', rand:'#ccc', start:30 },
+    { id:'grau',             label:'Grau',                        farbe:'#8e8e93', rand:null,   start:55 },
+    { id:'grau_manuel_rad',  label:'Grau manuell mit Rädchen',    farbe:'#8e8e93', rand:null,   start:2  },
+    { id:'grau_manuel_schr', label:'Grau manuell mit Schrauben',  farbe:'#8e8e93', rand:null,   start:4  },
+    { id:'grau_auseinander', label:'Grau manuell auseinandergebaut',farbe:'#8e8e93',rand:null,  start:1  },
+  ]},
+  { id:'schreibtisch_120', titel:'Schreibtisch 120×80 höhenverstellbar', emoji:'🖥️', zeilen:[
+    { id:'holz_rollen', label:'Holz manuell auf Rollen', farbe:'#c8a96e', rand:null, start:4 },
+  ]},
+  { id:'schreibtisch_240', titel:'Schreibtisch 240×80 (Winkeltisch)', emoji:'🖥️', zeilen:[
+    { id:'weiss', label:'Weiß Winkeltisch', farbe:'#f0f0f0', rand:'#ccc', start:1 },
+  ]},
+  { id:'buerostuehle', titel:'Bürostühle', emoji:'🪑', zeilen:[
+    { id:'jeansblau',  label:'Jeansblau',               farbe:'#4a6fa5', rand:null, start:33 },
+    { id:'grau',       label:'Grau',                    farbe:'#8e8e93', rand:null, start:6  },
+    { id:'dunkelblau', label:'Dunkelblau (geteilte RL)', farbe:'#1e3a6e', rand:null, start:72 },
+  ]},
+  { id:'besprechungsstuehle', titel:'Besprechungsstühle', emoji:'🪑', zeilen:[
+    { id:'dunkelblau',    label:'Dunkelblau',          farbe:'#1e3a6e', rand:null, start:0  },
+    { id:'jeansblau',     label:'Jeansblau',           farbe:'#4a6fa5', rand:null, start:71 },
+    { id:'grau',          label:'Grau',                farbe:'#8e8e93', rand:null, start:38 },
+    { id:'grau_ohne_arm', label:'Grau ohne Armlehne',  farbe:'#8e8e93', rand:null, start:4  },
+  ]},
+  { id:'beistelltisch', titel:'Beistelltisch', emoji:'📐', zeilen:[
+    { id:'weiss_120x60',  label:'Weiß 120×60',   farbe:'#f0f0f0', rand:'#ccc', start:2  },
+    { id:'weiss_160x80',  label:'Weiß 160×80',   farbe:'#f0f0f0', rand:'#ccc', start:17 },
+    { id:'weiss_180x60',  label:'Weiß 180×60',   farbe:'#f0f0f0', rand:'#ccc', start:2  },
+    { id:'weiss_180x80',  label:'Weiß 180×80',   farbe:'#f0f0f0', rand:'#ccc', start:1  },
+    { id:'weiss_190x90',  label:'Weiß 190×90',   farbe:'#f0f0f0', rand:'#ccc', start:1  },
+    { id:'grau_120x60',   label:'Grau 120×60',   farbe:'#8e8e93', rand:null,   start:1  },
+    { id:'grau_160x60',   label:'Grau 160×60',   farbe:'#8e8e93', rand:null,   start:9  },
+    { id:'grau_160x80',   label:'Grau 160×80',   farbe:'#8e8e93', rand:null,   start:15 },
+    { id:'grau_180x80',   label:'Grau 180×80',   farbe:'#8e8e93', rand:null,   start:3  },
+    { id:'grau_200x100',  label:'Grau 200×100',  farbe:'#8e8e93', rand:null,   start:1  },
+    { id:'holz_160x80',   label:'Holz 160×80',   farbe:'#c8a96e', rand:null,   start:4  },
+  ]},
+  { id:'rc', titel:'Rollcontainer (RC)', emoji:'📦', zeilen:[
+    { id:'grau_h51', label:'Grau H51', farbe:'#8e8e93', rand:null,   start:59 },
+    { id:'grau_h57', label:'Grau H57', farbe:'#8e8e93', rand:null,   start:43 },
+    { id:'weiss',    label:'Weiß',     farbe:'#f0f0f0', rand:'#ccc', start:8  },
+  ]},
+  { id:'sideboard', titel:'Sideboard', emoji:'🗄️', zeilen:[
+    { id:'holz_jalousie',   label:'Holz Jalousie 120×80',              farbe:'#c8a96e', rand:null,   start:3  },
+    { id:'holz_schiebe78',  label:'Holz Schiebetür 120×78',            farbe:'#c8a96e', rand:null,   start:2  },
+    { id:'holz_schiebe152', label:'Holz Schiebetür 120×152',           farbe:'#c8a96e', rand:null,   start:1  },
+    { id:'weiss_80',        label:'Weiß 80×80',                        farbe:'#f0f0f0', rand:'#ccc', start:2  },
+    { id:'weiss_100',       label:'Weiß 100×80',                       farbe:'#f0f0f0', rand:'#ccc', start:10 },
+    { id:'weiss_120',       label:'Weiß 120×80',                       farbe:'#f0f0f0', rand:'#ccc', start:7  },
+    { id:'weiss_160',       label:'Weiß 160×80',                       farbe:'#f0f0f0', rand:'#ccc', start:2  },
+    { id:'weiss_100_117',   label:'Weiß 100×117',                      farbe:'#f0f0f0', rand:'#ccc', start:1  },
+    { id:'weiss_120_117',   label:'Weiß 120×117',                      farbe:'#f0f0f0', rand:'#ccc', start:1  },
+    { id:'grau_jalousie',   label:'Grau Jalousie Hängeregister 160×117',farbe:'#8e8e93',rand:null,   start:3  },
+  ]},
+  { id:'schrank', titel:'Schrank', emoji:'🚪', zeilen:[
+    { id:'grau_schiebe',    label:'Grau Schiebetür 100×115',    farbe:'#8e8e93', rand:null, start:3 },
+    { id:'grau_doppel',     label:'Grau Doppelflügel 100×190',  farbe:'#8e8e93', rand:null, start:1 },
+    { id:'grau_jalousie80', label:'Grau Jalousie 100×117',      farbe:'#8e8e93', rand:null, start:1 },
+    { id:'grau_jalousie190',label:'Grau Jalousie 80×190',       farbe:'#8e8e93', rand:null, start:1 },
+  ]},
+  { id:'besprechungstisch', titel:'Besprechungstisch', emoji:'🪑', zeilen:[
+    { id:'holz_140',       label:'Holz 140×80',             farbe:'#c8a96e', rand:null,   start:2 },
+    { id:'holz_200',       label:'Holz 200×80 mit IT',      farbe:'#c8a96e', rand:null,   start:8 },
+    { id:'holz_210',       label:'Holz 210×120 mit IT',     farbe:'#c8a96e', rand:null,   start:2 },
+    { id:'grau_oval160',   label:'Grau 160×90 oval',        farbe:'#8e8e93', rand:null,   start:2 },
+    { id:'grau_160',       label:'Grau 160×90',             farbe:'#8e8e93', rand:null,   start:1 },
+    { id:'grau_r140',      label:'Grau rund Ø140',          farbe:'#8e8e93', rand:null,   start:1 },
+    { id:'grau_r120',      label:'Grau rund Ø120',          farbe:'#8e8e93', rand:null,   start:1 },
+    { id:'weiss_r120',     label:'Weiß rund Ø120',          farbe:'#f0f0f0', rand:'#ccc', start:1 },
+    { id:'weiss_160x160',  label:'Weiß 160×160 mit IT',     farbe:'#f0f0f0', rand:'#ccc', start:1 },
+    { id:'weiss_160x160b', label:'Weiß 160×160',            farbe:'#f0f0f0', rand:'#ccc', start:1 },
+  ]},
+  { id:'apothekerschrank', titel:'Apothekerschrank', emoji:'🗂️', zeilen:[
+    { id:'weiss_li',       label:'Weiß links',         farbe:'#f0f0f0', rand:'#ccc', start:1  },
+    { id:'weiss_esche_li', label:'Weiß/Esche links',   farbe:'#e8e0d0', rand:'#bbb', start:14 },
+    { id:'weiss_esche_re', label:'Weiß/Esche rechts',  farbe:'#e8e0d0', rand:'#bbb', start:13 },
+  ]},
+  { id:'whiteboard', titel:'Whiteboard', emoji:'📋', zeilen:[
+    { id:'100x150_neu', label:'100×150 neu/OVP',   farbe:'#ffffff', rand:'#ccc', start:1  },
+    { id:'100x200_neu', label:'100×200 neu/OVP',   farbe:'#ffffff', rand:'#ccc', start:3  },
+    { id:'120x150_neu', label:'120×150 neu/OVP',   farbe:'#ffffff', rand:'#ccc', start:1  },
+    { id:'100x200_gb',  label:'100×200 gebraucht', farbe:'#f0f0f0', rand:'#ccc', start:10 },
+    { id:'120x200_gb',  label:'120×200 gebraucht', farbe:'#f0f0f0', rand:'#ccc', start:10 },
+  ]},
+  { id:'garderobe', titel:'Garderobe', emoji:'🧥', zeilen:[
+    { id:'weiss',  label:'Weiß',       farbe:'#f0f0f0', rand:'#ccc', start:5  },
+    { id:'divers', label:'Divers',     farbe:'#c0c0c0', rand:null,   start:30 },
+    { id:'rollen', label:'Auf Rollen', farbe:'#8e8e93', rand:null,   start:1  },
+  ]},
+  { id:'pulttisch', titel:'Pulttisch mit Sitz', emoji:'🪑', zeilen:[
+    { id:'standard', label:'Standard', farbe:'#8e8e93', rand:null, start:2 },
+  ]},
+  { id:'luefter', titel:'Lüfter', emoji:'💨', zeilen:[
+    { id:'ansio',      label:'Ansio',              farbe:'#aeaeb2', rand:null, start:2 },
+    { id:'tecvance',   label:'TecVance',           farbe:'#aeaeb2', rand:null, start:3 },
+    { id:'honey_chr',  label:'Honeywell Chrom',    farbe:'#d4af37', rand:null, start:4 },
+    { id:'honey_schw', label:'Honeywell Schwarz',  farbe:'#3a3a3c', rand:null, start:4 },
+  ]},
+  { id:'ventilator', titel:'Ventilator', emoji:'🌀', zeilen:[
+    { id:'honeywell', label:'Honeywell',    farbe:'#aeaeb2', rand:null, start:10 },
+    { id:'aeg',       label:'AEG',          farbe:'#aeaeb2', rand:null, start:3  },
+    { id:'profi',     label:'Profi & Care', farbe:'#aeaeb2', rand:null, start:2  },
+  ]},
+  { id:'kleiderschrank', titel:'Kleiderschrank', emoji:'👔', zeilen:[
+    { id:'weiss', label:'Weiß 60×198', farbe:'#f0f0f0', rand:'#ccc', start:1 },
+    { id:'grau',  label:'Grau 60×186', farbe:'#8e8e93', rand:null,   start:1 },
+  ]},
+];
 
-let _db = null;
+/* ── State ── */
+let _data = {};
+let _db   = null;
 let _saveTimer = null;
+let _domBuilt  = false;
+
+// Initialisiere mit Startwerten
+KATEGORIEN.forEach(kat => {
+  _data[kat.id] = {};
+  kat.zeilen.forEach(z => { _data[kat.id][z.id] = { anzahl: z.start, notiz: '', updatedAt: '' }; });
+});
 
 /* ── Helpers ── */
-function now() {
+function nowStr() {
   const d = new Date();
-  return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'})
-       + ' ' + d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}) + ' '
+       + d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
 }
-
-function setSync(type, txt) {
+function setSync(t, txt) {
   const el = document.getElementById('syncIndicator');
-  el.className = 'sync-indicator ' + type;
-  document.getElementById('syncText').textContent = txt;
+  const te = document.getElementById('syncText');
+  if(el) el.className = 'sync-indicator ' + t;
+  if(te) te.textContent = txt;
 }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 /* ── Firebase ── */
-(function() {
+(function initFb(){
   try {
     const app = firebase.initializeApp(FB_CFG);
     _db = firebase.database(app);
-    setSync('', 'Verbinde…');
     _db.ref('moebel').on('value', snap => {
-      const d = snap.val();
-      if (d) {
-        Object.keys(d).forEach(kat => {
-          if (!_data[kat]) _data[kat] = {};
-          Object.keys(d[kat]).forEach(sub => {
-            if (!_data[kat][sub]) _data[kat][sub] = { anzahl:0, notiz:'', updatedAt:'' };
-            Object.assign(_data[kat][sub], d[kat][sub]);
-          });
+      const fbData = snap.val();
+      if (fbData) {
+        KATEGORIEN.forEach(kat => {
+          if (fbData[kat.id]) {
+            kat.zeilen.forEach(z => {
+              if (fbData[kat.id][z.id] !== undefined) {
+                const fb = fbData[kat.id][z.id];
+                if (!_data[kat.id]) _data[kat.id] = {};
+                if (!_data[kat.id][z.id]) _data[kat.id][z.id] = { anzahl: z.start, notiz:'', updatedAt:'' };
+                _data[kat.id][z.id].anzahl    = fb.anzahl    != null ? fb.anzahl    : _data[kat.id][z.id].anzahl;
+                _data[kat.id][z.id].notiz     = fb.notiz     != null ? fb.notiz     : '';
+                _data[kat.id][z.id].updatedAt = fb.updatedAt != null ? fb.updatedAt : '';
+              }
+            });
+          }
         });
       }
       renderAll();
       setSync('synced', 'Live ✓');
-    }, () => setSync('error', 'Fehler'));
-  } catch(e) { setSync('error', 'Init-Fehler'); console.error(e); }
+    }, () => { setSync('error','Firebase Fehler'); renderAll(); });
+  } catch(e) { setSync('error','Init-Fehler'); console.error(e); renderAll(); }
 })();
 
 /* ── Render ── */
 function renderAll() {
-  const cats = {
-    stuehle:       ['weiss','grau'],
-    tische:        ['weiss','grau'],
-    rollcontainer: ['standard']
-  };
+  if (!_domBuilt) buildDOM();
+  updateValues();
+  renderSummary();
+}
 
-  Object.keys(cats).forEach(kat => {
+function buildDOM() {
+  const container = document.getElementById('katContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  KATEGORIEN.forEach(kat => {
+    const rows = kat.zeilen.map(z => {
+      const ds = z.farbe ? `background:${z.farbe};${z.rand?'border:1.5px solid '+z.rand+';':''}` : '';
+      return `<tr>
+        <td><span class="fchip"><span class="fdot" style="${ds}"></span>${esc(z.label)}</span></td>
+        <td>
+          <div class="stepper">
+            <button class="s-btn" onclick="change('${kat.id}','${z.id}',-1)">−</button>
+            <span class="s-val zero" id="v-${kat.id}-${z.id}" onclick="openEdit('${kat.id}','${z.id}','${esc(z.label)}')" title="Klicken zum direkten Eingeben">0</span>
+            <button class="s-btn" onclick="change('${kat.id}','${z.id}',1)">+</button>
+          </div>
+        </td>
+        <td><span class="sbadge leer" id="b-${kat.id}-${z.id}">Leer</span></td>
+        <td><input class="notiz" id="n-${kat.id}-${z.id}" placeholder="Notiz…" oninput="noteChange('${kat.id}','${z.id}',this.value)" /></td>
+        <td><span class="ts" id="t-${kat.id}-${z.id}">–</span></td>
+      </tr>`;
+    }).join('');
+
+    const card = document.createElement('div');
+    card.className = 'kat-card';
+    card.innerHTML = `
+      <div class="kat-head">
+        <span class="kat-emoji">${kat.emoji}</span>
+        <span class="kat-title">${esc(kat.titel)}</span>
+        <span class="kat-gesamtbadge" id="kat-tot-${kat.id}">–</span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="mtbl">
+          <thead><tr>
+            <th style="min-width:220px">Typ / Farbe / Maße</th>
+            <th style="min-width:170px">Bestand <small style="font-weight:400;text-transform:none">(klick = direkt)</small></th>
+            <th style="min-width:110px">Status</th>
+            <th style="min-width:180px">Notiz</th>
+            <th style="min-width:110px">Geändert</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    container.appendChild(card);
+  });
+  _domBuilt = true;
+}
+
+function updateValues() {
+  KATEGORIEN.forEach(kat => {
     let total = 0;
-    cats[kat].forEach(sub => {
-      const d = (_data[kat] && _data[kat][sub]) || { anzahl:0, notiz:'', updatedAt:'' };
-      const v = d.anzahl || 0;
+    kat.zeilen.forEach(z => {
+      const d = (_data[kat.id]||{})[z.id] || { anzahl:0, notiz:'', updatedAt:'' };
+      const v = Math.max(0, Number(d.anzahl) || 0);
       total += v;
 
-      // Stepper-Wert
-      const valEl = document.getElementById('val-' + kat + '-' + sub);
-      if (valEl) {
-        valEl.textContent = v;
-        valEl.className = 'stepper-val ' + (v === 0 ? 'zero' : 'has-value');
-      }
+      const valEl = document.getElementById(`v-${kat.id}-${z.id}`);
+      if (valEl) { valEl.textContent = v; valEl.className = 's-val ' + (v > 10 ? 'pos' : v > 0 ? '' : 'zero'); }
 
-      // Status-Badge
-      const badgeEl = document.getElementById('badge-' + kat + '-' + sub);
+      const badgeEl = document.getElementById(`b-${kat.id}-${z.id}`);
       if (badgeEl) {
-        if (v === 0)      { badgeEl.className='status-badge leer'; badgeEl.textContent='Leer'; }
-        else if (v <= 5)  { badgeEl.className='status-badge mittel'; badgeEl.textContent='Wenig'; }
-        else              { badgeEl.className='status-badge voll'; badgeEl.textContent='Verfügbar'; }
+        if (v === 0)       { badgeEl.className = 'sbadge leer';   badgeEl.textContent = 'Leer'; }
+        else if (v <= 5)   { badgeEl.className = 'sbadge mittel'; badgeEl.textContent = 'Wenig (' + v + ')'; }
+        else               { badgeEl.className = 'sbadge viel';   badgeEl.textContent = 'OK (' + v + ')'; }
       }
 
-      // Notiz
-      const noteEl = document.getElementById('note-' + kat + '-' + sub);
+      const noteEl = document.getElementById(`n-${kat.id}-${z.id}`);
       if (noteEl && document.activeElement !== noteEl) noteEl.value = d.notiz || '';
 
-      // Timestamp
-      const tsEl = document.getElementById('ts-' + kat + '-' + sub);
+      const tsEl = document.getElementById(`t-${kat.id}-${z.id}`);
       if (tsEl) tsEl.textContent = d.updatedAt || '–';
-
-      // Summary-Karte
-      const sumEl = document.getElementById('sum-' + kat + '-' + sub);
-      if (sumEl) sumEl.textContent = v;
     });
 
-    // Kategorie-Total
-    const totEl = document.getElementById('kat-total-' + kat);
+    const totEl = document.getElementById(`kat-tot-${kat.id}`);
     if (totEl) totEl.textContent = total + ' gesamt';
   });
 }
 
-/* ── Interaktion ── */
-function change(kat, sub, delta) {
-  if (!_data[kat]) _data[kat] = {};
-  if (!_data[kat][sub]) _data[kat][sub] = { anzahl:0, notiz:'', updatedAt:'' };
-  const cur = _data[kat][sub].anzahl || 0;
-  _data[kat][sub].anzahl = Math.max(0, cur + delta);
-  _data[kat][sub].updatedAt = now();
-  renderAll();
+function renderSummary() {
+  let gesamt = 0, leer = 0, wenig = 0;
+  KATEGORIEN.forEach(kat => {
+    let tot = 0;
+    kat.zeilen.forEach(z => { tot += Math.max(0, Number(((_data[kat.id]||{})[z.id]||{}).anzahl) || 0); });
+    gesamt += tot;
+    if (tot === 0) leer++;
+    else if (tot <= 10) wenig++;
+  });
+  const strip = document.getElementById('summaryStrip');
+  if (!strip) return;
+  strip.innerHTML = `
+    <div class="sum-card ok"><div class="s-lbl">Gesamt Artikel</div><div class="s-num">${gesamt}</div><div class="s-sub">verfügbar</div></div>
+    <div class="sum-card"><div class="s-lbl">Kategorien</div><div class="s-num">${KATEGORIEN.length}</div><div class="s-sub">Möbeltypen</div></div>
+    <div class="sum-card ${wenig>0?'warn':''}"><div class="s-lbl">Wenig Bestand</div><div class="s-num">${wenig}</div><div class="s-sub">Kategorien ≤ 10 Stk.</div></div>
+    <div class="sum-card ${leer>0?'warn':''}"><div class="s-lbl">Leer</div><div class="s-num">${leer}</div><div class="s-sub">Kategorien = 0</div></div>
+  `;
+}
+
+/* ── Bestand ändern ── */
+function change(katId, zeilId, delta) {
+  if (!_data[katId]) _data[katId] = {};
+  if (!_data[katId][zeilId]) _data[katId][zeilId] = { anzahl:0, notiz:'', updatedAt:'' };
+  _data[katId][zeilId].anzahl    = Math.max(0, (Number(_data[katId][zeilId].anzahl)||0) + delta);
+  _data[katId][zeilId].updatedAt = nowStr();
+  updateValues(); renderSummary(); scheduleSave();
+}
+
+function noteChange(katId, zeilId, val) {
+  if (!_data[katId]) _data[katId] = {};
+  if (!_data[katId][zeilId]) _data[katId][zeilId] = { anzahl:0, notiz:'', updatedAt:'' };
+  _data[katId][zeilId].notiz     = val;
+  _data[katId][zeilId].updatedAt = nowStr();
   scheduleSave();
 }
 
-function noteChange(kat, sub, val) {
-  if (!_data[kat]) _data[kat] = {};
-  if (!_data[kat][sub]) _data[kat][sub] = { anzahl:0, notiz:'', updatedAt:'' };
-  _data[kat][sub].notiz = val;
-  _data[kat][sub].updatedAt = now();
-  scheduleSave();
-}
-
-function scheduleSave() {
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(save, 800);
-}
+function scheduleSave() { clearTimeout(_saveTimer); _saveTimer = setTimeout(save, 700); }
 
 function save() {
   if (!_db) return;
-  setSync('syncing', 'Speichern…');
+  setSync('syncing','Speichern…');
   _db.ref('moebel').set(_data)
-    .then(() => { setSync('synced', 'Gespeichert ✓'); toast('Gespeichert ✓'); })
-    .catch(() => setSync('error', 'Fehler'));
+    .then(()=>{ setSync('synced','Gespeichert ✓'); toast('Gespeichert ✓'); })
+    .catch(e=>{ setSync('error','Fehler'); console.error(e); });
 }
 
-/* ── Reset ── */
-function resetAll() {
-  if (!confirm('Alle Bestände auf 0 zurücksetzen?')) return;
-  const cats = { stuehle:['weiss','grau'], tische:['weiss','grau'], rollcontainer:['standard'] };
-  Object.keys(cats).forEach(kat => {
-    cats[kat].forEach(sub => {
-      if (!_data[kat]) _data[kat] = {};
-      _data[kat][sub] = { anzahl:0, notiz: (_data[kat][sub]||{}).notiz||'', updatedAt: now() };
-    });
-  });
-  renderAll();
-  save();
+/* ── Direkteingabe Modal ── */
+let _editKat = null, _editZeil = null;
+function openEdit(katId, zeilId, label) {
+  _editKat = katId; _editZeil = zeilId;
+  document.getElementById('editTitle').textContent = label + ' — Bestand';
+  document.getElementById('editSub').textContent   = 'Aktuell: ' + (((_data[katId]||{})[zeilId]||{}).anzahl || 0);
+  const inp = document.getElementById('editInput');
+  inp.value = ((_data[katId]||{})[zeilId]||{}).anzahl || 0;
+  document.getElementById('editOverlay').classList.add('open');
+  setTimeout(()=>{ inp.focus(); inp.select(); }, 80);
 }
+function closeEdit() { document.getElementById('editOverlay').classList.remove('open'); _editKat=null; _editZeil=null; }
+function confirmEdit() {
+  if (!_editKat || !_editZeil) return;
+  const v = Math.max(0, parseInt(document.getElementById('editInput').value)||0);
+  if (!_data[_editKat]) _data[_editKat] = {};
+  if (!_data[_editKat][_editZeil]) _data[_editKat][_editZeil] = { anzahl:0, notiz:'', updatedAt:'' };
+  _data[_editKat][_editZeil].anzahl    = v;
+  _data[_editKat][_editZeil].updatedAt = nowStr();
+  updateValues(); renderSummary(); scheduleSave(); closeEdit();
+}
+document.getElementById('editInput').addEventListener('keydown', e => {
+  if (e.key==='Enter') confirmEdit();
+  if (e.key==='Escape') closeEdit();
+});
+document.getElementById('editOverlay').addEventListener('click', e => {
+  if (e.target===document.getElementById('editOverlay')) closeEdit();
+});
 
 /* ── Excel Export ── */
 function exportExcel() {
-  // Wir bauen eine echte .xlsx Datei mit dem XML-basierten SpreadsheetML Format
-  const rows = [
-    ['Kategorie', 'Typ / Farbe', 'Verfügbar', 'Status', 'Notiz', 'Letzte Änderung']
-  ];
-
-  const label = { stuehle:'Stühle', tische:'Tische', rollcontainer:'Rollcontainer' };
-  const sublabel = { weiss:'Weiß', grau:'Grau', standard:'Standard' };
-  const cats = { stuehle:['weiss','grau'], tische:['weiss','grau'], rollcontainer:['standard'] };
-
-  Object.keys(cats).forEach(kat => {
-    cats[kat].forEach(sub => {
-      const d = (_data[kat] && _data[kat][sub]) || {};
-      const v = d.anzahl || 0;
-      const status = v === 0 ? 'Leer' : v <= 5 ? 'Wenig' : 'Verfügbar';
-      rows.push([
-        label[kat] || kat,
-        sublabel[sub] || sub,
-        v,
-        status,
-        d.notiz || '',
-        d.updatedAt || ''
-      ]);
+  const rows = [['Kategorie','Typ / Farbe / Maße','Bestand','Status','Notiz','Geändert']];
+  KATEGORIEN.forEach(kat => {
+    kat.zeilen.forEach(z => {
+      const d = ((_data[kat.id]||{})[z.id]) || {};
+      const v = Math.max(0, Number(d.anzahl)||0);
+      rows.push([kat.titel, z.label, v, v===0?'Leer':v<=5?'Wenig':'OK', d.notiz||'', d.updatedAt||'']);
     });
+    rows.push(['','','','','','']);
   });
-
-  // SpreadsheetML XML
-  let xmlRows = '';
-  rows.forEach((row, ri) => {
-    let cells = '';
-    row.forEach((cell, ci) => {
-      const col = String.fromCharCode(65 + ci);
-      const addr = col + (ri + 1);
-      if (ri === 0) {
-        // Header — als String mit Bold-Style
-        cells += `<Cell ss:StyleID="header"><Data ss:Type="String">${escXml(String(cell))}</Data></Cell>`;
-      } else if (typeof cell === 'number') {
-        cells += `<Cell><Data ss:Type="Number">${cell}</Data></Cell>`;
-      } else {
-        cells += `<Cell><Data ss:Type="String">${escXml(String(cell))}</Data></Cell>`;
-      }
-    });
-    xmlRows += `<Row>${cells}</Row>\n`;
-  });
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
-  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  let xmlRows = rows.map((row,ri) => {
+    const cells = row.map(cell => {
+      if (ri===0) return `<Cell ss:StyleID="hdr"><Data ss:Type="String">${escXml(String(cell))}</Data></Cell>`;
+      if (typeof cell==='number') return `<Cell><Data ss:Type="Number">${cell}</Data></Cell>`;
+      return `<Cell><Data ss:Type="String">${escXml(String(cell))}</Data></Cell>`;
+    }).join('');
+    return `<Row>${cells}</Row>`;
+  }).join('\n');
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
   <Styles>
-    <Style ss:ID="header">
-      <Font ss:Bold="1" ss:Size="11"/>
-      <Interior ss:Color="#FF9500" ss:Pattern="Solid"/>
-      <Font ss:Bold="1" ss:Color="#FFFFFF"/>
-    </Style>
+    <Style ss:ID="hdr"><Interior ss:Color="#FF9500" ss:Pattern="Solid"/><Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="11"/></Style>
   </Styles>
-  <Worksheet ss:Name="Möbel Übersicht">
+  <Worksheet ss:Name="Möbel Bestand">
     <Table>
-      <Column ss:Width="120"/>
-      <Column ss:Width="100"/>
-      <Column ss:Width="90"/>
-      <Column ss:Width="100"/>
-      <Column ss:Width="200"/>
-      <Column ss:Width="140"/>
+      <Column ss:Width="200"/><Column ss:Width="200"/><Column ss:Width="80"/><Column ss:Width="80"/><Column ss:Width="180"/><Column ss:Width="130"/>
       ${xmlRows}
     </Table>
   </Worksheet>
 </Workbook>`;
-
   const datum = new Date().toLocaleDateString('de-DE').replace(/\./g,'-');
-  const blob = new Blob([xml], { type: 'application/vnd.ms-excel;charset=utf-8' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'Moebel_Uebersicht_' + datum + '.xls';
+  a.href = URL.createObjectURL(new Blob([xml],{type:'application/vnd.ms-excel;charset=utf-8'}));
+  a.download = `Moebel_Bestand_${datum}.xls`;
   a.click();
   toast('Excel exportiert ✓');
 }
-
-function escXml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escXml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 /* ── Toast ── */
 let _tt;
 function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
-  clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2400);
+  clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2400);
 }
 </script>
 </body>
