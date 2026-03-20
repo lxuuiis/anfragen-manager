@@ -287,6 +287,42 @@
   /* ── TOAST ── */
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: rgba(29,29,31,0.92); backdrop-filter: blur(12px); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── MÖBEL ÜBERSICHT ── */
+  .moebel-section { margin-top: 36px; }
+  .moebel-section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; cursor: pointer; user-select: none; }
+  .moebel-section-header h2 { font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+  .moebel-section-toggle { color: var(--text-tertiary); transition: transform var(--transition); }
+  .moebel-section.collapsed .moebel-section-toggle { transform: rotate(-90deg); }
+  .moebel-section.collapsed .moebel-section-body { display: none; }
+  .moebel-section-body { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+  .moebel-table-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+  .moebel-table-card-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .moebel-table-card-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+  .moebel-icon { font-size: 16px; }
+  .moebel-total-badge { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border-strong); color: var(--text-secondary); }
+
+  .moebel-sub-table { width: 100%; border-collapse: collapse; }
+  .moebel-sub-table th { padding: 7px 14px; text-align: left; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .moebel-sub-table td { padding: 6px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  .moebel-sub-table tr:last-child td { border-bottom: none; }
+  .moebel-sub-table tr:hover td { background: #fafafa; }
+
+  .moebel-sub-label { font-weight: 500; color: var(--text); }
+  .moebel-color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; flex-shrink: 0; }
+
+  .moebel-anzahl-wrap { display: flex; align-items: center; gap: 6px; }
+  .moebel-stepper { display: flex; align-items: center; gap: 0; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; }
+  .moebel-stepper-btn { background: none; border: none; width: 28px; height: 28px; cursor: pointer; font-size: 16px; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+  .moebel-stepper-btn:hover { background: #e5e5ea; color: var(--text); }
+  .moebel-stepper-val { min-width: 36px; text-align: center; font-size: 14px; font-weight: 700; color: var(--text); padding: 0 4px; }
+  .moebel-stepper-val.has-value { color: var(--accent); }
+
+  .moebel-verfuegbar-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .moebel-verfuegbar-badge.gruen { background: #e8f8ee; color: #1a7a36; }
+  .moebel-verfuegbar-badge.gelb  { background: #fff8e6; color: #b07800; }
+  .moebel-verfuegbar-badge.rot   { background: #fff0f0; color: var(--danger); }
 </style>
 </head>
 <body>
@@ -347,6 +383,117 @@
       <div class="archiv-empty" id="archivEmpty">Noch keine abgeschlossenen Anfragen.</div>
     </div>
   </div>
+
+  <!-- Möbel Übersicht -->
+  <div class="moebel-section" id="moebelSection">
+    <div class="moebel-section-header" onclick="document.getElementById('moebelSection').classList.toggle('collapsed')">
+      <svg class="moebel-section-toggle" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <h2>🪑 Möbel Übersicht</h2>
+      <span style="font-size:11px;color:var(--text-tertiary);font-weight:500">Verfügbare Bestände eintragen</span>
+    </div>
+    <div class="moebel-section-body">
+
+      <!-- STÜHLE -->
+      <div class="moebel-table-card">
+        <div class="moebel-table-card-head">
+          <div class="moebel-table-card-title">
+            <span class="moebel-icon">🪑</span>
+            Stühle
+          </div>
+          <span class="moebel-total-badge" id="stuehle-total">0 gesamt</span>
+        </div>
+        <table class="moebel-sub-table">
+          <thead><tr><th>Farbe</th><th>Verfügbar</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="moebel-color-dot" style="background:#f5f5f5;border:1px solid #ccc"></span><span class="moebel-sub-label">Weiß</span></td>
+              <td><div class="moebel-anzahl-wrap">
+                <div class="moebel-stepper">
+                  <button class="moebel-stepper-btn" onclick="moebelChange('stuehle','weiss',-1)">−</button>
+                  <span class="moebel-stepper-val" id="val-stuehle-weiss">0</span>
+                  <button class="moebel-stepper-btn" onclick="moebelChange('stuehle','weiss',1)">+</button>
+                </div>
+              </div></td>
+            </tr>
+            <tr>
+              <td><span class="moebel-color-dot" style="background:#8e8e93"></span><span class="moebel-sub-label">Grau</span></td>
+              <td><div class="moebel-anzahl-wrap">
+                <div class="moebel-stepper">
+                  <button class="moebel-stepper-btn" onclick="moebelChange('stuehle','grau',-1)">−</button>
+                  <span class="moebel-stepper-val" id="val-stuehle-grau">0</span>
+                  <button class="moebel-stepper-btn" onclick="moebelChange('stuehle','grau',1)">+</button>
+                </div>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TISCHE -->
+      <div class="moebel-table-card">
+        <div class="moebel-table-card-head">
+          <div class="moebel-table-card-title">
+            <span class="moebel-icon">🪑</span>
+            Tische
+          </div>
+          <span class="moebel-total-badge" id="tische-total">0 gesamt</span>
+        </div>
+        <table class="moebel-sub-table">
+          <thead><tr><th>Farbe</th><th>Verfügbar</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="moebel-color-dot" style="background:#f5f5f5;border:1px solid #ccc"></span><span class="moebel-sub-label">Weiß</span></td>
+              <td><div class="moebel-anzahl-wrap">
+                <div class="moebel-stepper">
+                  <button class="moebel-stepper-btn" onclick="moebelChange('tische','weiss',-1)">−</button>
+                  <span class="moebel-stepper-val" id="val-tische-weiss">0</span>
+                  <button class="moebel-stepper-btn" onclick="moebelChange('tische','weiss',1)">+</button>
+                </div>
+              </div></td>
+            </tr>
+            <tr>
+              <td><span class="moebel-color-dot" style="background:#8e8e93"></span><span class="moebel-sub-label">Grau</span></td>
+              <td><div class="moebel-anzahl-wrap">
+                <div class="moebel-stepper">
+                  <button class="moebel-stepper-btn" onclick="moebelChange('tische','grau',-1)">−</button>
+                  <span class="moebel-stepper-val" id="val-tische-grau">0</span>
+                  <button class="moebel-stepper-btn" onclick="moebelChange('tische','grau',1)">+</button>
+                </div>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ROLLCONTAINER -->
+      <div class="moebel-table-card">
+        <div class="moebel-table-card-head">
+          <div class="moebel-table-card-title">
+            <span class="moebel-icon">📦</span>
+            Rollcontainer
+          </div>
+          <span class="moebel-total-badge" id="rollcontainer-total">0 gesamt</span>
+        </div>
+        <table class="moebel-sub-table">
+          <thead><tr><th>Typ</th><th>Verfügbar</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="moebel-sub-label">Standard</span></td>
+              <td><div class="moebel-anzahl-wrap">
+                <div class="moebel-stepper">
+                  <button class="moebel-stepper-btn" onclick="moebelChange('rollcontainer','standard',-1)">−</button>
+                  <span class="moebel-stepper-val" id="val-rollcontainer-standard">0</span>
+                  <button class="moebel-stepper-btn" onclick="moebelChange('rollcontainer','standard',1)">+</button>
+                </div>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
 </main>
 
 <!-- ══ MODAL: Neuer Termin ══ -->
@@ -1245,8 +1392,71 @@ document.getElementById('modalUhrzeit').addEventListener('keydown', e => { if(e.
 document.getElementById('modalName').addEventListener('keydown',    e => { if(e.key==='Enter') createNewSession(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 
+/* ── Möbel ────────────────────────────────────────────────────── */
+let _moebelData = {
+  stuehle:      { weiss: 0, grau: 0 },
+  tische:       { weiss: 0, grau: 0 },
+  rollcontainer:{ standard: 0 }
+};
+let _moebelSaveTimer = null;
+
+function moebelChange(kat, sub, delta) {
+  const cur = (_moebelData[kat] && _moebelData[kat][sub]) || 0;
+  const next = Math.max(0, cur + delta);
+  if (!_moebelData[kat]) _moebelData[kat] = {};
+  _moebelData[kat][sub] = next;
+  renderMoebelUI();
+  clearTimeout(_moebelSaveTimer);
+  _moebelSaveTimer = setTimeout(saveMoebel, 700);
+}
+
+function renderMoebelUI() {
+  const cats = {
+    stuehle:       ['weiss','grau'],
+    tische:        ['weiss','grau'],
+    rollcontainer: ['standard']
+  };
+  Object.keys(cats).forEach(kat => {
+    let total = 0;
+    cats[kat].forEach(sub => {
+      const val = (_moebelData[kat] && _moebelData[kat][sub]) || 0;
+      total += val;
+      const el = document.getElementById('val-'+kat+'-'+sub);
+      if (el) {
+        el.textContent = val;
+        el.className = 'moebel-stepper-val' + (val > 0 ? ' has-value' : '');
+      }
+    });
+    const tot = document.getElementById(kat+'-total');
+    if (tot) tot.textContent = total + ' gesamt';
+  });
+}
+
+function saveMoebel() {
+  if (!asilDb) return;
+  asilDb.ref('moebel').set(_moebelData)
+    .then(() => toast('Möbel gespeichert ✓'))
+    .catch(() => toast('Fehler beim Speichern'));
+}
+
+function loadMoebel() {
+  if (!asilDb) return;
+  asilDb.ref('moebel').on('value', snap => {
+    const d = snap.val();
+    if (d) {
+      // Tief mergen damit neue Kategorien nicht überschrieben werden
+      Object.keys(d).forEach(kat => {
+        if (!_moebelData[kat]) _moebelData[kat] = {};
+        Object.assign(_moebelData[kat], d[kat]);
+      });
+    }
+    renderMoebelUI();
+  });
+}
+
 /* ── Start ────────────────────────────────────────────────────── */
 initFirebase();
+loadMoebel();
 </script>
 </body>
 </html>
