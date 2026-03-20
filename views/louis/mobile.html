@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Anfragen · Louis</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f2f2f7; --surface: #ffffff; --surface2: #f2f2f7;
+    --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.16);
+    --text: #1c1c1e; --text-secondary: #6e6e73; --text-tertiary: #aeaeb2;
+    --accent: #0071e3; --accent-light: #e8f1fb;
+    --danger: #ff3b30; --danger-light: #fff1f0;
+    --success: #34c759; --warning: #ff9500;
+    --purple: #7c3aed; --purple-light: #f3eeff;
+    --owner-color: #0071e3;
+    --radius: 14px; --radius-sm: 10px;
+    --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    --transition: 0.18s ease;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; padding-bottom: calc(80px + var(--safe-bottom)); }
+
+  /* ── NAV ── */
+  nav { background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 200; padding: 0 16px; height: 54px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-brand { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+  .owner-tag { background: var(--owner-color); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
+  .sync-indicator { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-tertiary); }
+  .sync-indicator.synced { color: var(--success); } .sync-indicator.syncing { color: var(--warning); } .sync-indicator.error { color: var(--danger); }
+  .sync-indicator .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+  /* ── MAIN ── */
+  main { padding: 16px 16px 20px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── NEUER TERMIN ── */
+  .new-card { background: var(--surface); border-radius: var(--radius); padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .new-card h2 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-secondary); margin-bottom: 12px; }
+  .new-row { display: flex; gap: 8px; align-items: flex-end; }
+  .input-group { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .input-group label { font-size: 11px; font-weight: 500; color: var(--text-tertiary); }
+  .new-row input { font-family: var(--font); font-size: 15px; color: var(--text); background: var(--surface2); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 10px 12px; outline: none; width: 100%; }
+  .new-row input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(0,113,227,0.12); }
+  .btn-add { background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); padding: 10px 16px; font-family: var(--font); font-size: 15px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .btn-add:active { opacity: 0.85; }
+
+  /* ── ÜBERSICHT ── */
+  .overview-card { background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .ov-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; cursor: pointer; border-bottom: 1px solid transparent; }
+  .ov-header.has-content { border-bottom-color: var(--border); }
+  .ov-header h2 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+  .ov-chevron { color: var(--text-tertiary); transition: transform var(--transition); }
+  .overview-card.collapsed .ov-chevron { transform: rotate(-90deg); }
+  .ov-body { padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .overview-card.collapsed .ov-body { display: none; }
+  .ov-empty { font-size: 13px; color: var(--text-tertiary); text-align: center; padding: 8px 0; }
+  .ov-section-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+  .ov-pill-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ov-pill { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 20px; padding: 5px 11px; font-size: 13px; cursor: pointer; }
+  .ov-pill:active { opacity: 0.7; }
+  .ov-pill .pname { font-weight: 500; color: var(--accent); }
+  .ov-pill .pinfo { font-size: 11px; color: var(--text-secondary); }
+  .ov-pill-abh { background: var(--purple-light); border-color: #ddd0f8; }
+  .ov-pill-abh .pname { color: var(--purple); }
+  .ov-pill-offen { background: #fff8e6; border-color: #ffe59e; }
+  .ov-pill-offen .pname { color: #b07800; }
+
+  /* ── SESSION CARDS ── */
+  .sessions-list { display: flex; flex-direction: column; gap: 10px; }
+  .session-card { background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .session-header { padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .session-header:active { background: var(--surface2); }
+  .session-header-left { display: flex; flex-direction: column; gap: 3px; }
+  .session-header-right { display: flex; align-items: center; gap: 8px; }
+  .session-count { font-size: 12px; color: var(--text-tertiary); background: var(--surface2); border-radius: 20px; padding: 2px 9px; }
+  .collapse-chevron { color: var(--text-tertiary); transition: transform var(--transition); }
+  .session-card.collapsed .collapse-chevron { transform: rotate(-90deg); }
+  .session-card.collapsed .session-body { display: none; }
+  .hdr-input { font-family: var(--font); font-size: 15px; font-weight: 700; color: var(--text); background: transparent; border: none; outline: none; padding: 0; letter-spacing: -0.3px; width: 100%; }
+  .hdr-input-uhr { font-size: 13px; font-weight: 400; color: var(--text-secondary); }
+
+  /* ── PERSON ROW ── */
+  .session-body { padding: 0 16px 4px; border-top: 1px solid var(--border); }
+  .person-row { padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+  .person-row:last-of-type { border-bottom: none; }
+  .person-row-top { display: flex; align-items: center; gap: 8px; }
+  .person-name-wrap { flex: 1; display: flex; align-items: center; gap: 6px; }
+  .person-name-input { font-family: var(--font); font-size: 15px; font-weight: 600; color: var(--text); background: transparent; border: none; border-bottom: 1.5px solid var(--border-strong); padding: 3px 0; outline: none; width: 100%; }
+  .person-name-input:focus { border-bottom-color: var(--accent); }
+  .transfer-btn { background: none; border: 1px solid var(--border-strong); border-radius: 6px; padding: 3px 7px; font-size: 11px; font-weight: 600; color: var(--text-secondary); cursor: pointer; white-space: nowrap; font-family: var(--font); flex-shrink: 0; }
+  .transfer-btn:active { background: #e8f8ee; color: #1a7a36; }
+  .rm-btn { background: none; border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); cursor: pointer; flex-shrink: 0; }
+  .rm-btn:active { background: var(--danger-light); color: var(--danger); }
+  .person-row-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .field-group { display: flex; flex-direction: column; gap: 3px; }
+  .field-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); }
+
+  /* Status */
+  .status-select-wrap { position: relative; }
+  .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .status-offen { background: #fff8e6; color: #b07800; }
+  .status-reservierung { background: #e8f1fb; color: #0071e3; }
+  .status-abgeschlossen { background: #e8f8ee; color: #1a7a36; }
+  .status-abholung { background: var(--purple-light); color: var(--purple); }
+  .status-native { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; font-size: 16px; }
+
+  /* JA/NEIN */
+  .jn-toggle { display: flex; border-radius: 20px; overflow: hidden; border: 1px solid var(--border-strong); background: var(--surface2); width: fit-content; }
+  .jn-opt { padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); color: var(--text-secondary); border: none; background: transparent; font-family: var(--font); }
+  .jn-opt.active-nein { background: #e5e5ea; color: var(--text); }
+  .jn-opt.active-ja { background: #e8f8ee; color: #1a7a36; }
+
+  /* Möbel */
+  .moebel-row { display: flex; gap: 8px; }
+  .moebel-item { display: flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 8px; padding: 5px 10px; flex: 1; }
+  .moebel-input { font-family: var(--font); font-size: 16px; font-weight: 600; color: var(--text); background: transparent; border: none; outline: none; width: 40px; text-align: center; }
+  .moebel-label { font-size: 11px; color: var(--text-secondary); }
+
+  /* Abholung */
+  .abh-row { display: flex; gap: 8px; }
+  .abh-input { font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 8px; padding: 7px 10px; outline: none; flex: 1; min-width: 0; }
+  .abh-input:focus { border-color: var(--accent); background: #fff; }
+
+  /* Bemerkung */
+  .bem-input { font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 8px; padding: 7px 10px; outline: none; width: 100%; }
+  .bem-input:focus { border-color: var(--accent); background: #fff; }
+
+  /* Footer */
+  .session-footer { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .add-person-btn { background: none; border: none; color: var(--accent); font-family: var(--font); font-size: 14px; font-weight: 600; padding: 6px 0; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+  .session-del-btn { background: none; border: none; color: var(--text-tertiary); font-size: 12px; cursor: pointer; font-family: var(--font); padding: 6px; }
+  .session-del-btn:active { color: var(--danger); }
+
+  /* ── TRANSFER MODAL ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); animation: fadeIn 0.15s ease; }
+  .modal-sheet { background: var(--surface); border-radius: 20px 20px 0 0; padding: 20px 20px calc(20px + var(--safe-bottom)); width: 100%; max-width: 600px; animation: slideUp 0.22s cubic-bezier(0.34,1.56,0.64,1); }
+  .modal-sheet h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .modal-sheet p { font-size: 14px; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.5; }
+  .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+  .btn-modal { padding: 14px; border-radius: var(--radius-sm); border: none; font-family: var(--font); font-size: 16px; font-weight: 600; cursor: pointer; }
+  .btn-transfer-rohat { background: #34c759; color: #fff; }
+  .btn-cancel { background: var(--surface2); color: var(--text-secondary); }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes slideUp { from { transform: translateY(60px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+  /* ── TOAST ── */
+  .toast { position: fixed; bottom: calc(84px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(60px); background: rgba(29,29,31,0.92); backdrop-filter: blur(12px); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: 500; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── EMPTY ── */
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--text-tertiary); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    📋 Anfragen
+    <span class="owner-tag">Louis</span>
+  </div>
+  <div class="sync-indicator" id="syncIndicator">
+    <div class="dot"></div>
+    <span id="syncText">…</span>
+  </div>
+</nav>
+
+<main>
+  <!-- Neue Session -->
+  <div class="new-card">
+    <h2>Neuer Termin</h2>
+    <div class="new-row">
+      <div class="input-group">
+        <label>Datum</label>
+        <input type="text" id="newDatum" placeholder="TT.MM.JJJJ" inputmode="numeric" />
+      </div>
+      <div class="input-group">
+        <label>Uhrzeit</label>
+        <input type="text" id="newUhrzeit" placeholder="11:00 Uhr" />
+      </div>
+      <button class="btn-add" onclick="addSession()">+</button>
+    </div>
+  </div>
+
+  <!-- Tagesübersicht -->
+  <div class="overview-card" id="dayOverview"></div>
+
+  <!-- Session Liste -->
+  <div class="sessions-list" id="sessionsList">
+    <div class="empty-state" id="emptyState" style="display:none">Noch keine Termine.</div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
+  authDomain:        "manager-3cf2b.firebaseapp.com",
+  databaseURL:       "https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "manager-3cf2b",
+  storageBucket:     "manager-3cf2b.firebasestorage.app",
+  messagingSenderId: "55315892331",
+  appId:             "1:55315892331:web:9889b92c74e535a85a892e"
+};
+const OWNER   = 'louis';
+const DB_PATH = 'sessions';
+const STATUS_OPTS = ['Offen','Reservierung','Abholung','Abgeschlossen'];
+
+let sessions = [];
+let db = null, isConfigured = false;
+let _dirtyIds = new Set();
+
+// ── Firebase ──────────────────────────────────────────────────
+function initFirebase() {
+  try {
+    const app = firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database(app);
+    isConfigured = true;
+    setSyncStatus('syncing', 'Verbinde…');
+    db.ref(DB_PATH).on('value', snapshot => {
+      const raw = snapshot.val();
+      const all = raw ? Object.values(raw) : [];
+      const incoming = all.filter(s => s.owner === OWNER);
+      let needsRender = false;
+      incoming.forEach(s => {
+        const sid = String(s.id);
+        if (_dirtyIds.has(sid)) return;
+        const idx = sessions.findIndex(x => String(x.id) === sid);
+        if (idx < 0) { sessions.push(s); needsRender = true; }
+        else if (JSON.stringify(sessions[idx]) !== JSON.stringify(s)) { sessions[idx] = s; needsRender = true; }
+      });
+      const incomingIds = incoming.map(s => String(s.id));
+      const before = sessions.length;
+      sessions = sessions.filter(s => incomingIds.includes(String(s.id)) || _dirtyIds.has(String(s.id)));
+      if (sessions.length !== before) needsRender = true;
+      if (needsRender) renderAll();
+      setSyncStatus('synced', 'Live');
+    }, err => setSyncStatus('error', 'Fehler'));
+  } catch(e) { setSyncStatus('error', 'Fehler'); }
+}
+
+function save() {
+  if (!isConfigured || !db) return;
+  const updates = {};
+  sessions.forEach(s => { updates[DB_PATH + '/' + s.id] = {...s, owner: OWNER}; });
+  firebase.database().ref().update(updates)
+    .then(() => { setSyncStatus('synced', 'Gespeichert ✓'); setTimeout(() => _dirtyIds.clear(), 2000); })
+    .catch(() => setSyncStatus('error', 'Fehler'));
+}
+function scheduleSave() {
+  setSyncStatus('syncing', 'Speichern…');
+  clearTimeout(scheduleSave._t);
+  scheduleSave._t = setTimeout(save, 900);
+}
+function setSyncStatus(type, text) {
+  document.getElementById('syncIndicator').className = 'sync-indicator ' + type;
+  document.getElementById('syncText').textContent = text;
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function isoToDE(iso) { if (!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}.${m}.${y}`; }
+function deToISO(de) { if (!de) return ''; const p = de.split('.'); if (p.length<3) return ''; return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; }
+function datumToSort(d) { if (!d) return Infinity; const p = d.split('.'); if (p.length<3) return Infinity; return parseInt(p[2])*10000+parseInt(p[1])*100+parseInt(p[0]); }
+function statusClass(s) { return {'Offen':'status-offen','Reservierung':'status-reservierung','Abgeschlossen':'status-abgeschlossen','Abholung':'status-abholung'}[s]||'status-offen'; }
+function statusDot(s) { const c={'Offen':'#b07800','Reservierung':'#0071e3','Abgeschlossen':'#1a7a36','Abholung':'#7c3aed'}[s]||'#b07800'; return `<svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3.5" fill="${c}"/></svg>`; }
+
+// ── Render ────────────────────────────────────────────────────
+function renderAll() {
+  const list = document.getElementById('sessionsList');
+  const empty = document.getElementById('emptyState');
+  list.querySelectorAll('.session-card').forEach(el => el.remove());
+  const sorted = [...sessions].sort((a,b) => datumToSort(a.datum) - datumToSort(b.datum));
+  if (!sorted.length) { empty.style.display = ''; }
+  else { empty.style.display = 'none'; sorted.forEach(s => list.appendChild(buildCard(s))); }
+  renderOverview();
+}
+
+function renderOverview() {
+  const box = document.getElementById('dayOverview');
+  const abhMap = {}, abhOhne = [], offenList = [];
+  sessions.forEach(s => s.personen.forEach((p, pi) => {
+    if (!p.name?.trim()) return;
+    if (p.status === 'Abholung') {
+      if (p.abh_datum) { if (!abhMap[p.abh_datum]) abhMap[p.abh_datum] = []; abhMap[p.abh_datum].push({p, sid:s.id, pi}); }
+      else abhOhne.push({p, sid:s.id, pi});
+    }
+    if (p.status === 'Offen') offenList.push({p, sid:s.id, pi, datum:s.datum});
+  }));
+  const abhKeys = Object.keys(abhMap).sort((a,b) => deToISO(a).localeCompare(deToISO(b)));
+  const totalAbh = abhKeys.reduce((n,k) => n+abhMap[k].length,0) + abhOhne.length;
+  const wasCollapsed = box.classList.contains('collapsed');
+
+  if (!totalAbh && !offenList.length) {
+    box.innerHTML = `<div class="ov-header" onclick="this.closest('.overview-card').classList.toggle('collapsed')"><h2>📅 Tagesübersicht</h2><svg class="ov-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="ov-body"><p class="ov-empty">Keine offenen Einträge.</p></div>`;
+    if (wasCollapsed) box.classList.add('collapsed');
+    return;
+  }
+  let body = '';
+  if (totalAbh) {
+    body += `<div class="ov-section-title">📦 Abholungen (${totalAbh})</div><div class="ov-pill-row">`;
+    abhKeys.forEach(datum => abhMap[datum].forEach(({p, sid, pi}) => {
+      body += `<div class="ov-pill ov-pill-abh" onclick="scrollToRow(${sid},${pi})"><span class="pname">${esc(p.name)}</span><span class="pinfo">${esc(datum)}${p.abh_zeit?' · '+p.abh_zeit:''}</span></div>`;
+    }));
+    abhOhne.forEach(({p, sid, pi}) => {
+      body += `<div class="ov-pill ov-pill-abh" onclick="scrollToRow(${sid},${pi})"><span class="pname">${esc(p.name)}</span><span class="pinfo">Datum offen</span></div>`;
+    });
+    body += '</div>';
+  }
+  if (offenList.length) {
+    body += `<div class="ov-section-title">📋 Offen (${offenList.length})</div><div class="ov-pill-row">`;
+    offenList.forEach(({p, sid, pi, datum}) => {
+      body += `<div class="ov-pill ov-pill-offen" onclick="scrollToRow(${sid},${pi})"><span class="pname">${esc(p.name)}</span><span class="pinfo">${esc(datum)}</span></div>`;
+    });
+    body += '</div>';
+  }
+  box.className = 'overview-card';
+  box.innerHTML = `<div class="ov-header has-content" onclick="this.closest('.overview-card').classList.toggle('collapsed')"><h2>📅 Tagesübersicht</h2><svg class="ov-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="ov-body">${body}</div>`;
+  if (wasCollapsed) box.classList.add('collapsed');
+}
+
+function scrollToRow(sid, pIdx) {
+  const card = document.querySelector(`.session-card[data-id="${sid}"]`);
+  if (!card) return;
+  if (card.classList.contains('collapsed')) card.classList.remove('collapsed');
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => {
+    const rows = card.querySelectorAll('.person-row');
+    if (rows[pIdx]) rows[pIdx].style.cssText = 'background:#fff8cc;border-radius:8px;transition:background 1s';
+    setTimeout(() => { if (rows[pIdx]) rows[pIdx].style.background = ''; }, 1400);
+  }, 400);
+}
+
+function buildCard(s) {
+  const el = document.createElement('div');
+  el.className = 'session-card' + (s.collapsed ? ' collapsed' : '');
+  el.dataset.id = s.id;
+  const cnt = s.personen.filter(p => p.name.trim()).length;
+  el.innerHTML = `
+    <div class="session-header" onclick="toggleCollapse(${s.id}, event)">
+      <div class="session-header-left">
+        <div onclick="event.stopPropagation()">
+          <input class="hdr-input" type="text" value="${esc(s.datum)}" placeholder="TT.MM.JJJJ"
+            onchange="updateSession(${s.id},'datum',this.value)" />
+          <input class="hdr-input hdr-input-uhr" type="text" value="${esc(s.uhrzeit)}" placeholder="Uhrzeit"
+            onchange="updateSession(${s.id},'uhrzeit',this.value)" />
+        </div>
+      </div>
+      <div class="session-header-right">
+        <span class="session-count" id="cnt-${s.id}">${cnt} Person${cnt!==1?'en':''}</span>
+        <svg class="collapse-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+    <div class="session-body" id="sbody-${s.id}">
+      ${s.personen.map((p,i) => buildPersonRow(s.id, p, i)).join('')}
+      <div class="session-footer">
+        <button class="add-person-btn" onclick="addPerson(${s.id})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Person hinzufügen
+        </button>
+        <button class="session-del-btn" onclick="deleteSession(${s.id})">Löschen</button>
+      </div>
+    </div>`;
+  return el;
+}
+
+function buildPersonRow(sid, p, idx) {
+  const isAbh = p.status === 'Abholung';
+  const abhISO = p.abh_datum ? deToISO(p.abh_datum) : '';
+  const cls = statusClass(p.status);
+  return `<div class="person-row" id="prow-${sid}-${idx}">
+    <div class="person-row-top">
+      <div class="person-name-wrap">
+        <input class="person-name-input" type="text" value="${esc(p.name)}" placeholder="Name, Vorname"
+          oninput="up('${sid}',${idx},'name',this.value)" />
+      </div>
+      <button class="transfer-btn" onclick="openTransfer('${sid}',${idx})">→ R</button>
+      <button class="rm-btn" onclick="removePerson('${sid}',${idx})">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="person-row-fields">
+      <div class="field-group">
+        <span class="field-label">Status</span>
+        <div class="status-select-wrap">
+          <span class="status-badge ${cls}" id="sbadge-${sid}-${idx}">${statusDot(p.status)} ${esc(p.status)}</span>
+          <select class="status-native" onchange="up('${sid}',${idx},'status',this.value);renderCard('${sid}');renderOverview()">
+            ${STATUS_OPTS.map(o => `<option value="${o}"${p.status===o?' selected':''}>${o}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <span class="field-label">Möbel</span>
+        <div class="moebel-row">
+          <div class="moebel-item">
+            <input class="moebel-input" type="number" min="0" max="99" value="${p.tische||0}"
+              oninput="up('${sid}',${idx},'tische',+this.value)" />
+            <span class="moebel-label">Ti</span>
+          </div>
+          <div class="moebel-item">
+            <input class="moebel-input" type="number" min="0" max="99" value="${p.stuehle||0}"
+              oninput="up('${sid}',${idx},'stuehle',+this.value)" />
+            <span class="moebel-label">St</span>
+          </div>
+        </div>
+      </div>
+      <div class="field-group">
+        <span class="field-label">Form. erhalten</span>
+        ${buildJnToggle(sid, idx, 'fe', p.fe||'Nein')}
+      </div>
+      <div class="field-group">
+        <span class="field-label">Form. weiterg.</span>
+        ${buildJnToggle(sid, idx, 'fw', p.fw||'Nein')}
+      </div>
+    </div>
+    <div class="field-group" id="abh-wrap-${sid}-${idx}" ${isAbh?'':'style="display:none"'}>
+      <span class="field-label">Abholung</span>
+      <div class="abh-row">
+        <input class="abh-input" type="date" value="${abhISO}"
+          onchange="up('${sid}',${idx},'abh_datum',isoToDE(this.value));renderOverview()" />
+        <input class="abh-input" type="time" value="${esc(p.abh_zeit||'')}" style="flex:0 0 auto;width:110px"
+          onchange="up('${sid}',${idx},'abh_zeit',this.value);renderOverview()" />
+      </div>
+    </div>
+    <div class="field-group">
+      <span class="field-label">Bemerkung</span>
+      <input class="bem-input" type="text" value="${esc(p.bem||'')}" placeholder="—"
+        oninput="up('${sid}',${idx},'bem',this.value)" />
+    </div>
+  </div>`;
+}
+
+function buildJnToggle(sid, idx, field, val) {
+  return `<div class="jn-toggle">
+    <button class="jn-opt ${val==='Nein'?'active-nein':''}" onclick="setJn('${sid}',${idx},'${field}','Nein',this)">Nein</button>
+    <button class="jn-opt ${val==='Ja'?'active-ja':''}" onclick="setJn('${sid}',${idx},'${field}','Ja',this)">Ja</button>
+  </div>`;
+}
+
+// ── Aktionen ──────────────────────────────────────────────────
+function up(sid, idx, field, val) {
+  const s = sessions.find(x => String(x.id) === String(sid));
+  if (s && s.personen[idx]) {
+    s.personen[idx][field] = val;
+    _dirtyIds.add(String(sid));
+    if (field === 'status') {
+      const wrap = document.getElementById(`abh-wrap-${sid}-${idx}`);
+      if (wrap) wrap.style.display = val === 'Abholung' ? '' : 'none';
+      const badge = document.getElementById(`sbadge-${sid}-${idx}`);
+      if (badge) { badge.className = 'status-badge ' + statusClass(val); badge.innerHTML = statusDot(val) + ' ' + esc(val); }
+    }
+    scheduleSave();
+  }
+}
+function setJn(sid, idx, field, val, btn) {
+  up(sid, idx, field, val);
+  const wrap = btn.closest('.jn-toggle');
+  wrap.querySelectorAll('.jn-opt').forEach(b => b.className = 'jn-opt');
+  btn.className = 'jn-opt ' + (val === 'Ja' ? 'active-ja' : 'active-nein');
+}
+function toggleCollapse(id, e) {
+  if (e && e.target.closest('input,select,button')) return;
+  const s = sessions.find(x => String(x.id) === String(id)); if (!s) return;
+  s.collapsed = !s.collapsed;
+  _dirtyIds.add(String(id));
+  document.querySelector(`.session-card[data-id="${id}"]`)?.classList.toggle('collapsed', s.collapsed);
+  scheduleSave();
+}
+function updateSession(id, field, val) {
+  const s = sessions.find(x => String(x.id) === String(id)); if (!s) return;
+  s[field] = val; _dirtyIds.add(String(id)); scheduleSave();
+  const cnt = s.personen.filter(p => p.name.trim()).length;
+  const badge = document.getElementById('cnt-' + id);
+  if (badge) badge.textContent = cnt + ' Person' + (cnt!==1?'en':'');
+  renderOverview();
+}
+function renderCard(sid) {
+  const s = sessions.find(x => String(x.id) === String(sid)); if (!s) return;
+  const body = document.getElementById('sbody-' + sid); if (!body) return;
+  body.querySelectorAll('.person-row').forEach(el => el.remove());
+  const html = s.personen.map((p,i) => buildPersonRow(sid, p, i)).join('');
+  body.insertAdjacentHTML('afterbegin', html);
+}
+function addPerson(sid) {
+  const s = sessions.find(x => String(x.id) === String(sid)); if (!s) return;
+  s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',tische:0,stuehle:0,bem:'',abh_datum:'',abh_zeit:''});
+  _dirtyIds.add(String(sid));
+  renderCard(sid); scheduleSave();
+  setTimeout(() => {
+    const rows = document.getElementById('sbody-'+sid)?.querySelectorAll('.person-row');
+    if (rows?.length) rows[rows.length-1].querySelector('.person-name-input')?.focus();
+  }, 50);
+}
+function removePerson(sid, idx) {
+  const s = sessions.find(x => String(x.id) === String(sid)); if (!s) return;
+  s.personen.splice(idx, 1);
+  if (!s.personen.length) s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',tische:0,stuehle:0,bem:'',abh_datum:'',abh_zeit:''});
+  _dirtyIds.add(String(sid));
+  renderCard(sid); renderOverview(); scheduleSave();
+}
+function addSession() {
+  const datum = document.getElementById('newDatum').value.trim();
+  const uhrzeit = document.getElementById('newUhrzeit').value.trim();
+  if (!datum || !uhrzeit) { toast('Bitte Datum und Uhrzeit eingeben.'); return; }
+  const newS = { id: Date.now(), datum, uhrzeit, collapsed: false, owner: OWNER, personen: [{name:'',status:'Offen',fe:'Nein',fw:'Nein',tische:0,stuehle:0,bem:'',abh_datum:'',abh_zeit:''}] };
+  sessions.push(newS);
+  document.getElementById('newDatum').value = '';
+  document.getElementById('newUhrzeit').value = '';
+  renderAll(); save(); toast('Termin erstellt ✓');
+}
+function deleteSession(id) {
+  if (!confirm('Termin wirklich löschen?')) return;
+  sessions = sessions.filter(s => String(s.id) !== String(id));
+  if (isConfigured && db) firebase.database().ref(DB_PATH + '/' + id).remove();
+  renderAll(); toast('Termin gelöscht');
+}
+
+// ── Transfer ──────────────────────────────────────────────────
+let _tSid = null, _tIdx = null;
+function openTransfer(sid, idx) {
+  const s = sessions.find(x => String(x.id) === String(sid)); if (!s) return;
+  const p = s.personen[idx]; if (!p?.name.trim()) { toast('Bitte zuerst einen Namen eingeben.'); return; }
+  _tSid = sid; _tIdx = idx;
+  const existing = document.getElementById('transferModal');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay'; overlay.id = 'transferModal';
+  overlay.innerHTML = `<div class="modal-sheet">
+    <h3>👤 Person verschieben</h3>
+    <p><strong>${esc(p.name)}</strong> zu Rohat verschieben?</p>
+    <div class="modal-actions">
+      <button class="btn-modal btn-transfer-rohat" onclick="confirmTransfer()">→ Zu Rohat verschieben</button>
+      <button class="btn-modal btn-cancel" onclick="document.getElementById('transferModal').remove()">Abbrechen</button>
+    </div>
+  </div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+function confirmTransfer() {
+  document.getElementById('transferModal')?.remove();
+  const s = sessions.find(x => String(x.id) === String(_tSid)); if (!s) return;
+  const p = s.personen[_tIdx]; if (!p) return;
+  const personCopy = {...p};
+  s.personen.splice(_tIdx, 1);
+  if (!s.personen.length) s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',tische:0,stuehle:0,bem:'',abh_datum:'',abh_zeit:''});
+  if (isConfigured && db) {
+    const newId = Date.now();
+    firebase.database().ref('sessions/' + newId).set({ id: newId, datum: s.datum, uhrzeit: s.uhrzeit, collapsed: false, owner: 'rohat', personen: [personCopy] });
+    firebase.database().ref('sessions/' + _tSid).set({...s, owner: OWNER});
+  }
+  renderAll(); toast(`${personCopy.name} → Rohat ✓`);
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+document.getElementById('newUhrzeit').addEventListener('keydown', e => { if (e.key==='Enter') addSession(); });
+document.getElementById('newDatum').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('newUhrzeit').focus(); });
+initFirebase();
+</script>
+</body>
+</html>
