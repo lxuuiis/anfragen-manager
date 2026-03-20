@@ -862,9 +862,12 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.jn-cell')) document.querySelectorAll('.jn-dropdown.open').forEach(d => d.classList.remove('open'));
   if (!e.target.closest('.mpick-panel') && !e.target.closest('.mpick-trigger')) mpickClose();
 });
-window.addEventListener('scroll', () => {
+window.addEventListener('scroll', e => {
   document.querySelectorAll('.jn-dropdown.open').forEach(d => d.classList.remove('open'));
-  mpickClose();
+  // Nicht schließen wenn innerhalb des mpick-Panels gescrollt wird
+  if (!e.target.closest || !e.target.closest('.mpick-panel')) {
+    mpickClose();
+  }
 }, true);
 document.getElementById('newUhrzeit').addEventListener('keydown',e=>{if(e.key==='Enter')addSession();});
 document.getElementById('newDatum').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('newUhrzeit').focus();});

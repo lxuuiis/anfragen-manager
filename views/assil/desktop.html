@@ -224,11 +224,35 @@
   .archiv-empty { text-align: center; padding: 24px; color: var(--text-tertiary); font-size: 13px; }
   .archiv-abgeschlossen { background: #e8f8ee; color: #1a7a36; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 20px; }
 
-  .moebel-wrap { display: flex; align-items: center; gap: 5px; }
-  .moebel-item { display: flex; align-items: center; gap: 3px; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 7px; padding: 3px 7px; transition: var(--transition); }
-  .moebel-item:focus-within { background: #fff; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,113,227,0.1); }
-  .moebel-item input[type=number] { border: none !important; background: transparent !important; width: 34px; padding: 1px 0; text-align: center; font-size: 13px; box-shadow: none !important; }
-  .moebel-label { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+  .moebel-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .moebel-posten { display: flex; flex-direction: column; gap: 2px; background: #eef6ff; border: 1px solid #cce0ff; border-radius: 8px; padding: 5px 7px; font-size: 11px; position: relative; }
+  .moebel-posten-kat { display: flex; align-items: center; justify-content: space-between; gap: 2px; }
+  .moebel-posten-bot { display: flex; align-items: center; gap: 3px; }
+  .mpick-trigger { display: flex; align-items: center; gap: 3px; background: transparent; border: none; cursor: pointer; font-family: var(--font); text-align: left; padding: 1px 2px; border-radius: 4px; min-width: 0; width: 100%; transition: background 0.1s; }
+  .mpick-trigger:hover { background: rgba(0,82,163,0.07); }
+  .mpick-trigger-kat { font-size: 11px; font-weight: 600; color: #0052a3; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mpick-trigger-sub { font-size: 11px; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mpick-chevron { flex-shrink: 0; color: #7aabdc; transition: transform 0.15s; }
+  .mpick-trigger.open .mpick-chevron { transform: rotate(180deg); }
+  .moebel-qty { width: 32px !important; text-align: center; font-size: 12px; font-weight: 700; color: #0052a3; background: #fff; border: 1px solid #cce0ff !important; border-radius: 4px; box-shadow: none !important; padding: 1px 2px !important; flex-shrink: 0; }
+  .moebel-qty:focus { background: #fff !important; border: 1px solid var(--accent) !important; }
+  .moebel-rm { background: none; border: none; cursor: pointer; color: #aac4e0; font-size: 13px; line-height: 1; padding: 0 1px; flex-shrink: 0; }
+  .moebel-rm:hover { color: var(--danger); }
+  .moebel-add { grid-column: 1 / -1; background: none; border: 1px dashed var(--border-strong); border-radius: 6px; cursor: pointer; color: var(--accent); font-size: 11px; font-weight: 600; padding: 4px 8px; font-family: var(--font); transition: 0.15s; display: flex; align-items: center; gap: 3px; width: 100%; justify-content: center; box-sizing: border-box; }
+  .moebel-add:hover { background: var(--accent-light); border-color: var(--accent); }
+
+  .mpick-panel { position: fixed; z-index: 2000; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.16); display: none; width: 380px; overflow: hidden; animation: mpickIn 0.13s ease; }
+  .mpick-panel.open { display: flex; }
+  @keyframes mpickIn { from { opacity:0; transform:translateY(-4px) scale(0.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+  .mpick-col-kat { width: 140px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--surface2); overflow-y: auto; max-height: 280px; padding: 4px 0; }
+  .mpick-col-sub { flex: 1; overflow-y: auto; max-height: 280px; padding: 4px 0; }
+  .mpick-kat-item { padding: 7px 12px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.1s; }
+  .mpick-kat-item:hover { background: #e8f1fb; }
+  .mpick-kat-item.active { background: #dceeff; color: #0052a3; font-weight: 700; }
+  .mpick-sub-item { padding: 7px 14px; font-size: 12px; cursor: pointer; color: var(--text); transition: background 0.1s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mpick-sub-item:hover { background: #f0f7ff; }
+  .mpick-sub-item.active { color: #0071e3; font-weight: 600; }
+  .mpick-sub-item.active::before { content: '✓ '; }
 
   .abh-wrap { display: flex; align-items: center; gap: 4px; }
   .abh-wrap input[type=date] { width: 130px; font-size: 11px; padding: 3px 6px; }
@@ -327,7 +351,12 @@
 </head>
 <body>
 
-<!-- NAV -->
+<!-- Möbel-Picker Panel (shared, einmalig im DOM) -->
+<div class="mpick-panel" id="mpickPanel">
+  <div class="mpick-col-kat" id="mpickKatCol"></div>
+  <div class="mpick-col-sub" id="mpickSubCol"></div>
+</div>
+
 <nav>
   <div class="nav-brand">
     <a href="../../index.html" class="back-btn">
@@ -479,35 +508,7 @@ let _dirtyIds = new Set();
 
 /* ── Firebase ─────────────────────────────────────────────────── */
 function initFirebase() {
-  try {
-    const app = firebase.initializeApp(FIREBASE_CONFIG);
-    asilDb = firebase.database(app);
-    setSyncStatus('syncing', 'Verbinde…');
-    asilDb.ref('sessions').on('value', snap => {
-      const raw = snap.val();
-      const incoming = raw ? Object.values(raw) : [];
-      // Nur externe Änderungen übernehmen – dirty Sessions behalten
-      let needsRender = false;
-      incoming.forEach(s => {
-        const sid = String(s.id);
-        if (_dirtyIds.has(sid)) return;
-        const idx = allSessions.findIndex(x => String(x.id) === sid);
-        if (idx < 0) { allSessions.push(s); needsRender = true; }
-        else if (JSON.stringify(allSessions[idx]) !== JSON.stringify(s)) { allSessions[idx] = s; needsRender = true; }
-      });
-      const incomingIds = incoming.map(s => String(s.id));
-      const before = allSessions.length;
-      allSessions = allSessions.filter(s => incomingIds.includes(String(s.id)) || _dirtyIds.has(String(s.id)));
-      if (allSessions.length !== before) needsRender = true;
-      if (needsRender) renderAll();
-      setSyncStatus('synced', 'Live ✓');
-    }, err => setSyncStatus('error', 'Fehler: ' + err.message));
-    asilDb.ref('archiv').on('value', snap => {
-      const raw = snap.val();
-      allArchiv = raw ? Object.values(raw) : [];
-      renderArchiv();
-    });
-  } catch(e) { setSyncStatus('error', 'Init-Fehler'); console.error(e); }
+  initFirebaseAndKatalog();
 }
 
 function saveSession(sid) {
@@ -960,7 +961,7 @@ function buildCard(s, owner) {
           <th class="td-status">Status</th>
           <th class="td-sm">Formular<br><span style="font-weight:400;font-size:10px">erhalten</span></th>
           <th class="td-sm">Formular<br><span style="font-weight:400;font-size:10px">weiterg.</span></th>
-          <th class="td-moebel">Möbel<br><span style="font-weight:400;font-size:10px;color:var(--text-tertiary)">Tische · Stühle</span></th>
+          <th class="td-moebel">Möbel</th>
           <th class="td-abh" style="color:var(--purple)">Abholung<br><span style="font-weight:400;font-size:10px;color:#a78bdb">Datum + Uhrzeit</span></th>
           <th class="td-bem">Bemerkung</th>
           <th class="td-action"></th>
@@ -1031,18 +1032,7 @@ function buildRow(sid, p, idx) {
     ${buildJnCell(sid, idx, 'fe', p.fe||'Nein')}
     ${buildJnCell(sid, idx, 'fw', p.fw||'Nein')}
     <td class="td-moebel">
-      <div class="moebel-wrap">
-        <div class="moebel-item">
-          <input type="number" min="0" max="99" value="${p.tische||0}"
-            oninput="upPerson(${sid},${idx},'tische',+this.value)" />
-          <span class="moebel-label">Tisch</span>
-        </div>
-        <div class="moebel-item">
-          <input type="number" min="0" max="99" value="${p.stuehle||0}"
-            oninput="upPerson(${sid},${idx},'stuehle',+this.value)" />
-          <span class="moebel-label">Stuhl</span>
-        </div>
-      </div>
+      ${buildMoebelCell(sid, idx, p)}
     </td>
     <td class="td-abh">
       <div class="abh-wrap" id="abh-${sid}-${idx}" ${abhVis}>
@@ -1176,27 +1166,24 @@ function archivePerson(sid, idx) {
   const s = allSessions.find(x => x.id === sid); if (!s) return;
   const p = s.personen[idx]; if (!p) return;
   const archivEntry = {
-    id:          Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    id:           Date.now() + '_' + Math.random().toString(36).slice(2,7),
     archiviertAm: new Date().toLocaleDateString('de-DE'),
-    owner:       s.owner,
-    terminDatum: s.datum,
+    owner:        s.owner,
+    terminDatum:  s.datum,
     terminUhrzeit: s.uhrzeit,
-    name:        p.name || '–',
-    fe:          p.fe,
-    fw:          p.fw,
-    tische:      p.tische || 0,
-    stuehle:     p.stuehle || 0,
-    bem:         p.bem || '',
-    abh_datum:   p.abh_datum || '',
-    abh_zeit:    p.abh_zeit  || ''
+    name:         p.name || '–',
+    fe:           p.fe,
+    fw:           p.fw,
+    moebel:       Array.isArray(p.moebel) ? p.moebel : [],
+    bem:          p.bem || '',
+    abh_datum:    p.abh_datum || '',
+    abh_zeit:     p.abh_zeit  || ''
   };
   if (!asilDb) { toast('Keine Firebase-Verbindung'); return; }
   asilDb.ref('archiv/' + archivEntry.id).set(archivEntry)
     .then(() => {
-      // Remove person from session
       s.personen.splice(idx, 1);
       if (!s.personen.length) {
-        // Session empty → delete it
         asilDb.ref('sessions/' + sid).remove();
       } else {
         saveSession(sid);
@@ -1223,9 +1210,17 @@ function renderArchiv() {
     const ownerColor = g.owner === 'louis' ? 'var(--louis)' : 'var(--rohat)';
     const ownerLabel = g.owner === 'louis' ? 'Louis' : 'Rohat';
     const rows = g.items.map(e => {
-      const moebelText = e.moebel && e.moebel.length > 0
-        ? e.moebel.map(m => `${m.qty}× ${m.sub || m.kat}`).join(', ')
-        : `${e.tische||0} Tisch · ${e.stuehle||0} Stuhl`;
+      let moebelText;
+      if (e.moebel && e.moebel.length > 0) {
+        moebelText = e.moebel.map(m => {
+          const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
+          const subObj = katObj ? katObj.subs.find(s => s.id === m.sub) : null;
+          const label  = subObj ? subObj.label : (katObj ? katObj.label : (m.sub || m.kat || '?'));
+          return `${m.qty}× ${label}`;
+        }).join(', ');
+      } else {
+        moebelText = `${e.tische||0} Tisch · ${e.stuehle||0} Stuhl`;
+      }
       return `<tr>
       <td class="archiv-name">${esc(e.name)}</td>
       <td>${esc(e.fe)}</td>
@@ -1294,17 +1289,164 @@ function toast(msg) {
 }
 
 /* ── Keyboard shortcuts ───────────────────────────────────────── */
-document.getElementById('modalDatum').addEventListener('keydown',   e => { if(e.key==='Enter') document.getElementById('modalUhrzeit').focus(); });
-document.getElementById('modalUhrzeit').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('modalName').focus(); });
-document.getElementById('modalName').addEventListener('keydown',    e => { if(e.key==='Enter') createNewSession(); });
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+document.addEventListener('click', e => {
+  if (!e.target.closest('.mpick-panel') && !e.target.closest('.mpick-trigger')) {
+    mpickClose();
+  }
+  if (!e.target.closest('.jn-cell')) {
+    document.querySelectorAll('.jn-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+  if (!e.target.closest('.td-status')) {
+    document.querySelectorAll('.status-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+});
+window.addEventListener('scroll', e => {
+  document.querySelectorAll('.jn-dropdown.open,.status-dropdown.open').forEach(d => d.classList.remove('open'));
+  if (!e.target.closest || !e.target.closest('.mpick-panel')) {
+    mpickClose();
+  }
+}, true);
 
-/* ── Möbel ────────────────────────────────────────────────────── */
-let _moebelData = {
-  stuehle:      { weiss: 0, grau: 0 },
-  tische:       { weiss: 0, grau: 0 },
-  rollcontainer:{ standard: 0 }
-};
+/* ── MOEBEL_KATALOG (aus Firebase geladen) ── */
+let MOEBEL_KATALOG = [];
+
+/* ── mpick-Picker Logik ── */
+let _mpick = { sid:null, idx:null, mi:null };
+
+function buildMoebelCell(sid, idx, p) {
+  const moebel = Array.isArray(p.moebel) ? p.moebel : [];
+  const rows = moebel.map((m, mi) => {
+    const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
+    const subObj = katObj ? katObj.subs.find(s => s.id === m.sub) : null;
+    const katLabel = katObj ? katObj.label : (m.kat || '–');
+    const subLabel = subObj ? subObj.label : (m.sub || '–');
+    return `<div class="moebel-posten" id="mp-${sid}-${idx}-${mi}">
+      <div class="moebel-posten-kat">
+        <button class="mpick-trigger" onmousedown="event.preventDefault();mpickOpen(event,${sid},${idx},${mi})">
+          <span class="mpick-trigger-kat">${esc(katLabel)}</span>
+          <svg class="mpick-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <button class="moebel-rm" onmousedown="event.preventDefault();moebelRemove(${sid},${idx},${mi})" title="Entfernen">×</button>
+      </div>
+      <div class="moebel-posten-bot">
+        <span class="mpick-trigger-sub">${esc(subLabel)}</span>
+        <input class="moebel-qty" type="number" min="1" max="99" value="${m.qty||1}"
+          onchange="moebelQtyChange(${sid},${idx},${mi},+this.value)" title="Anzahl" />
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="moebel-wrap">${rows}<button class="moebel-add" onclick="moebelAdd(${sid},${idx})">+ Möbel</button></div>`;
+}
+
+function moebelAdd(sid, idx) {
+  const s = allSessions.find(x => String(x.id) === String(sid)); if (!s) return;
+  if (!s.personen[idx].moebel) s.personen[idx].moebel = [];
+  const firstKat = MOEBEL_KATALOG[0] || { id:'', subs:[{id:'',label:''}] };
+  s.personen[idx].moebel.push({ kat: firstKat.id, sub: (firstKat.subs[0]||{}).id||'', qty: 1 });
+  reRenderRow(sid, idx);
+  scheduleSave(sid);
+}
+
+function moebelRemove(sid, idx, mi) {
+  const s = allSessions.find(x => String(x.id) === String(sid)); if (!s) return;
+  if (!Array.isArray(s.personen[idx].moebel)) return;
+  s.personen[idx].moebel.splice(mi, 1);
+  reRenderRow(sid, idx);
+  scheduleSave(sid);
+}
+
+function moebelQtyChange(sid, idx, mi, val) {
+  const s = allSessions.find(x => String(x.id) === String(sid)); if (!s) return;
+  if (!s.personen[idx].moebel[mi]) return;
+  s.personen[idx].moebel[mi].qty = Math.max(1, val || 1);
+  scheduleSave(sid);
+}
+
+function mpickOpen(event, sid, idx, mi) {
+  const panel = document.getElementById('mpickPanel');
+  const trigger = event.currentTarget;
+  if (panel.classList.contains('open') &&
+      _mpick.sid===sid && _mpick.idx===idx && _mpick.mi===mi) {
+    mpickClose(); return;
+  }
+  _mpick = { sid, idx, mi };
+  const s = allSessions.find(x => String(x.id) === String(sid));
+  if (!s || !s.personen[idx]) return;
+  const moebel = s.personen[idx].moebel || [];
+  const m = moebel[mi]; if (!m) return;
+  mpickRenderKat(m);
+  mpickRenderSub(m);
+  const rect = trigger.getBoundingClientRect();
+  panel.style.left = Math.min(rect.left, window.innerWidth - 390) + 'px';
+  const below = rect.bottom + 290 < window.innerHeight;
+  panel.style.top = below ? (rect.bottom + 4) + 'px' : (rect.top - 290) + 'px';
+  panel.classList.add('open');
+  setTimeout(() => {
+    const ak = panel.querySelector('.mpick-kat-item.active');
+    if (ak) ak.scrollIntoView({ block: 'nearest' });
+  }, 30);
+}
+
+function mpickRenderKat(m) {
+  const col = document.getElementById('mpickKatCol');
+  col.innerHTML = MOEBEL_KATALOG.map(k => {
+    const active = k.id === m.kat ? ' active' : '';
+    return `<div class="mpick-kat-item${active}" onmousedown="event.preventDefault();mpickSelectKat('${esc(k.id)}')">${esc(k.label)}</div>`;
+  }).join('');
+}
+
+function mpickRenderSub(m) {
+  const col = document.getElementById('mpickSubCol');
+  const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
+  if (!katObj) { col.innerHTML = ''; return; }
+  col.innerHTML = katObj.subs.map(s => {
+    const active = s.id === m.sub ? ' active' : '';
+    return `<div class="mpick-sub-item${active}" onmousedown="event.preventDefault();mpickSelectSub('${esc(s.id)}')">${esc(s.label)}</div>`;
+  }).join('');
+}
+
+function mpickSelectKat(katId) {
+  const { sid, idx, mi } = _mpick;
+  const s = allSessions.find(x => String(x.id) === String(sid));
+  if (!s || !s.personen[idx] || !s.personen[idx].moebel) return;
+  const katObj = MOEBEL_KATALOG.find(k => k.id === katId);
+  s.personen[idx].moebel[mi].kat = katId;
+  s.personen[idx].moebel[mi].sub = katObj && katObj.subs.length ? katObj.subs[0].id : '';
+  scheduleSave(sid);
+  const m = s.personen[idx].moebel[mi];
+  mpickRenderKat(m);
+  mpickRenderSub(m);
+  const posten = document.getElementById(`mp-${sid}-${idx}-${mi}`);
+  if (posten) {
+    const subObj = katObj ? katObj.subs[0] : null;
+    posten.querySelector('.mpick-trigger-kat').textContent = katObj ? katObj.label : '–';
+    posten.querySelector('.mpick-trigger-sub').textContent = subObj ? subObj.label : '–';
+  }
+}
+
+function mpickSelectSub(subId) {
+  const { sid, idx, mi } = _mpick;
+  const s = allSessions.find(x => String(x.id) === String(sid));
+  if (!s || !s.personen[idx] || !s.personen[idx].moebel) return;
+  s.personen[idx].moebel[mi].sub = subId;
+  scheduleSave(sid);
+  const m = s.personen[idx].moebel[mi];
+  const posten = document.getElementById(`mp-${sid}-${idx}-${mi}`);
+  if (posten) {
+    const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
+    const subObj = katObj ? katObj.subs.find(ss => ss.id === subId) : null;
+    posten.querySelector('.mpick-trigger-sub').textContent = subObj ? subObj.label : '–';
+  }
+  mpickClose();
+}
+
+function mpickClose() {
+  document.getElementById('mpickPanel').classList.remove('open');
+  _mpick = { sid:null, idx:null, mi:null };
+}
+
+/* ── Möbel-Inventar (moebel.html Bestandsverwaltung) ── */
+let _moebelData = {};
 let _moebelSaveTimer = null;
 
 function moebelChange(kat, sub, delta) {
@@ -1329,10 +1471,7 @@ function renderMoebelUI() {
       const val = (_moebelData[kat] && _moebelData[kat][sub]) || 0;
       total += val;
       const el = document.getElementById('val-'+kat+'-'+sub);
-      if (el) {
-        el.textContent = val;
-        el.className = 'moebel-stepper-val' + (val > 0 ? ' has-value' : '');
-      }
+      if (el) { el.textContent = val; el.className = 'moebel-stepper-val' + (val > 0 ? ' has-value' : ''); }
     });
     const tot = document.getElementById(kat+'-total');
     if (tot) tot.textContent = total + ' gesamt';
@@ -1351,7 +1490,6 @@ function loadMoebel() {
   asilDb.ref('moebel').on('value', snap => {
     const d = snap.val();
     if (d) {
-      // Tief mergen damit neue Kategorien nicht überschrieben werden
       Object.keys(d).forEach(kat => {
         if (!_moebelData[kat]) _moebelData[kat] = {};
         Object.assign(_moebelData[kat], d[kat]);
@@ -1362,8 +1500,68 @@ function loadMoebel() {
 }
 
 /* ── Start ────────────────────────────────────────────────────── */
+function initFirebaseAndKatalog() {
+  try {
+    const app = firebase.initializeApp(FIREBASE_CONFIG);
+    asilDb = firebase.database(app);
+    setSyncStatus('syncing', 'Verbinde…');
+
+    // Katalog zuerst laden, dann Sessions
+    asilDb.ref('moebelDropdownKatalog').once('value', snapKat => {
+      const fbKat = snapKat.val();
+      if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
+        MOEBEL_KATALOG.length = 0;
+        fbKat.forEach(k => MOEBEL_KATALOG.push(k));
+      }
+      startAsilListeners();
+    });
+
+    // Live-Updates des Katalogs
+    asilDb.ref('moebelDropdownKatalog').on('value', snapKat => {
+      const fbKat = snapKat.val();
+      if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
+        MOEBEL_KATALOG.length = 0;
+        fbKat.forEach(k => MOEBEL_KATALOG.push(k));
+        renderSessions();
+        renderArchiv();
+      }
+    });
+  } catch(e) { setSyncStatus('error', 'Init-Fehler'); console.error(e); }
+}
+
+function startAsilListeners() {
+  asilDb.ref('sessions').on('value', snap => {
+    const raw = snap.val();
+    const incoming = raw ? Object.values(raw) : [];
+    let needsRender = false;
+    incoming.forEach(s => {
+      const sid = String(s.id);
+      if (_dirtyIds.has(sid)) return;
+      const idx = allSessions.findIndex(x => String(x.id) === sid);
+      if (idx < 0) { allSessions.push(s); needsRender = true; }
+      else if (JSON.stringify(allSessions[idx]) !== JSON.stringify(s)) { allSessions[idx] = s; needsRender = true; }
+    });
+    const incomingIds = incoming.map(s => String(s.id));
+    const before = allSessions.length;
+    allSessions = allSessions.filter(s => incomingIds.includes(String(s.id)) || _dirtyIds.has(String(s.id)));
+    if (allSessions.length !== before) needsRender = true;
+    if (needsRender) renderAll();
+    setSyncStatus('synced', 'Live ✓');
+  }, err => setSyncStatus('error', 'Fehler: ' + err.message));
+  asilDb.ref('archiv').on('value', snap => {
+    const raw = snap.val();
+    allArchiv = raw ? Object.values(raw) : [];
+    renderArchiv();
+  });
+  loadMoebel();
+}
+
 initFirebase();
-loadMoebel();
+
+document.getElementById('modalDatum').addEventListener('keydown',   e => { if(e.key==='Enter') document.getElementById('modalUhrzeit').focus(); });
+document.getElementById('modalUhrzeit').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('modalName').focus(); });
+document.getElementById('modalName').addEventListener('keydown',    e => { if(e.key==='Enter') createNewSession(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') { closeModal(); mpickClose(); } });
 </script>
 </body>
 </html>
