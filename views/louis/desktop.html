@@ -170,17 +170,31 @@
   .status-offen { background: #fff8e6; color: #b07800; } .status-reservierung { background: #e8f1fb; color: #0071e3; }
   .status-abgeschlossen { background: #e8f8ee; color: #1a7a36; } .status-abholung { background: var(--purple-light); color: var(--purple); }
   /* Möbel-Picker */
-  .moebel-wrap { display: flex; flex-direction: column; gap: 4px; }
-  .moebel-posten { display: flex; align-items: center; gap: 4px; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 7px; padding: 3px 6px; font-size: 11px; }
-  .moebel-posten select { font-size: 11px; padding: 2px 4px; border-radius: 4px; background: transparent; border: none; flex: 1; min-width: 0; cursor: pointer; }
-  .moebel-posten select:focus { background: #fff; border: 1px solid var(--accent); box-shadow: none; }
-  .moebel-qty { width: 36px !important; text-align: center; font-size: 12px; font-weight: 600; background: transparent; border: none !important; box-shadow: none !important; padding: 1px 2px !important; }
-  .moebel-qty:focus { background: #fff !important; border: 1px solid var(--accent) !important; border-radius: 4px; }
-  .moebel-rm { background: none; border: none; cursor: pointer; color: var(--text-tertiary); font-size: 14px; line-height: 1; padding: 0 2px; flex-shrink: 0; }
+  .moebel-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .moebel-posten { display: flex; flex-direction: column; gap: 2px; background: #eef6ff; border: 1px solid #cce0ff; border-radius: 8px; padding: 5px 7px; font-size: 11px; }
+  .moebel-posten-kat { display: flex; align-items: center; justify-content: space-between; gap: 2px; }
+  .moebel-posten-kat select { font-size: 11px; font-weight: 600; color: #0052a3; padding: 1px 3px; border-radius: 4px; background: transparent; border: none; flex: 1; min-width: 0; cursor: pointer; }
+  .moebel-posten-bot { display: flex; align-items: center; gap: 3px; }
+  .moebel-posten-bot select { font-size: 11px; padding: 1px 3px; border-radius: 4px; background: transparent; border: none; flex: 1; min-width: 0; cursor: pointer; color: var(--text-primary); }
+  .moebel-posten select:focus { outline: none; background: #fff; border: 1px solid var(--accent); box-shadow: none; }
+  .moebel-qty { width: 32px !important; text-align: center; font-size: 12px; font-weight: 700; color: #0052a3; background: #fff; border: 1px solid #cce0ff !important; border-radius: 4px; box-shadow: none !important; padding: 1px 2px !important; flex-shrink: 0; }
+  .moebel-qty:focus { background: #fff !important; border: 1px solid var(--accent) !important; }
+  .moebel-rm { background: none; border: none; cursor: pointer; color: #aac4e0; font-size: 13px; line-height: 1; padding: 0 1px; flex-shrink: 0; }
   .moebel-rm:hover { color: var(--danger); }
-  .moebel-add { background: none; border: 1px dashed var(--border-strong); border-radius: 6px; cursor: pointer; color: var(--accent); font-size: 11px; font-weight: 600; padding: 3px 8px; font-family: var(--font); transition: 0.15s; display: flex; align-items: center; gap: 3px; width: 100%; justify-content: center; }
+  .moebel-add { grid-column: 1 / -1; background: none; border: 1px dashed var(--border-strong); border-radius: 6px; cursor: pointer; color: var(--accent); font-size: 11px; font-weight: 600; padding: 4px 8px; font-family: var(--font); transition: 0.15s; display: flex; align-items: center; gap: 3px; width: 100%; justify-content: center; box-sizing: border-box; }
   .moebel-add:hover { background: var(--accent-light); border-color: var(--accent); }
   .moebel-label { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+  /* Archiv-Sektion */
+  .archiv-hdr-row td { background: #f0faf4; padding: 5px 10px; cursor: pointer; user-select: none; }
+  .archiv-hdr-row td:hover { background: #e4f5ea; }
+  .archiv-hdr-inner { display: flex; align-items: center; gap: 7px; color: #1a7a36; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .archiv-hdr-inner svg { transition: transform 0.2s; }
+  .archiv-hdr-inner.open svg { transform: rotate(180deg); }
+  .archiv-count-badge { background: #c5edcf; color: #1a7a36; border-radius: 20px; padding: 1px 8px; font-size: 10px; font-weight: 700; }
+  .archiv-hidden { display: none; }
+  tr.archiv-row { opacity: 0.8; }
+  tr.archiv-row td { background: #f7fdf9; }
+  tr.archiv-row:hover td { background: #edfaf2 !important; }
   .abh-wrap { display: flex; align-items: center; gap: 4px; }
   .abh-wrap input[type=date] { width: 130px; font-size: 11px; padding: 3px 6px; }
   .abh-wrap input[type=time] { width: 72px; font-size: 11px; padding: 3px 6px; }
@@ -622,7 +636,8 @@ function buildCard(s) {
         <th class="td-abh" style="color:var(--purple)">Abholung<br><span style="font-weight:400;font-size:10px;color:#a78bdb">Datum + Uhrzeit</span></th>
         <th class="td-bem">Bemerkung</th><th class="td-action"></th>
       </tr></thead>
-      <tbody id="tbody-${s.id}">${s.personen.map((p,i) => buildRow(s.id,p,i)).join('')}</tbody>
+      <tbody id="tbody-${s.id}">${s.personen.map((p,i) => p.status === 'Abgeschlossen' ? '' : buildRow(s.id,p,i)).join('')}</tbody>
+      <tbody id="tbody-archiv-${s.id}">${s.personen.some(p=>p.status==='Abgeschlossen') ? buildArchivBody(s.id, s) : ''}</tbody>
     </table></div>
     <div class="session-footer">
       <button class="add-person-btn" onclick="addPerson(${s.id})">
@@ -676,21 +691,58 @@ function buildMoebelCell(sid, idx, p) {
       `<option value="${esc(k.id)}"${m.kat===k.id?' selected':''}>${esc(k.label)}</option>`
     ).join('');
     return `<div class="moebel-posten">
-      <select onchange="moebelKatChange(${sid},${idx},${mi},this.value)" title="Möbelkategorie">${katOpts}</select>
-      <select onchange="moebelSubChange(${sid},${idx},${mi},this.value)" title="Variante">${subOpts}</select>
-      <input class="moebel-qty" type="number" min="1" max="99" value="${m.qty||1}" onchange="moebelQtyChange(${sid},${idx},${mi},+this.value)" />
-      <button class="moebel-rm" onclick="moebelRemove(${sid},${idx},${mi})" title="Entfernen">×</button>
+      <div class="moebel-posten-kat">
+        <select onchange="moebelKatChange(${sid},${idx},${mi},this.value)" title="Kategorie">${katOpts}</select>
+        <button class="moebel-rm" onclick="moebelRemove(${sid},${idx},${mi})" title="Entfernen">×</button>
+      </div>
+      <div class="moebel-posten-bot">
+        <select onchange="moebelSubChange(${sid},${idx},${mi},this.value)" title="Variante">${subOpts}</select>
+        <input class="moebel-qty" type="number" min="1" max="99" value="${m.qty||1}" onchange="moebelQtyChange(${sid},${idx},${mi},+this.value)" title="Anzahl" />
+      </div>
     </div>`;
   }).join('');
   return `<td class="td-moebel"><div class="moebel-wrap">${rows}<button class="moebel-add" onclick="moebelAdd(${sid},${idx})">+ Möbel</button></div></td>`;
 }
 
-function buildRow(sid, p, idx) {
+function buildArchivBody(sid, s, isOpen = false) {
+  const archivPersonen = s.personen
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => p.status === 'Abgeschlossen');
+  const count = archivPersonen.length;
+  const openClass = isOpen ? ' open' : '';
+  const rowsHtml = archivPersonen.map(({ p, i }) => buildRow(sid, p, i, true)).join('');
+  return `<tr class="archiv-hdr-row" onclick="toggleArchiv(${sid}, this)">
+    <td colspan="8">
+      <div class="archiv-hdr-inner${openClass}">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+        Archiviert
+        <span class="archiv-count-badge">${count}</span>
+      </div>
+    </td>
+  </tr>
+  <tr class="archiv-rows-wrapper${isOpen ? '' : ' archiv-hidden'}"><td colspan="8" style="padding:0">
+    <table style="width:100%;border-collapse:collapse">
+      <tbody>${rowsHtml}</tbody>
+    </table>
+  </td></tr>`;
+}
+
+function toggleArchiv(sid, hdrRow) {
+  const inner = hdrRow.querySelector('.archiv-hdr-inner');
+  const wrapper = hdrRow.nextElementSibling;
+  const isOpen = inner.classList.contains('open');
+  inner.classList.toggle('open', !isOpen);
+  wrapper.classList.toggle('archiv-hidden', isOpen);
+}
+
+function buildRow(sid, p, idx, isArchiv = false) {
   const cls    = {'Offen':'status-offen','Reservierung':'status-reservierung','Abgeschlossen':'status-abgeschlossen','Abholung':'status-abholung'}[p.status]||'status-offen';
   const isAbh  = p.status === 'Abholung';
   const abhISO = p.abh_datum ? deToISO(p.abh_datum) : '';
   const abhVis = isAbh ? '' : 'style="visibility:hidden;pointer-events:none"';
-  return `<tr data-idx="${idx}">
+  const trClass = isArchiv ? ' class="archiv-row"' : '';
+  return `<tr data-idx="${idx}"${trClass}>
     <td class="td-name"><div style="display:flex;align-items:center;gap:4px"><input type="text" value="${esc(p.name)}" placeholder="Name, Vorname" style="font-weight:500;flex:1;min-width:0" oninput="up(${sid},${idx},'name',this.value)" /><button class="transfer-btn" onclick="openTransfer(${sid},${idx})" title="Zu Rohat verschieben">→ R</button></div></td>
     <td class="td-status status-cell">
       <span class="status-badge ${cls}" id="sbadge-${sid}-${idx}">${dot(p.status)} ${esc(p.status)}</span>
@@ -822,7 +874,22 @@ function updateSession(id, field, val) {
 function renderCard(sid) {
   const s = sessions.find(x => String(x.id) === String(sid)); if (!s) return;
   const tbody = document.getElementById('tbody-' + sid);
-  if (tbody) tbody.innerHTML = s.personen.map((p,i) => buildRow(sid,p,i)).join('');
+  const tbodyArchiv = document.getElementById('tbody-archiv-' + sid);
+  if (tbody) {
+    tbody.innerHTML = s.personen
+      .map((p,i) => p.status === 'Abgeschlossen' ? '' : buildRow(sid,p,i))
+      .join('');
+  }
+  if (tbodyArchiv) {
+    const archivPersonen = s.personen.filter(p => p.status === 'Abgeschlossen');
+    if (archivPersonen.length) {
+      // Archiv-Header aufbewahren (offen/zu) wenn schon vorhanden
+      const wasOpen = tbodyArchiv.querySelector('.archiv-hdr-inner.open') !== null;
+      tbodyArchiv.innerHTML = buildArchivBody(sid, s, wasOpen);
+    } else {
+      tbodyArchiv.innerHTML = '';
+    }
+  }
 }
 function addPerson(sid) {
   const s = sessions.find(x => x.id === sid); if (!s) return;
