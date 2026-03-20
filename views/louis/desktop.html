@@ -171,19 +171,35 @@
   .status-abgeschlossen { background: #e8f8ee; color: #1a7a36; } .status-abholung { background: var(--purple-light); color: var(--purple); }
   /* Möbel-Picker */
   .moebel-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-  .moebel-posten { display: flex; flex-direction: column; gap: 2px; background: #eef6ff; border: 1px solid #cce0ff; border-radius: 8px; padding: 5px 7px; font-size: 11px; }
+  .moebel-posten { display: flex; flex-direction: column; gap: 2px; background: #eef6ff; border: 1px solid #cce0ff; border-radius: 8px; padding: 5px 7px; font-size: 11px; position: relative; }
   .moebel-posten-kat { display: flex; align-items: center; justify-content: space-between; gap: 2px; }
-  .moebel-posten-kat select { font-size: 11px; font-weight: 600; color: #0052a3; padding: 1px 3px; border-radius: 4px; background: transparent; border: none; flex: 1; min-width: 0; cursor: pointer; }
   .moebel-posten-bot { display: flex; align-items: center; gap: 3px; }
-  .moebel-posten-bot select { font-size: 11px; padding: 1px 3px; border-radius: 4px; background: transparent; border: none; flex: 1; min-width: 0; cursor: pointer; color: var(--text-primary); }
-  .moebel-posten select:focus { outline: none; background: #fff; border: 1px solid var(--accent); box-shadow: none; }
+  /* Trigger-Buttons (ersetzen die select-Elemente) */
+  .mpick-trigger { display: flex; align-items: center; gap: 3px; background: transparent; border: none; cursor: pointer; font-family: var(--font); text-align: left; padding: 1px 2px; border-radius: 4px; min-width: 0; width: 100%; transition: background 0.1s; }
+  .mpick-trigger:hover { background: rgba(0,82,163,0.07); }
+  .mpick-trigger-kat { font-size: 11px; font-weight: 600; color: #0052a3; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mpick-trigger-sub { font-size: 11px; color: var(--text-primary); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mpick-chevron { flex-shrink: 0; color: #7aabdc; transition: transform 0.15s; }
+  .mpick-trigger.open .mpick-chevron { transform: rotate(180deg); }
   .moebel-qty { width: 32px !important; text-align: center; font-size: 12px; font-weight: 700; color: #0052a3; background: #fff; border: 1px solid #cce0ff !important; border-radius: 4px; box-shadow: none !important; padding: 1px 2px !important; flex-shrink: 0; }
   .moebel-qty:focus { background: #fff !important; border: 1px solid var(--accent) !important; }
   .moebel-rm { background: none; border: none; cursor: pointer; color: #aac4e0; font-size: 13px; line-height: 1; padding: 0 1px; flex-shrink: 0; }
   .moebel-rm:hover { color: var(--danger); }
   .moebel-add { grid-column: 1 / -1; background: none; border: 1px dashed var(--border-strong); border-radius: 6px; cursor: pointer; color: var(--accent); font-size: 11px; font-weight: 600; padding: 4px 8px; font-family: var(--font); transition: 0.15s; display: flex; align-items: center; gap: 3px; width: 100%; justify-content: center; box-sizing: border-box; }
   .moebel-add:hover { background: var(--accent-light); border-color: var(--accent); }
-  .moebel-label { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+  /* 2-Spalten Möbel-Popup */
+  .mpick-panel { position: fixed; z-index: 2000; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.16); display: none; width: 380px; overflow: hidden; animation: mpickIn 0.13s ease; }
+  .mpick-panel.open { display: flex; }
+  @keyframes mpickIn { from { opacity:0; transform:translateY(-4px) scale(0.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+  .mpick-col-kat { width: 140px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--surface2); overflow-y: auto; max-height: 280px; padding: 4px 0; }
+  .mpick-col-sub { flex: 1; overflow-y: auto; max-height: 280px; padding: 4px 0; }
+  .mpick-kat-item { padding: 7px 12px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.1s; }
+  .mpick-kat-item:hover { background: #e8f1fb; }
+  .mpick-kat-item.active { background: #dceeff; color: #0052a3; font-weight: 700; }
+  .mpick-sub-item { padding: 7px 14px; font-size: 12px; cursor: pointer; color: var(--text-primary); transition: background 0.1s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mpick-sub-item:hover { background: #f0f7ff; }
+  .mpick-sub-item.active { color: #0071e3; font-weight: 600; }
+  .mpick-sub-item.active::before { content: '✓ '; }
   /* Archiv-Sektion */
   .archiv-hdr-row td { background: #f0faf4; padding: 5px 10px; cursor: pointer; user-select: none; }
   .archiv-hdr-row td:hover { background: #e4f5ea; }
@@ -224,6 +240,12 @@
 </style>
 </head>
 <body>
+
+<!-- Möbel-Picker Panel (shared, einmalig im DOM) -->
+<div class="mpick-panel" id="mpickPanel">
+  <div class="mpick-col-kat" id="mpickKatCol"></div>
+  <div class="mpick-col-sub" id="mpickSubCol"></div>
+</div>
 
 <nav>
   <div class="nav-brand">
@@ -636,8 +658,7 @@ function buildCard(s) {
         <th class="td-abh" style="color:var(--purple)">Abholung<br><span style="font-weight:400;font-size:10px;color:#a78bdb">Datum + Uhrzeit</span></th>
         <th class="td-bem">Bemerkung</th><th class="td-action"></th>
       </tr></thead>
-      <tbody id="tbody-${s.id}">${s.personen.map((p,i) => p.status === 'Abgeschlossen' ? '' : buildRow(s.id,p,i)).join('')}</tbody>
-      <tbody id="tbody-archiv-${s.id}">${s.personen.some(p=>p.status==='Abgeschlossen') ? buildArchivBody(s.id, s) : ''}</tbody>
+      <tbody id="tbody-${s.id}">${s.personen.map((p,i) => buildRow(s.id,p,i)).join('')}</tbody>
     </table></div>
     <div class="session-footer">
       <button class="add-person-btn" onclick="addPerson(${s.id})">
@@ -684,65 +705,148 @@ function buildMoebelCell(sid, idx, p) {
   const moebel = Array.isArray(p.moebel) ? p.moebel : [];
   const rows = moebel.map((m, mi) => {
     const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
-    const subOpts = katObj ? katObj.subs.map(s =>
-      `<option value="${esc(s.id)}"${m.sub===s.id?' selected':''}>${esc(s.label)}</option>`
-    ).join('') : '';
-    const katOpts = MOEBEL_KATALOG.map(k =>
-      `<option value="${esc(k.id)}"${m.kat===k.id?' selected':''}>${esc(k.label)}</option>`
-    ).join('');
-    return `<div class="moebel-posten">
+    const subObj = katObj ? katObj.subs.find(s => s.id === m.sub) : null;
+    const katLabel = katObj ? esc(katObj.label) : '–';
+    const subLabel = subObj ? esc(subObj.label) : '–';
+    return `<div class="moebel-posten" id="mp-${sid}-${idx}-${mi}">
       <div class="moebel-posten-kat">
-        <select onchange="moebelKatChange(${sid},${idx},${mi},this.value)" title="Kategorie">${katOpts}</select>
+        <button class="mpick-trigger" type="button"
+          onclick="mpickOpen(event,${sid},${idx},${mi},'kat')"
+          title="Kategorie wählen">
+          <span class="mpick-trigger-kat">${katLabel}</span>
+          <svg class="mpick-chevron" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
         <button class="moebel-rm" onclick="moebelRemove(${sid},${idx},${mi})" title="Entfernen">×</button>
       </div>
       <div class="moebel-posten-bot">
-        <select onchange="moebelSubChange(${sid},${idx},${mi},this.value)" title="Variante">${subOpts}</select>
-        <input class="moebel-qty" type="number" min="1" max="99" value="${m.qty||1}" onchange="moebelQtyChange(${sid},${idx},${mi},+this.value)" title="Anzahl" />
+        <button class="mpick-trigger" type="button"
+          onclick="mpickOpen(event,${sid},${idx},${mi},'sub')"
+          title="Variante wählen">
+          <span class="mpick-trigger-sub">${subLabel}</span>
+          <svg class="mpick-chevron" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <input class="moebel-qty" type="number" min="1" max="99" value="${m.qty||1}"
+          onchange="moebelQtyChange(${sid},${idx},${mi},+this.value)" title="Anzahl" />
       </div>
     </div>`;
   }).join('');
   return `<td class="td-moebel"><div class="moebel-wrap">${rows}<button class="moebel-add" onclick="moebelAdd(${sid},${idx})">+ Möbel</button></div></td>`;
 }
 
-function buildArchivBody(sid, s, isOpen = false) {
-  const archivPersonen = s.personen
-    .map((p, i) => ({ p, i }))
-    .filter(({ p }) => p.status === 'Abgeschlossen');
-  const count = archivPersonen.length;
-  const openClass = isOpen ? ' open' : '';
-  const rowsHtml = archivPersonen.map(({ p, i }) => buildRow(sid, p, i, true)).join('');
-  return `<tr class="archiv-hdr-row" onclick="toggleArchiv(${sid}, this)">
-    <td colspan="8">
-      <div class="archiv-hdr-inner${openClass}">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
-        Archiviert
-        <span class="archiv-count-badge">${count}</span>
-      </div>
-    </td>
-  </tr>
-  <tr class="archiv-rows-wrapper${isOpen ? '' : ' archiv-hidden'}"><td colspan="8" style="padding:0">
-    <table style="width:100%;border-collapse:collapse">
-      <tbody>${rowsHtml}</tbody>
-    </table>
-  </td></tr>`;
+/* ── Möbel-Picker Panel Logik ── */
+let _mpick = { sid:null, idx:null, mi:null, focusCol:null };
+
+function mpickOpen(e, sid, idx, mi, focusCol) {
+  e.stopPropagation();
+  const panel = document.getElementById('mpickPanel');
+  const trigger = e.currentTarget;
+
+  // Schon offen für denselben? → schließen
+  if (panel.classList.contains('open') &&
+      _mpick.sid===sid && _mpick.idx===idx && _mpick.mi===mi && _mpick.focusCol===focusCol) {
+    mpickClose(); return;
+  }
+
+  _mpick = { sid, idx, mi, focusCol };
+
+  const s = sessions.find(x => String(x.id) === String(sid));
+  if (!s || !s.personen[idx]) return;
+  const m = s.personen[idx].moebel[mi];
+  if (!m) return;
+
+  mpickRenderKat(m);
+  mpickRenderSub(m);
+
+  // Position berechnen
+  const rect = trigger.getBoundingClientRect();
+  panel.style.left = Math.min(rect.left, window.innerWidth - 390) + 'px';
+  const below = rect.bottom + 290 < window.innerHeight;
+  panel.style.top = below ? (rect.bottom + 4) + 'px' : (rect.top - 290) + 'px';
+  panel.classList.add('open');
+
+  // Aktive Kat/Sub sichtbar scrollen
+  setTimeout(() => {
+    const activeKat = panel.querySelector('.mpick-kat-item.active');
+    if (activeKat) activeKat.scrollIntoView({ block: 'nearest' });
+    const activeSub = panel.querySelector('.mpick-sub-item.active');
+    if (activeSub) activeSub.scrollIntoView({ block: 'nearest' });
+  }, 30);
 }
 
-function toggleArchiv(sid, hdrRow) {
-  const inner = hdrRow.querySelector('.archiv-hdr-inner');
-  const wrapper = hdrRow.nextElementSibling;
-  const isOpen = inner.classList.contains('open');
-  inner.classList.toggle('open', !isOpen);
-  wrapper.classList.toggle('archiv-hidden', isOpen);
+function mpickRenderKat(m) {
+  const col = document.getElementById('mpickKatCol');
+  col.innerHTML = MOEBEL_KATALOG.map(k => {
+    const active = k.id === m.kat ? ' active' : '';
+    return `<div class="mpick-kat-item${active}" onclick="mpickSelectKat('${esc(k.id)}')">${esc(k.label)}</div>`;
+  }).join('');
 }
 
-function buildRow(sid, p, idx, isArchiv = false) {
+function mpickRenderSub(m) {
+  const col = document.getElementById('mpickSubCol');
+  const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
+  if (!katObj) { col.innerHTML = ''; return; }
+  col.innerHTML = katObj.subs.map(s => {
+    const active = s.id === m.sub ? ' active' : '';
+    return `<div class="mpick-sub-item${active}" onclick="mpickSelectSub('${esc(s.id)}')">${esc(s.label)}</div>`;
+  }).join('');
+}
+
+function mpickSelectKat(katId) {
+  const { sid, idx, mi } = _mpick;
+  const s = sessions.find(x => String(x.id) === String(sid));
+  if (!s || !s.personen[idx] || !s.personen[idx].moebel[mi]) return;
+  const katObj = MOEBEL_KATALOG.find(k => k.id === katId);
+  s.personen[idx].moebel[mi].kat = katId;
+  s.personen[idx].moebel[mi].sub = katObj ? katObj.subs[0].id : '';
+  _dirtyIds.add(String(sid)); scheduleSave();
+
+  // Panel-Inhalt neu rendern (Kategorie markieren, Subs aktualisieren)
+  const m = s.personen[idx].moebel[mi];
+  mpickRenderKat(m);
+  mpickRenderSub(m);
+
+  // Trigger-Texte im Posten aktualisieren (ohne ganzen renderCard)
+  const posten = document.getElementById(`mp-${sid}-${idx}-${mi}`);
+  if (posten) {
+    const subObj = katObj ? katObj.subs[0] : null;
+    posten.querySelector('.mpick-trigger-kat').textContent = katObj ? katObj.label : '–';
+    posten.querySelector('.mpick-trigger-sub').textContent = subObj ? subObj.label : '–';
+  }
+}
+
+function mpickSelectSub(subId) {
+  const { sid, idx, mi } = _mpick;
+  const s = sessions.find(x => String(x.id) === String(sid));
+  if (!s || !s.personen[idx] || !s.personen[idx].moebel[mi]) return;
+  s.personen[idx].moebel[mi].sub = subId;
+  _dirtyIds.add(String(sid)); scheduleSave();
+
+  // Panel aktualisieren
+  const m = s.personen[idx].moebel[mi];
+  mpickRenderSub(m);
+
+  // Trigger-Text aktualisieren
+  const posten = document.getElementById(`mp-${sid}-${idx}-${mi}`);
+  if (posten) {
+    const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
+    const subObj = katObj ? katObj.subs.find(ss => ss.id === subId) : null;
+    posten.querySelector('.mpick-trigger-sub').textContent = subObj ? subObj.label : '–';
+  }
+  mpickClose();
+}
+
+function mpickClose() {
+  const panel = document.getElementById('mpickPanel');
+  panel.classList.remove('open');
+  _mpick = { sid:null, idx:null, mi:null, focusCol:null };
+}
+
+function buildRow(sid, p, idx) {
   const cls    = {'Offen':'status-offen','Reservierung':'status-reservierung','Abgeschlossen':'status-abgeschlossen','Abholung':'status-abholung'}[p.status]||'status-offen';
   const isAbh  = p.status === 'Abholung';
   const abhISO = p.abh_datum ? deToISO(p.abh_datum) : '';
   const abhVis = isAbh ? '' : 'style="visibility:hidden;pointer-events:none"';
-  const trClass = isArchiv ? ' class="archiv-row"' : '';
-  return `<tr data-idx="${idx}"${trClass}>
+  return `<tr data-idx="${idx}">
     <td class="td-name"><div style="display:flex;align-items:center;gap:4px"><input type="text" value="${esc(p.name)}" placeholder="Name, Vorname" style="font-weight:500;flex:1;min-width:0" oninput="up(${sid},${idx},'name',this.value)" /><button class="transfer-btn" onclick="openTransfer(${sid},${idx})" title="Zu Rohat verschieben">→ R</button></div></td>
     <td class="td-status status-cell">
       <span class="status-badge ${cls}" id="sbadge-${sid}-${idx}">${dot(p.status)} ${esc(p.status)}</span>
@@ -769,45 +873,64 @@ function up(sid, idx, field, val) {
   if (s && s.personen[idx]) { s.personen[idx][field] = val; _dirtyIds.add(String(sid)); scheduleSave(); }
 }
 
-/* ── Status-Änderung mit Bestandsabzug ── */
+/* ── Status-Änderung mit Bestandsabzug + Firebase-Archiv ── */
 function statusChanged(sid, idx, newStatus) {
   const s = sessions.find(x => String(x.id) === String(sid));
   if (!s || !s.personen[idx]) return;
   const p = s.personen[idx];
-  const oldStatus = p.status;
 
-  // Abzug: wenn neu = Abgeschlossen UND noch nicht abgezogen
-  if (newStatus === 'Abgeschlossen' && !p._moebelAbgezogen) {
+  // Abgeschlossen → Bestand abziehen + ins Firebase-Archiv schreiben
+  if (newStatus === 'Abgeschlossen') {
     const moebel = Array.isArray(p.moebel) ? p.moebel : [];
+
+    // Bestandsabzug: für jedes Möbelstück genau m.qty abziehen
     if (moebel.length > 0 && isConfigured && db) {
       moebel.forEach(m => {
         if (m.kat && m.sub && m.qty > 0) {
-          firebase.database()
-            .ref(`moebel/${m.kat}/${m.sub}/anzahl`)
-            .transaction(cur => Math.max(0, (cur || 0) - m.qty));
+          db.ref(`moebel/${m.kat}/${m.sub}/anzahl`).once('value').then(snap => {
+            const cur = snap.val() || 0;
+            db.ref(`moebel/${m.kat}/${m.sub}/anzahl`).set(Math.max(0, cur - m.qty));
+          });
         }
       });
-      p._moebelAbgezogen = true;
-      if (moebel.length > 0) toast(`${p.name || 'Person'}: ${moebel.reduce((a,m)=>a+m.qty,0)} Möbel aus Bestand abgezogen ✓`);
     }
-  }
-  // Rückgabe: wenn vorher Abgeschlossen und jetzt geändert
-  if (oldStatus === 'Abgeschlossen' && newStatus !== 'Abgeschlossen' && p._moebelAbgezogen) {
-    const moebel = Array.isArray(p.moebel) ? p.moebel : [];
-    if (moebel.length > 0 && isConfigured && db) {
-      moebel.forEach(m => {
-        if (m.kat && m.sub && m.qty > 0) {
-          firebase.database()
-            .ref(`moebel/${m.kat}/${m.sub}/anzahl`)
-            .transaction(cur => (cur || 0) + m.qty);
-        }
-      });
-      p._moebelAbgezogen = false;
-    }
+
+    // Archiv-Eintrag in Firebase schreiben (gleich wie Assil)
+    if (!db) { toast('Keine Firebase-Verbindung'); return; }
+    const archivEntry = {
+      id:           Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      archiviertAm: new Date().toLocaleDateString('de-DE'),
+      owner:        OWNER,
+      terminDatum:  s.datum,
+      terminUhrzeit:s.uhrzeit,
+      name:         p.name || '–',
+      fe:           p.fe   || 'Nein',
+      fw:           p.fw   || 'Nein',
+      moebel:       moebel,
+      bem:          p.bem      || '',
+      abh_datum:    p.abh_datum || '',
+      abh_zeit:     p.abh_zeit  || ''
+    };
+    db.ref('archiv/' + archivEntry.id).set(archivEntry)
+      .then(() => {
+        s.personen.splice(idx, 1);
+        if (!s.personen.length)
+          s.personen.push({ name:'', status:'Offen', fe:'Nein', fw:'Nein', moebel:[], bem:'', abh_datum:'', abh_zeit:'' });
+        _dirtyIds.add(String(sid));
+        scheduleSave();
+        renderCard(sid);
+        renderDayOverview();
+        if (moebel.length > 0)
+          toast(`${p.name||'Person'} → Archiv ✓ · ${moebel.reduce((a,m)=>a+m.qty,0)} Möbel abgezogen`);
+        else
+          toast(`${p.name||'Person'} → Archiv ✓`);
+      })
+      .catch(err => toast('Fehler: ' + err.message));
+    return; // renderCard/renderDayOverview wird im .then() aufgerufen
   }
 
+  // Alle anderen Status-Änderungen (Offen, Reservierung, Abholung) normal speichern
   up(sid, idx, 'status', newStatus);
-  if (p._moebelAbgezogen !== undefined) up(sid, idx, '_moebelAbgezogen', p._moebelAbgezogen);
   renderCard(sid);
   renderDayOverview();
 }
@@ -874,22 +997,12 @@ function updateSession(id, field, val) {
 function renderCard(sid) {
   const s = sessions.find(x => String(x.id) === String(sid)); if (!s) return;
   const tbody = document.getElementById('tbody-' + sid);
-  const tbodyArchiv = document.getElementById('tbody-archiv-' + sid);
   if (tbody) {
-    tbody.innerHTML = s.personen
-      .map((p,i) => p.status === 'Abgeschlossen' ? '' : buildRow(sid,p,i))
-      .join('');
+    tbody.innerHTML = s.personen.map((p,i) => buildRow(sid,p,i)).join('');
   }
-  if (tbodyArchiv) {
-    const archivPersonen = s.personen.filter(p => p.status === 'Abgeschlossen');
-    if (archivPersonen.length) {
-      // Archiv-Header aufbewahren (offen/zu) wenn schon vorhanden
-      const wasOpen = tbodyArchiv.querySelector('.archiv-hdr-inner.open') !== null;
-      tbodyArchiv.innerHTML = buildArchivBody(sid, s, wasOpen);
-    } else {
-      tbodyArchiv.innerHTML = '';
-    }
-  }
+  const cnt = s.personen.filter(p => p.name.trim()).length;
+  const badge = document.getElementById('cnt-' + sid);
+  if (badge) badge.textContent = cnt + ' Person' + (cnt!==1?'en':'');
 }
 function addPerson(sid) {
   const s = sessions.find(x => x.id === sid); if (!s) return;
@@ -985,9 +1098,13 @@ document.addEventListener('click', e => {
   if (!e.target.closest('.jn-cell')) {
     document.querySelectorAll('.jn-dropdown.open').forEach(d => d.classList.remove('open'));
   }
+  if (!e.target.closest('.mpick-panel') && !e.target.closest('.mpick-trigger')) {
+    mpickClose();
+  }
 });
 window.addEventListener('scroll', () => {
   document.querySelectorAll('.jn-dropdown.open').forEach(d => d.classList.remove('open'));
+  mpickClose();
 }, true);
 
 document.getElementById('newUhrzeit').addEventListener('keydown', e => { if (e.key==='Enter') addSession(); });

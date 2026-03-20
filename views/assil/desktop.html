@@ -1222,14 +1222,19 @@ function renderArchiv() {
   body.innerHTML = Object.values(grouped).map(g => {
     const ownerColor = g.owner === 'louis' ? 'var(--louis)' : 'var(--rohat)';
     const ownerLabel = g.owner === 'louis' ? 'Louis' : 'Rohat';
-    const rows = g.items.map(e => `<tr>
+    const rows = g.items.map(e => {
+      const moebelText = e.moebel && e.moebel.length > 0
+        ? e.moebel.map(m => `${m.qty}× ${m.sub || m.kat}`).join(', ')
+        : `${e.tische||0} Tisch · ${e.stuehle||0} Stuhl`;
+      return `<tr>
       <td class="archiv-name">${esc(e.name)}</td>
       <td>${esc(e.fe)}</td>
       <td>${esc(e.fw)}</td>
-      <td>${e.tische||0} · ${e.stuehle||0}</td>
+      <td>${moebelText}</td>
       <td>${esc(e.abh_datum)} ${e.abh_zeit ? fmtTime(e.abh_zeit) : ''}</td>
       <td>${esc(e.bem||'–')}</td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
     return `<div class="archiv-card">
       <div class="archiv-card-header">
         <div class="archiv-card-meta">
@@ -1242,7 +1247,7 @@ function renderArchiv() {
       <table class="archiv-table">
         <thead><tr>
           <th>Name</th><th>Form. erh.</th><th>Form. weit.</th>
-          <th>Tische · Stühle</th><th>Abholdatum</th><th>Bemerkung</th>
+          <th>Möbel</th><th>Abholdatum</th><th>Bemerkung</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
