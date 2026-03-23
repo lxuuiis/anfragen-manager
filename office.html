@@ -3,308 +3,655 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agent Office</title>
+<title>🏢 Agent Office</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --sky:    #a8c8e8;
-  --wall-o: #f5f0e0;
-  --wall-b: #e8f0e0;
-  --floor:  #c49a6c;
-  --ol:     #0d0d0d;
-}
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: var(--sky);
-  background-image: radial-gradient(ellipse 60% 40% at 30% 25%, #cde4f5 0%, transparent 70%);
-  font-family: 'Arial Black', 'Impact', sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 16px 32px;
-  gap: 14px;
-}
-
-/* ── TITLE ──────────────────────────────────────────── */
-h1 {
-  font-size: 22px;
-  color: var(--ol);
-  text-shadow: 3px 3px 0 rgba(0,0,0,0.12);
-  letter-spacing: 1px;
-  font-weight: 900;
-}
-
-/* ── BUILDING ───────────────────────────────────────── */
-.building {
-  width: 100%;
-  max-width: 880px;
-  height: 320px;
-  display: flex;
-  border: 4px solid var(--ol);
-  border-radius: 3px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 6px 6px 0 rgba(0,0,0,0.25);
-}
-
-/* wall grid texture */
-.room::before {
-  content: '';
-  position: absolute;
-  inset: 0;
+  font-family: Arial, sans-serif;
+  background: #a8c8e8;
   background-image:
-    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
-  background-size: 28px 28px;
-  pointer-events: none;
-  z-index: 0;
+    radial-gradient(ellipse 400px 120px at 20% 15%, rgba(255,255,255,0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 90px at 65% 8%, rgba(255,255,255,0.45) 0%, transparent 70%),
+    radial-gradient(ellipse 250px 80px at 85% 20%, rgba(255,255,255,0.35) 0%, transparent 70%);
+  min-height: 100vh;
+  padding: 24px 16px 48px;
 }
 
-/* floor strip */
-.room::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 32px;
-  background: var(--floor);
-  border-top: 3px solid var(--ol);
-  z-index: 0;
-}
-
-.room-label {
-  position: absolute;
-  top: 10px; left: 14px;
-  font-size: 11px;
-  font-weight: 900;
+h1 {
+  font-family: 'Arial Black', 'Impact', sans-serif;
+  font-size: 2.2rem;
+  text-align: center;
+  color: #1a1a2e;
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
   letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(0,0,0,0.2);
-  z-index: 1;
+  margin-bottom: 20px;
 }
 
-/* ── BÜRO (left) ────────────────────────────────────── */
-.work-room {
-  flex: 2.2;
-  background: var(--wall-o);
-  border-right: 3px solid var(--ol);
+/* ============================================================
+   SCENE WRAPPER
+   ============================================================ */
+.scene-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.scene {
   position: relative;
-}
-
-/* Door in divider wall */
-.door {
-  position: absolute;
-  bottom: 32px; right: -4px;
-  width: 44px; height: 68px;
-  background: #d4a96a;
-  border: 3px solid var(--ol);
-  border-bottom: none;
-  border-right: none;
-  z-index: 3;
-}
-.door-knob {
-  position: absolute;
-  top: 28px; right: 7px;
-  width: 9px; height: 9px;
-  border-radius: 50%;
-  background: #f0c030;
-  border: 2px solid var(--ol);
-}
-
-/* Workstations */
-.workstations {
-  position: absolute;
-  bottom: 32px; left: 0; right: 0;
-  display: flex;
-  justify-content: space-evenly;
-  align-items: flex-end;
-  padding: 0 18px;
-  z-index: 1;
-}
-
-.ws {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-
-/* Monitor */
-.monitor {
-  width: 54px; height: 40px;
-  background: #111;
-  border: 3px solid var(--ol);
-  border-radius: 3px;
+  width: 900px;
+  height: 500px;
   overflow: hidden;
-  position: relative;
-  transition: box-shadow 0.4s;
-}
-.ws.working .monitor {
-  box-shadow: 0 0 14px rgba(0,200,100,0.7);
-}
-.monitor-stand {
-  width: 12px; height: 6px;
-  background: #555;
-  border: 2px solid var(--ol);
-  margin: 0 auto;
-}
-.monitor-base {
-  width: 28px; height: 4px;
-  background: #444;
-  border: 2px solid var(--ol);
-  border-radius: 1px;
-  margin: 0 auto;
-}
-.code-scroll {
-  position: absolute;
-  top: 5px; left: 5px; right: 5px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  animation: scroll-up 5s linear infinite paused;
-}
-.ws.working .code-scroll { animation-play-state: running; }
-@keyframes scroll-up { to { transform: translateY(-50%); } }
-.cl {
-  height: 2.5px;
-  border-radius: 1px;
-  background: #22c55e;
-  opacity: 0.15;
-  transition: opacity 0.4s;
-}
-.ws.working .cl { opacity: 0.85; }
-
-.desk {
-  width: 70px; height: 12px;
-  background: #a0642a;
-  border: 3px solid var(--ol);
-  border-radius: 2px;
-  box-shadow: 0 5px 0 #6a3a10, 0 5px 0 3px var(--ol);
-  margin-top: 2px;
+  border: 3.5px solid #000;
+  box-shadow: 6px 6px 0 #000, 0 0 0 1px #333;
+  border-radius: 4px;
 }
 
-.ws-name {
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: rgba(0,0,0,0.3);
-  margin-top: 38px;
-}
-
-/* ── PAUSENRAUM (right) ─────────────────────────────── */
+/* ============================================================
+   BREAK ROOM (top portion)
+   ============================================================ */
 .break-room {
-  flex: 1;
-  background: var(--wall-b);
-  position: relative;
-}
-
-.break-plant {
   position: absolute;
-  bottom: 32px; left: 10px;
-  font-size: 30px;
+  top: 0; left: 0; right: 0;
+  height: 135px;
+  background: #d4e8c4;
+  border-bottom: 3px solid #000;
   z-index: 1;
-  filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.15));
 }
 
-/* Window */
+/* ceiling strip */
+.ceiling {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 16px;
+  background: #e8f4e0;
+  border-bottom: 2px solid #b0caa0;
+}
+
+/* ceiling lights */
+.ceiling-light {
+  position: absolute;
+  top: 3px;
+  width: 48px; height: 10px;
+  background: #fff9c4;
+  border: 2px solid #ccc080;
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(255,240,100,0.6), 0 0 20px rgba(255,240,100,0.3);
+}
+.ceiling-light:nth-child(1) { left: 180px; }
+.ceiling-light:nth-child(2) { left: 430px; }
+.ceiling-light:nth-child(3) { left: 680px; }
+
+/* window */
 .window {
   position: absolute;
-  top: 22px; right: 18px;
-  width: 52px; height: 52px;
-  background: linear-gradient(140deg, #87ceeb, #b8e4ff);
-  border: 3px solid var(--ol);
-  z-index: 1;
+  top: 24px;
+  right: 30px;
+  width: 68px;
+  height: 62px;
+  background: linear-gradient(180deg, #b8d8f8 0%, #e4f0ff 100%);
+  border: 3px solid #000;
+  border-radius: 2px;
+  overflow: hidden;
 }
 .window::before {
   content: '';
   position: absolute;
-  top: 0; left: 50%; width: 3px; height: 100%;
-  background: var(--ol);
-  transform: translateX(-50%);
+  top: 50%; left: 0; right: 0;
+  height: 2px;
+  background: #000;
 }
 .window::after {
   content: '';
   position: absolute;
-  top: 50%; left: 0; height: 3px; width: 100%;
-  background: var(--ol);
-  transform: translateY(-50%);
+  left: 50%; top: 0; bottom: 0;
+  width: 2px;
+  background: #000;
+}
+.window-sun {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 14px; height: 14px;
+  background: #ffd700;
+  border: 2px solid #b8860b;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255,215,0,0.7);
 }
 
-/* Couch */
-.couch-wrap {
+/* plant */
+.plant {
   position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1;
+  top: 28px;
+  left: 28px;
+}
+.plant-pot {
+  width: 20px; height: 18px;
+  background: #c06040;
+  border: 2.5px solid #000;
+  border-radius: 0 0 5px 5px;
+  position: relative;
+  margin: 0 auto;
+}
+.plant-pot::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: -3px; right: -3px;
+  height: 5px;
+  background: #a04828;
+  border: 2px solid #000;
+  border-radius: 2px;
+}
+.plant-leaves {
+  font-size: 28px;
+  line-height: 1;
+  text-align: center;
+  position: relative;
+  top: 0;
+  filter: drop-shadow(1px 2px 0 rgba(0,0,0,0.4));
+}
+
+/* couch */
+.couch {
+  position: absolute;
+  top: 36px;
+  left: 180px;
+  width: 430px;
 }
 .couch-back {
-  width: 118px; height: 26px;
-  background: #8B4FC8;
-  border: 3px solid var(--ol);
-  border-bottom: none;
+  width: 430px; height: 28px;
+  background: #7c4faf;
+  border: 2.5px solid #000;
   border-radius: 6px 6px 0 0;
+  position: relative;
+}
+.couch-back::before {
+  content: '';
+  position: absolute;
+  top: 6px; left: 14px; right: 14px;
+  height: 6px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 3px;
 }
 .couch-seat {
-  width: 118px; height: 18px;
-  background: #7a3eb8;
-  border: 3px solid var(--ol);
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 5px 0 #4a1e80, 0 5px 0 3px var(--ol);
+  width: 430px; height: 36px;
+  background: #9660cc;
+  border: 2.5px solid #000;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 10px;
 }
-.couch-seat::after {
+.couch-cushion {
+  width: 118px; height: 24px;
+  background: #a870d8;
+  border: 2px solid #000;
+  border-radius: 4px;
+}
+.couch-arm {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 20px;
+  background: #7c4faf;
+  border: 2.5px solid #000;
+}
+.couch-arm.l { left: -20px; border-radius: 6px 0 0 8px; }
+.couch-arm.r { right: -20px; border-radius: 0 6px 8px 0; }
+
+/* coffee table */
+.coffee-table {
+  position: absolute;
+  top: 90px;
+  left: 340px;
+  width: 90px;
+}
+.ct-top {
+  width: 90px; height: 22px;
+  background: #8b6914;
+  border: 2.5px solid #000;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+}
+.ct-legs {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+.ct-leg {
+  width: 6px; height: 10px;
+  background: #6b4f10;
+  border: 1.5px solid #000;
+  border-top: none;
+}
+
+/* ============================================================
+   DIVIDER WALL
+   ============================================================ */
+.wall-divider {
+  position: absolute;
+  top: 135px;
+  left: 0; right: 0;
+  z-index: 5;
+}
+.wall-top-face {
+  height: 12px;
+  background: #b8c8cc;
+  border-top: 2.5px solid #000;
+  border-bottom: 1px solid #000;
+}
+.wall-front-face {
+  height: 48px;
+  background: #9aafb4;
+  border-bottom: 2.5px solid #000;
+  position: relative;
+}
+/* door opening */
+.door-gap {
+  position: absolute;
+  top: -12px;
+  left: 440px;
+  width: 64px;
+  height: 60px;
+  background: transparent;
+  z-index: 6;
+}
+.door-frame-left {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  background: #6a7f84;
+  border-left: 2px solid #000;
+}
+.door-frame-right {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 5px;
+  background: #6a7f84;
+  border-right: 2px solid #000;
+}
+.door-frame-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: #6a7f84;
+  border-top: 2px solid #000;
+}
+/* mask out wall behind door */
+.door-mask-top {
+  position: absolute;
+  top: 0;
+  left: 445px;
+  width: 54px;
+  height: 12px;
+  background: #d4e8c4;
+  z-index: 7;
+}
+.door-mask-bottom {
+  position: absolute;
+  top: 12px;
+  left: 445px;
+  width: 54px;
+  height: 48px;
+  background: #f5eed8;
+  z-index: 7;
+}
+
+/* ============================================================
+   OFFICE FLOOR / WORK AREA
+   ============================================================ */
+.office-floor {
+  position: absolute;
+  top: 195px; left: 0; right: 0; bottom: 0;
+  background-color: #c49a6c;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 59px,
+      rgba(0,0,0,0.08) 59px,
+      rgba(0,0,0,0.08) 61px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 38px,
+      rgba(0,0,0,0.06) 38px,
+      rgba(0,0,0,0.06) 40px
+    );
+  z-index: 0;
+}
+
+/* office ceiling lights (row above wall) */
+.office-light {
+  position: absolute;
+  top: 148px;
+  width: 56px; height: 10px;
+  background: #fff9c4;
+  border: 2px solid #ccc080;
+  border-radius: 3px;
+  box-shadow: 0 0 14px rgba(255,240,100,0.7), 0 0 28px rgba(255,240,100,0.3);
+  z-index: 6;
+}
+.office-light:nth-of-type(1) { left: 100px; }
+.office-light:nth-of-type(2) { left: 390px; }
+.office-light:nth-of-type(3) { left: 680px; }
+
+/* whiteboard */
+.whiteboard {
+  position: absolute;
+  top: 200px;
+  left: 10px;
+  width: 70px;
+  height: 50px;
+  background: #f8f8f0;
+  border: 3px solid #000;
+  border-radius: 2px;
+  overflow: hidden;
+  z-index: 2;
+}
+.whiteboard::before {
   content: '';
-  display: block;
-  margin: 4px auto 0;
-  width: 80%;
-  height: 6px;
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 8px;
+  background: #c0c0b0;
+  border-top: 2px solid #000;
+}
+.wb-line {
+  height: 2px;
+  background: #3a80cc;
+  margin: 7px 5px 0;
+  border-radius: 1px;
+  opacity: 0.7;
+}
+.wb-line:nth-child(2) { width: 50%; background: #cc3a3a; }
+.wb-line:nth-child(3) { width: 80%; }
+.wb-line:nth-child(4) { width: 60%; background: #3acc60; }
+
+/* filing cabinet on right side */
+.filing-cabinet {
+  position: absolute;
+  top: 205px;
+  right: 12px;
+  width: 38px;
+  z-index: 2;
+}
+.fc-top {
+  width: 38px; height: 8px;
+  background: #8090a0;
+  border: 2.5px solid #000;
+  border-radius: 2px 2px 0 0;
+}
+.fc-body {
+  width: 38px; height: 70px;
+  background: #90a0b0;
+  border: 2.5px solid #000;
+  border-top: none;
+  box-shadow: 4px 6px 0 #5a6a7a, 4px 6px 0 2px #000;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 4px 0;
+}
+.fc-drawer {
+  width: 28px; height: 14px;
+  background: #a0b0c0;
+  border: 2px solid #000;
+  margin: 0 auto;
+  border-radius: 1px;
+  position: relative;
+}
+.fc-drawer::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 8px; height: 3px;
+  background: #7a8a9a;
+  border: 1px solid #000;
+  border-radius: 1px;
+}
+
+/* ============================================================
+   WORKSTATIONS
+   ============================================================ */
+.workstation {
+  position: absolute;
+  z-index: 10;
+}
+
+/* partition wall */
+.pw-wrap { position: absolute; left: 0; top: 0; }
+.pw-top {
+  width: 200px; height: 10px;
+  background: #9aafb4;
+  border: 2.5px solid #000;
+}
+.pw-face {
+  width: 200px; height: 55px;
+  background: #7a9fa8;
+  border: 2.5px solid #000;
+  border-top: none;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 6px;
+  justify-content: center;
+  box-shadow: 0 8px 0 #4a6f78, 0 8px 0 2px #000;
+}
+.nameplate {
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 900;
+  color: #e8f4f8;
+  background: #4a6f78;
+  border: 1.5px solid #2a4f58;
+  border-radius: 2px;
+  padding: 1px 6px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+/* small post-it notes on partition */
+.pw-sticky {
+  position: absolute;
+  top: 8px; left: 10px;
+  width: 16px; height: 16px;
+  border: 1.5px solid #000;
+  border-radius: 1px;
+}
+.pw-sticky:nth-child(2) { background: #ffe066; left: 10px; }
+.pw-sticky:nth-child(3) { background: #ff9980; left: 30px; top: 6px; }
+.pw-sticky:nth-child(4) { background: #80ccff; left: 50px; top: 10px; }
+
+/* desk */
+.desk-wrap { position: absolute; left: 15px; top: 65px; }
+.desk-top {
+  width: 170px; height: 55px;
+  background: #c08840;
+  border: 2.5px solid #000;
+  position: relative;
+}
+.desk-front {
+  width: 170px; height: 11px;
+  background: #905820;
+  border: 2.5px solid #000;
+  border-top: none;
+  box-shadow: 0 4px 0 #000;
+}
+
+/* monitor */
+.monitor {
+  position: absolute;
+  top: 5px;
+  left: 60px;
+  width: 52px;
+}
+.monitor-screen {
+  width: 52px; height: 38px;
+  background: #0a1a0e;
+  border: 2.5px solid #000;
+  border-radius: 3px 3px 0 0;
+  overflow: hidden;
+  position: relative;
+  transition: box-shadow 0.4s;
+}
+.workstation.working .monitor-screen {
+  box-shadow: 0 0 14px rgba(0,220,100,0.75), 0 0 6px rgba(0,200,80,0.5);
+}
+.code-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 3px;
+  animation: scroll-up 5s linear infinite paused;
+}
+.workstation.working .code-scroll {
+  animation-play-state: running;
+}
+@keyframes scroll-up {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+.cl {
+  height: 2px;
+  background: #00cc55;
+  border-radius: 1px;
+  opacity: 0.85;
+}
+.cl:nth-child(odd)  { width: 80%; }
+.cl:nth-child(3n)   { width: 55%; opacity: 0.5; }
+.cl:nth-child(4n)   { width: 90%; }
+.cl:nth-child(5n)   { width: 40%; opacity: 0.6; }
+
+.monitor-stand {
+  width: 12px; height: 6px;
+  background: #555;
+  border: 2px solid #000;
+  margin: 0 auto;
+  border-top: none;
+}
+.monitor-base {
+  width: 24px; height: 4px;
+  background: #444;
+  border: 2px solid #000;
+  border-top: none;
+  margin: 0 auto;
+  border-radius: 0 0 2px 2px;
+}
+
+/* keyboard */
+.keyboard {
+  position: absolute;
+  bottom: 8px;
+  left: 22px;
+  width: 40px; height: 8px;
+  background: #c8c8c0;
+  border: 2px solid #000;
+  border-radius: 2px;
+}
+.keyboard::before {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px; right: 2px;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #888 0px, #888 2px, transparent 2px, transparent 4px);
+  border-radius: 1px;
+}
+
+/* coffee mug on desk */
+.desk-mug {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* mouse */
+.desk-mouse {
+  position: absolute;
+  bottom: 8px;
+  left: 68px;
+  width: 8px; height: 12px;
+  background: #d0d0c8;
+  border: 1.5px solid #000;
+  border-radius: 4px 4px 3px 3px;
+}
+.desk-mouse::before {
+  content: '';
+  position: absolute;
+  top: 3px; left: 50%;
+  transform: translateX(-50%);
+  width: 1px; height: 4px;
+  background: #000;
+}
+
+/* chair */
+.chair-wrap { position: absolute; left: 22px; top: 135px; }
+.chair-back {
+  width: 30px; height: 12px;
+  background: #3a3a5a;
+  border: 2.5px solid #000;
+  border-radius: 4px 4px 0 0;
+  margin: 0 auto 0 3px;
+}
+.chair-seat {
+  width: 36px; height: 36px;
+  background: #3a3a5a;
+  border: 2.5px solid #000;
+  border-radius: 6px;
+  box-shadow:
+    4px 4px 0 0 #1a1a2a, 4px 4px 0 2px #000,
+    -4px 4px 0 0 #1a1a2a, -4px 4px 0 2px #000;
+  position: relative;
+}
+.chair-seat::after {
+  content: '';
+  position: absolute;
+  top: 6px; left: 5px; right: 5px;
+  height: 8px;
   background: rgba(255,255,255,0.1);
   border-radius: 3px;
 }
 
-/* Coffee table */
-.coffee-tbl {
-  position: absolute;
-  bottom: 32px; right: 12px;
-  z-index: 1;
-}
-.ct-cup { font-size: 16px; text-align: center; }
-.ct-top {
-  width: 32px; height: 8px;
-  background: #a0642a;
-  border: 2.5px solid var(--ol);
-  border-radius: 2px;
-  box-shadow: 0 4px 0 #6a3a10, 0 4px 0 2.5px var(--ol);
-}
-
-/* ── CHARACTER LAYER ────────────────────────────────── */
-/* Sits on top of the entire building, covers both rooms */
+/* ============================================================
+   SOUTH PARK CHARACTERS
+   ============================================================ */
 .chars-layer {
   position: absolute;
   inset: 0;
+  z-index: 30;
   pointer-events: none;
-  z-index: 20;
 }
 
-/* Individual South Park character */
 .sp {
   position: absolute;
-  bottom: 32px;    /* stand on floor */
   width: 32px;
-  /* visual height ~58px incl hat */
-  transition: left 1s cubic-bezier(0.45, 0, 0.25, 1);
+  transition:
+    left 1.1s cubic-bezier(0.45,0,0.25,1),
+    top  1.1s cubic-bezier(0.45,0,0.25,1),
+    transform 0.4s ease;
 }
 
-/* Hat */
+/* hat */
 .sp .hat {
   position: absolute;
   top: -14px; left: 2px;
-  width: 28px; height: 18px;
+  width: 28px; height: 16px;
   background: var(--jc);
-  border: 2.5px solid var(--ol);
-  border-radius: 6px 6px 0 0;
+  border: 2.5px solid #000;
+  border-radius: 5px 5px 0 0;
 }
 .sp .hat::after {
   content: '';
@@ -312,106 +659,106 @@ h1 {
   bottom: -4px; left: -3px; right: -3px;
   height: 6px;
   background: var(--jc);
-  border: 2.5px solid var(--ol);
+  border: 2.5px solid #000;
   border-top: none;
-  border-radius: 0 0 2px 2px;
 }
 
-/* Head */
+/* head */
 .sp .head {
   position: absolute;
-  top: 0; left: 1px;
+  top: 2px; left: 1px;
   width: 30px; height: 28px;
   background: #FDBCB4;
-  border: 2.5px solid var(--ol);
+  border: 2.5px solid #000;
   border-radius: 50%;
 }
-/* Eyes */
+/* eyes */
 .sp .head::before {
   content: '';
   position: absolute;
-  top: 10px; left: 7px;
+  top: 9px; left: 6px;
   width: 5px; height: 5px;
   border-radius: 50%;
-  background: var(--ol);
-  box-shadow: 9px 0 0 var(--ol);
+  background: #000;
+  box-shadow: 10px 0 0 #000;
 }
-/* Mouth */
+/* mouth */
 .sp .head::after {
   content: '';
   position: absolute;
-  bottom: 6px; left: 9px;
+  bottom: 5px; left: 9px;
   width: 12px; height: 4px;
   border-radius: 0 0 4px 4px;
-  border: 2.5px solid var(--ol);
+  border: 2.5px solid #000;
   border-top: none;
 }
 
-/* Body (puffy jacket) */
+/* body */
 .sp .body {
   position: absolute;
-  top: 24px; left: 0;
-  width: 32px; height: 24px;
+  top: 26px; left: 0;
+  width: 32px; height: 22px;
   background: var(--jc);
-  border: 2.5px solid var(--ol);
-  border-radius: 45% 45% 20% 20%;
+  border: 2.5px solid #000;
+  border-radius: 40% 40% 20% 20%;
 }
 
-/* Arms */
+/* arms */
 .sp .arm {
   position: absolute;
-  top: 27px;
-  width: 7px; height: 15px;
+  top: 28px;
+  width: 7px; height: 14px;
   background: var(--jc);
-  border: 2.5px solid var(--ol);
+  border: 2.5px solid #000;
   border-radius: 3px;
   transform-origin: top center;
 }
 .sp .arm.l { left: -5px;  transform: rotate(-12deg); }
 .sp .arm.r { right: -5px; transform: rotate(12deg); }
 
-/* Legs */
+/* legs */
 .sp .leg {
   position: absolute;
-  bottom: 0;
-  width: 12px; height: 16px;
+  top: 46px;
+  width: 12px; height: 15px;
   background: #2a2848;
-  border: 2.5px solid var(--ol);
-  border-radius: 0 0 5px 5px;
+  border: 2.5px solid #000;
+  border-radius: 0 0 4px 4px;
   transform-origin: top center;
 }
 .sp .leg.l { left: 3px; }
 .sp .leg.r { right: 3px; }
 
-/* ── Speech Bubble ── */
+/* ============================================================
+   SPEECH BUBBLE
+   ============================================================ */
 .sp-bubble {
   position: absolute;
-  bottom: calc(100% + 18px);
+  bottom: calc(100% + 20px);
   left: 50%;
   transform: translateX(-50%);
   background: #fff;
-  border: 2.5px solid var(--ol);
+  border: 2.5px solid #000;
   border-radius: 8px;
   padding: 3px 8px;
   font-size: 9px;
-  font-family: 'Arial', sans-serif;
+  font-family: Arial, sans-serif;
   font-weight: bold;
   white-space: nowrap;
   max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #333;
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.15);
-  z-index: 30;
-  transition: opacity 0.2s;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  pointer-events: none;
+  z-index: 40;
 }
 .sp-bubble::after {
   content: '';
   position: absolute;
-  bottom: -7px; left: 50%;
+  bottom: -8px; left: 50%;
   transform: translateX(-50%);
   border: 4px solid transparent;
-  border-top-color: var(--ol);
+  border-top-color: #000;
 }
 .sp-bubble::before {
   content: '';
@@ -423,328 +770,482 @@ h1 {
   z-index: 1;
 }
 
-/* ═══ ANIMATIONS ═══ */
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
 
-/* Typing */
-@keyframes type-l { 0%,100% { transform: rotate(-32deg); } 50% { transform: rotate(18deg); } }
-@keyframes type-r { 0%,100% { transform: rotate(32deg);  } 50% { transform: rotate(-18deg); } }
-@keyframes nod    { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+/* walking */
+@keyframes wlk-l  { 0%,100%{ transform: rotate(-28deg); } 50%{ transform: rotate(22deg); } }
+@keyframes wlk-r  { 0%,100%{ transform: rotate(22deg);  } 50%{ transform: rotate(-28deg); } }
+@keyframes wlk-al { 0%,100%{ transform: rotate(22deg);  } 50%{ transform: rotate(-18deg); } }
+@keyframes wlk-ar { 0%,100%{ transform: rotate(-22deg); } 50%{ transform: rotate(18deg); } }
+@keyframes walk-bob { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-3px); } }
 
-.sp.typing .arm.l { animation: type-l 0.2s ease-in-out infinite; }
-.sp.typing .arm.r { animation: type-r 0.2s ease-in-out infinite; }
-.sp.typing .head  { animation: nod   0.4s ease-in-out infinite; }
+.sp.walking .leg.l { animation: wlk-l  0.25s ease-in-out infinite; }
+.sp.walking .leg.r { animation: wlk-r  0.25s ease-in-out infinite; }
+.sp.walking .arm.l { animation: wlk-al 0.25s ease-in-out infinite; }
+.sp.walking .arm.r { animation: wlk-ar 0.25s ease-in-out infinite; }
+.sp.walking .body  { animation: walk-bob 0.25s ease-in-out infinite; }
+.sp.walking { transform: scaleX(var(--fx, 1)) !important; }
 
-/* Walking */
-@keyframes wlk-l { 0%,100% { transform: rotate(-28deg); } 50% { transform: rotate(22deg); } }
-@keyframes wlk-r { 0%,100% { transform: rotate(22deg);  } 50% { transform: rotate(-28deg); } }
-@keyframes wlk-al { 0%,100% { transform: rotate(22deg); }  50% { transform: rotate(-18deg); } }
-@keyframes wlk-ar { 0%,100% { transform: rotate(-22deg); } 50% { transform: rotate(18deg); } }
-@keyframes bob    { 0%,100% { transform: scaleX(var(--flip,1)) translateY(0); }
-                    50%      { transform: scaleX(var(--flip,1)) translateY(-3px); } }
+/* typing */
+@keyframes type-l  { 0%,100%{ transform: rotate(-32deg); } 50%{ transform: rotate(18deg); } }
+@keyframes type-r  { 0%,100%{ transform: rotate(32deg);  } 50%{ transform: rotate(-18deg); } }
+@keyframes head-nod { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-2px); } }
 
-.sp.walking .leg.l { animation: wlk-l  0.26s ease-in-out infinite; }
-.sp.walking .leg.r { animation: wlk-r  0.26s ease-in-out infinite; }
-.sp.walking .arm.l { animation: wlk-al 0.26s ease-in-out infinite; }
-.sp.walking .arm.r { animation: wlk-ar 0.26s ease-in-out infinite; }
-.sp.walking        { animation: bob    0.26s ease-in-out infinite; }
+.sp.typing .arm.l { animation: type-l  0.2s ease-in-out infinite; }
+.sp.typing .arm.r { animation: type-r  0.2s ease-in-out infinite; }
+.sp.typing .head  { animation: head-nod 0.4s ease-in-out infinite; }
 
-/* Sitting on couch */
-.sp.sitting .leg.l { transform: rotate(-38deg) translateX(-2px); transition: transform 0.3s; }
-.sp.sitting .leg.r { transform: rotate(38deg) translateX(2px);   transition: transform 0.3s; }
-.sp.sitting .arm.l { transform: rotate(25deg);  transition: transform 0.3s; }
-.sp.sitting .arm.r { transform: rotate(-25deg); transition: transform 0.3s; }
+/* sit / stand */
+@keyframes do-sit   {
+  0%   { transform: translateY(0)    scaleY(1); }
+  100% { transform: translateY(13px) scaleY(0.74); }
+}
+@keyframes do-stand {
+  0%   { transform: translateY(13px) scaleY(0.74); }
+  55%  { transform: translateY(-4px) scaleY(1.05); }
+  100% { transform: translateY(0)    scaleY(1); }
+}
 
-/* Idle breathe */
-@keyframes breathe { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(1.06); } }
-.sp:not(.typing):not(.walking):not(.sitting) .body { animation: breathe 2.5s ease-in-out infinite; }
+.sp.seated       { transform: translateY(13px) scaleY(0.74); }
+.sp.sitting-down { animation: do-sit   0.35s ease forwards; }
+.sp.standing-up  { animation: do-stand 0.45s ease forwards; }
 
-/* ── STATUS PANEL ───────────────────────────────────── */
-.status-panel {
-  width: 100%; max-width: 880px;
+/* idle breathe */
+@keyframes breathe { 0%,100%{ transform: scaleY(1); } 50%{ transform: scaleY(1.06); } }
+.sp:not(.typing):not(.walking):not(.seated):not(.sitting-down):not(.standing-up) .body {
+  animation: breathe 2.8s ease-in-out infinite;
+}
+
+/* ============================================================
+   STATUS PANEL BELOW SCENE
+   ============================================================ */
+.panel {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.agent-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
 .agent-card {
   background: #fff;
-  border: 3px solid var(--ol);
-  border-radius: 5px;
+  border: 3px solid #000;
+  border-radius: 6px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
   padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.18);
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: background 0.4s, border-color 0.4s;
 }
-.agent-card.working { background: #f0fff4; border-color: #16a34a; box-shadow: 4px 4px 0 rgba(22,163,74,0.3); }
-.agent-card.break   { background: #fffbeb; border-color: #d97706; }
+.agent-card.working { background: #eafff0; border-color: #00aa44; }
+.agent-card.break   { background: #fff8e8; border-color: #cc8800; }
+.agent-card.idle    { background: #f8f8f8; }
 
-.card-swatch {
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  background: var(--jc);
-  border: 2.5px solid var(--ol);
-  flex-shrink: 0;
+.agent-card h3 {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
 }
-.agent-card.working .card-swatch {
-  animation: pulse-swatch 1s ease-in-out infinite;
-  box-shadow: 0 0 0 3px rgba(34,197,94,0.3);
+.agent-card .status-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 2px solid #000;
+  margin-bottom: 6px;
 }
-@keyframes pulse-swatch { 0%,100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.3); } 50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } }
+.working .status-badge { background: #00cc55; color: #fff; }
+.break   .status-badge { background: #ffaa00; color: #fff; }
+.idle    .status-badge { background: #aaa;    color: #fff; }
 
-.card-info .cname { font-size: 11px; font-weight: 900; color: #1a1a1a; letter-spacing: 1px; text-transform: uppercase; }
-.card-info .ctask { font-size: 10px; font-family: Arial, sans-serif; color: #555; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-.card-info .ctask.empty { color: #aaa; font-style: italic; }
-
-/* ── CONTROLS ───────────────────────────────────────── */
-.ctrl-section {
-  width: 100%; max-width: 880px;
-  background: #fff;
-  border: 3px solid var(--ol);
-  border-radius: 5px;
-  padding: 12px 16px;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.18);
-}
-.ctrl-title { font-size: 10px; font-weight: 900; color: #333; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
-.ctrl-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
-.ctrl-row:last-child { margin-bottom: 0; }
-.ctrl-name { font-size: 10px; font-weight: 900; width: 52px; text-transform: uppercase; }
-.ctrl-btn {
-  padding: 4px 11px;
-  font-size: 9px;
-  font-family: 'Arial Black', sans-serif;
-  font-weight: 900;
-  border: 2.5px solid var(--ol);
-  border-radius: 4px;
-  background: #f0f0f0;
+.ctask {
+  font-size: 0.8rem;
   color: #333;
-  cursor: pointer;
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
-  transition: transform 0.08s, box-shadow 0.08s;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  font-style: italic;
+  margin-top: 4px;
 }
-.ctrl-btn:hover { background: #e0e0e0; }
-.ctrl-btn:active { transform: translate(2px,2px); box-shadow: none; }
-.ctrl-task {
-  flex: 1;
-  font-size: 9px;
-  font-family: Arial, sans-serif;
-  padding: 4px 8px;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-  outline: none;
+.ctask.empty { color: #999; }
+
+/* controls */
+.controls-section {
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 6px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+  padding: 16px 20px;
+}
+.controls-section h2 {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 1rem;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.ctrl-block {
+  border: 2.5px solid #000;
+  border-radius: 6px;
+  padding: 10px 12px;
   background: #fafafa;
 }
-.ctrl-task:focus { border-color: #888; }
-.ctrl-task::placeholder { color: #bbb; font-style: italic; }
-
-footer {
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(0,0,0,0.2);
+.ctrl-block h4 {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
 }
+.ctrl-input {
+  width: 100%;
+  border: 2px solid #000;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+  outline: none;
+}
+.ctrl-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+}
+.ctrl-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border: 2.5px solid #000;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 #000;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.btn:active { transform: translate(2px,2px); box-shadow: none; }
+.btn-work  { background: #00cc55; color: #fff; }
+.btn-break { background: #ffaa00; color: #fff; }
+.btn-idle  { background: #aaa;    color: #fff; }
 </style>
 </head>
 <body>
 
 <h1>🏢 AGENT OFFICE</h1>
 
-<!-- ═══════════ BUILDING ═══════════ -->
-<div class="building">
+<div class="scene-wrap">
+  <div class="scene">
 
-  <!-- BÜRO -->
-  <div class="room work-room">
-    <div class="room-label">Büro</div>
-
-    <!-- Door to break room -->
-    <div class="door"><div class="door-knob"></div></div>
-
-    <div class="workstations">
-
-      <!-- Alpha desk -->
-      <div class="ws" id="ws-alpha">
-        <div class="monitor">
-          <div class="code-scroll">
-            <div class="cl" style="width:85%"></div><div class="cl" style="width:60%"></div>
-            <div class="cl" style="width:40%"></div><div class="cl" style="width:75%"></div>
-            <div class="cl" style="width:90%"></div><div class="cl" style="width:50%"></div>
-            <div class="cl" style="width:65%"></div><div class="cl" style="width:80%"></div>
-            <div class="cl" style="width:85%"></div><div class="cl" style="width:60%"></div>
-            <div class="cl" style="width:40%"></div><div class="cl" style="width:75%"></div>
-          </div>
-        </div>
-        <div class="monitor-stand"></div><div class="monitor-base"></div>
-        <div class="desk"></div>
-        <div class="ws-name">Alpha</div>
+    <!-- ── BREAK ROOM ── -->
+    <div class="break-room">
+      <div class="ceiling">
+        <div class="ceiling-light"></div>
+        <div class="ceiling-light"></div>
+        <div class="ceiling-light"></div>
       </div>
 
-      <!-- Beta desk -->
-      <div class="ws" id="ws-beta">
-        <div class="monitor">
-          <div class="code-scroll" style="animation-delay:-1.8s">
-            <div class="cl" style="width:70%"></div><div class="cl" style="width:45%"></div>
-            <div class="cl" style="width:90%"></div><div class="cl" style="width:30%"></div>
-            <div class="cl" style="width:60%"></div><div class="cl" style="width:80%"></div>
-            <div class="cl" style="width:55%"></div><div class="cl" style="width:95%"></div>
-            <div class="cl" style="width:70%"></div><div class="cl" style="width:45%"></div>
-            <div class="cl" style="width:90%"></div><div class="cl" style="width:30%"></div>
-          </div>
-        </div>
-        <div class="monitor-stand"></div><div class="monitor-base"></div>
-        <div class="desk"></div>
-        <div class="ws-name">Beta</div>
+      <div class="window">
+        <div class="window-sun"></div>
       </div>
 
-      <!-- Gamma desk -->
-      <div class="ws" id="ws-gamma">
-        <div class="monitor">
-          <div class="code-scroll" style="animation-delay:-3.4s">
-            <div class="cl" style="width:50%"></div><div class="cl" style="width:88%"></div>
-            <div class="cl" style="width:65%"></div><div class="cl" style="width:35%"></div>
-            <div class="cl" style="width:78%"></div><div class="cl" style="width:55%"></div>
-            <div class="cl" style="width:92%"></div><div class="cl" style="width:40%"></div>
-            <div class="cl" style="width:50%"></div><div class="cl" style="width:88%"></div>
-            <div class="cl" style="width:65%"></div><div class="cl" style="width:35%"></div>
-          </div>
-        </div>
-        <div class="monitor-stand"></div><div class="monitor-base"></div>
-        <div class="desk"></div>
-        <div class="ws-name">Gamma</div>
+      <div class="plant">
+        <div class="plant-leaves">🪴</div>
+        <div class="plant-pot"></div>
       </div>
 
-    </div>
-  </div><!-- /work-room -->
+      <div class="couch">
+        <div class="couch-back"></div>
+        <div class="couch-seat">
+          <div class="couch-cushion"></div>
+          <div class="couch-cushion"></div>
+          <div class="couch-cushion"></div>
+        </div>
+        <div class="couch-arm l"></div>
+        <div class="couch-arm r"></div>
+      </div>
 
-  <!-- PAUSENRAUM -->
-  <div class="room break-room">
-    <div class="room-label">Pausenraum</div>
-    <div class="break-plant">🪴</div>
-    <div class="window"></div>
-    <div class="couch-wrap">
-      <div class="couch-back"></div>
-      <div class="couch-seat"></div>
-    </div>
-    <div class="coffee-tbl">
-      <div class="ct-cup">☕</div>
-      <div class="ct-top"></div>
-    </div>
-  </div><!-- /break-room -->
+      <div class="coffee-table">
+        <div class="ct-top">☕</div>
+        <div class="ct-legs">
+          <div class="ct-leg"></div>
+          <div class="ct-leg"></div>
+        </div>
+      </div>
+    </div><!-- /break-room -->
 
-  <!-- ═══ CHARACTERS (float over everything) ═══ -->
-  <div class="chars-layer">
-
-    <!-- ALPHA – blue jacket -->
-    <div class="sp" id="sp-alpha" style="--jc:#3b82f6; left:12%">
-      <div class="sp-bubble" id="bub-alpha">Bereit</div>
-      <div class="hat"></div>
-      <div class="head"></div>
-      <div class="body"></div>
-      <div class="arm l"></div>
-      <div class="arm r"></div>
-      <div class="leg l"></div>
-      <div class="leg r"></div>
-    </div>
-
-    <!-- BETA – red jacket -->
-    <div class="sp" id="sp-beta" style="--jc:#ef4444; left:33%">
-      <div class="sp-bubble" id="bub-beta">Bereit</div>
-      <div class="hat"></div>
-      <div class="head"></div>
-      <div class="body"></div>
-      <div class="arm l"></div>
-      <div class="arm r"></div>
-      <div class="leg l"></div>
-      <div class="leg r"></div>
+    <!-- ── DIVIDER WALL ── -->
+    <div class="wall-divider">
+      <div class="wall-top-face"></div>
+      <div class="wall-front-face">
+        <div class="door-gap">
+          <div class="door-frame-left"></div>
+          <div class="door-frame-right"></div>
+          <div class="door-frame-top"></div>
+        </div>
+      </div>
+      <div class="door-mask-top"></div>
+      <div class="door-mask-bottom"></div>
     </div>
 
-    <!-- GAMMA – orange jacket -->
-    <div class="sp" id="sp-gamma" style="--jc:#f97316; left:54%">
-      <div class="sp-bubble" id="bub-gamma">Bereit</div>
-      <div class="hat"></div>
-      <div class="head"></div>
-      <div class="body"></div>
-      <div class="arm l"></div>
-      <div class="arm r"></div>
-      <div class="leg l"></div>
-      <div class="leg r"></div>
+    <!-- ── OFFICE FLOOR ── -->
+    <div class="office-floor"></div>
+
+    <!-- office ceiling lights -->
+    <div class="office-light" style="left:100px;"></div>
+    <div class="office-light" style="left:390px;"></div>
+    <div class="office-light" style="left:680px;"></div>
+
+    <!-- whiteboard -->
+    <div class="whiteboard">
+      <div class="wb-line"></div>
+      <div class="wb-line"></div>
+      <div class="wb-line"></div>
+      <div class="wb-line"></div>
     </div>
 
-  </div><!-- /chars-layer -->
+    <!-- filing cabinet -->
+    <div class="filing-cabinet">
+      <div class="fc-top"></div>
+      <div class="fc-body">
+        <div class="fc-drawer"></div>
+        <div class="fc-drawer"></div>
+        <div class="fc-drawer"></div>
+      </div>
+    </div>
 
-</div><!-- /building -->
+    <!-- ── WORKSTATION ALPHA ── -->
+    <div class="workstation" id="ws-alpha" style="left:50px; top:195px;">
+      <div class="pw-wrap">
+        <div class="pw-top"></div>
+        <div class="pw-face">
+          <div class="pw-sticky"></div>
+          <div class="pw-sticky"></div>
+          <div class="pw-sticky"></div>
+          <span class="nameplate">ALPHA</span>
+        </div>
+      </div>
+      <div class="desk-wrap">
+        <div class="desk-top">
+          <div class="monitor">
+            <div class="monitor-screen">
+              <div class="code-scroll">
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+              </div>
+            </div>
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
+          </div>
+          <div class="keyboard"></div>
+          <div class="desk-mouse"></div>
+          <div class="desk-mug">☕</div>
+        </div>
+        <div class="desk-front"></div>
+      </div>
+      <div class="chair-wrap">
+        <div class="chair-back"></div>
+        <div class="chair-seat"></div>
+      </div>
+    </div>
 
+    <!-- ── WORKSTATION BETA ── -->
+    <div class="workstation" id="ws-beta" style="left:340px; top:195px;">
+      <div class="pw-wrap">
+        <div class="pw-top"></div>
+        <div class="pw-face">
+          <div class="pw-sticky"></div>
+          <div class="pw-sticky"></div>
+          <div class="pw-sticky"></div>
+          <span class="nameplate">BETA</span>
+        </div>
+      </div>
+      <div class="desk-wrap">
+        <div class="desk-top">
+          <div class="monitor">
+            <div class="monitor-screen">
+              <div class="code-scroll">
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+              </div>
+            </div>
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
+          </div>
+          <div class="keyboard"></div>
+          <div class="desk-mouse"></div>
+          <div class="desk-mug">☕</div>
+        </div>
+        <div class="desk-front"></div>
+      </div>
+      <div class="chair-wrap">
+        <div class="chair-back"></div>
+        <div class="chair-seat"></div>
+      </div>
+    </div>
 
-<!-- ═══════════ STATUS PANEL ═══════════ -->
-<div class="status-panel">
+    <!-- ── WORKSTATION GAMMA ── -->
+    <div class="workstation" id="ws-gamma" style="left:630px; top:195px;">
+      <div class="pw-wrap">
+        <div class="pw-top"></div>
+        <div class="pw-face">
+          <div class="pw-sticky"></div>
+          <div class="pw-sticky"></div>
+          <div class="pw-sticky"></div>
+          <span class="nameplate">GAMMA</span>
+        </div>
+      </div>
+      <div class="desk-wrap">
+        <div class="desk-top">
+          <div class="monitor">
+            <div class="monitor-screen">
+              <div class="code-scroll">
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+                <div class="cl"></div><div class="cl"></div><div class="cl"></div>
+              </div>
+            </div>
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
+          </div>
+          <div class="keyboard"></div>
+          <div class="desk-mouse"></div>
+          <div class="desk-mug">☕</div>
+        </div>
+        <div class="desk-front"></div>
+      </div>
+      <div class="chair-wrap">
+        <div class="chair-back"></div>
+        <div class="chair-seat"></div>
+      </div>
+    </div>
 
-  <div class="agent-card idle" id="card-alpha" style="--jc:#3b82f6">
-    <div class="card-swatch"></div>
-    <div class="card-info">
-      <div class="cname" style="color:#3b82f6">Alpha</div>
+    <!-- ── CHARACTERS LAYER ── -->
+    <div class="chars-layer">
+
+      <!-- ALPHA — blue -->
+      <div class="sp" id="sp-alpha" style="--jc: #3b82f6; left: 82px; top: 400px;">
+        <div class="sp-bubble" id="bub-alpha">Bereit</div>
+        <div class="hat"></div>
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="arm l"></div>
+        <div class="arm r"></div>
+        <div class="leg l"></div>
+        <div class="leg r"></div>
+      </div>
+
+      <!-- BETA — red/orange -->
+      <div class="sp" id="sp-beta" style="--jc: #ef4444; left: 372px; top: 400px;">
+        <div class="sp-bubble" id="bub-beta">Bereit</div>
+        <div class="hat"></div>
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="arm l"></div>
+        <div class="arm r"></div>
+        <div class="leg l"></div>
+        <div class="leg r"></div>
+      </div>
+
+      <!-- GAMMA — green -->
+      <div class="sp" id="sp-gamma" style="--jc: #22c55e; left: 662px; top: 400px;">
+        <div class="sp-bubble" id="bub-gamma">Bereit</div>
+        <div class="hat"></div>
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="arm l"></div>
+        <div class="arm r"></div>
+        <div class="leg l"></div>
+        <div class="leg r"></div>
+      </div>
+
+    </div><!-- /chars-layer -->
+
+  </div><!-- /scene -->
+</div><!-- /scene-wrap -->
+
+<!-- ══════════════════════════════════════════════
+     STATUS PANEL
+     ══════════════════════════════════════════════ -->
+<div class="panel">
+
+  <div class="agent-grid">
+    <div class="agent-card idle" id="card-alpha">
+      <h3>🤖 ALPHA</h3>
+      <span class="status-badge">IDLE</span>
       <div class="ctask empty" id="ctask-alpha">Wartet auf Aufgabe…</div>
     </div>
-  </div>
-
-  <div class="agent-card idle" id="card-beta" style="--jc:#ef4444">
-    <div class="card-swatch"></div>
-    <div class="card-info">
-      <div class="cname" style="color:#ef4444">Beta</div>
+    <div class="agent-card idle" id="card-beta">
+      <h3>🤖 BETA</h3>
+      <span class="status-badge">IDLE</span>
       <div class="ctask empty" id="ctask-beta">Wartet auf Aufgabe…</div>
     </div>
-  </div>
-
-  <div class="agent-card idle" id="card-gamma" style="--jc:#f97316">
-    <div class="card-swatch"></div>
-    <div class="card-info">
-      <div class="cname" style="color:#f97316">Gamma</div>
+    <div class="agent-card idle" id="card-gamma">
+      <h3>🤖 GAMMA</h3>
+      <span class="status-badge">IDLE</span>
       <div class="ctask empty" id="ctask-gamma">Wartet auf Aufgabe…</div>
     </div>
   </div>
 
-</div>
+  <div class="controls-section">
+    <h2>⚙️ MANUELLE STEUERUNG</h2>
+    <div class="controls-grid">
 
+      <div class="ctrl-block">
+        <h4>ALPHA</h4>
+        <input type="text" class="ctrl-input" id="task-alpha" placeholder="Aufgabe eingeben…">
+        <div class="ctrl-btns">
+          <button class="btn btn-work"  onclick="setAgent('alpha','working',document.getElementById('task-alpha').value)">Arbeitet</button>
+          <button class="btn btn-break" onclick="setAgent('alpha','break')">Pause</button>
+          <button class="btn btn-idle"  onclick="setAgent('alpha','idle')">Idle</button>
+        </div>
+      </div>
 
-<!-- ═══════════ CONTROLS ═══════════ -->
-<div class="ctrl-section">
-  <div class="ctrl-title">⚙ Agent steuern</div>
+      <div class="ctrl-block">
+        <h4>BETA</h4>
+        <input type="text" class="ctrl-input" id="task-beta" placeholder="Aufgabe eingeben…">
+        <div class="ctrl-btns">
+          <button class="btn btn-work"  onclick="setAgent('beta','working',document.getElementById('task-beta').value)">Arbeitet</button>
+          <button class="btn btn-break" onclick="setAgent('beta','break')">Pause</button>
+          <button class="btn btn-idle"  onclick="setAgent('beta','idle')">Idle</button>
+        </div>
+      </div>
 
-  <div class="ctrl-row">
-    <span class="ctrl-name" style="color:#3b82f6">Alpha</span>
-    <button class="ctrl-btn" onclick="setAgent('alpha','working',document.getElementById('t-alpha').value)">Arbeitet</button>
-    <button class="ctrl-btn" onclick="setAgent('alpha','break')">Pause</button>
-    <button class="ctrl-btn" onclick="setAgent('alpha','idle')">Idle</button>
-    <input class="ctrl-task" id="t-alpha" placeholder="Aufgabe…">
+      <div class="ctrl-block">
+        <h4>GAMMA</h4>
+        <input type="text" class="ctrl-input" id="task-gamma" placeholder="Aufgabe eingeben…">
+        <div class="ctrl-btns">
+          <button class="btn btn-work"  onclick="setAgent('gamma','working',document.getElementById('task-gamma').value)">Arbeitet</button>
+          <button class="btn btn-break" onclick="setAgent('gamma','break')">Pause</button>
+          <button class="btn btn-idle"  onclick="setAgent('gamma','idle')">Idle</button>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <div class="ctrl-row">
-    <span class="ctrl-name" style="color:#ef4444">Beta</span>
-    <button class="ctrl-btn" onclick="setAgent('beta','working',document.getElementById('t-beta').value)">Arbeitet</button>
-    <button class="ctrl-btn" onclick="setAgent('beta','break')">Pause</button>
-    <button class="ctrl-btn" onclick="setAgent('beta','idle')">Idle</button>
-    <input class="ctrl-task" id="t-beta" placeholder="Aufgabe…">
-  </div>
+</div><!-- /panel -->
 
-  <div class="ctrl-row">
-    <span class="ctrl-name" style="color:#f97316">Gamma</span>
-    <button class="ctrl-btn" onclick="setAgent('gamma','working',document.getElementById('t-gamma').value)">Arbeitet</button>
-    <button class="ctrl-btn" onclick="setAgent('gamma','break')">Pause</button>
-    <button class="ctrl-btn" onclick="setAgent('gamma','idle')">Idle</button>
-    <input class="ctrl-task" id="t-gamma" placeholder="Aufgabe…">
-  </div>
-</div>
-
-<footer>agent office · firebase live · local</footer>
-
-
-<!-- ═══════════ LOGIC ═══════════ -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- ══════════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════════ -->
 <script>
-// ── Firebase ─────────────────────────────────────────
+/* ── Firebase init ── */
 const FB = {
   apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
   authDomain:        "manager-3cf2b.firebaseapp.com",
@@ -754,112 +1255,173 @@ const FB = {
   messagingSenderId: "55315892331",
   appId:             "1:55315892331:web:9889b92c74e535a85a892e"
 };
-const app = firebase.initializeApp(FB, 'office');
-const db  = firebase.database(app);
-const PATH = 'office/agents';
+const fbApp = firebase.initializeApp(FB, 'office');
+const db    = firebase.database(fbApp);
+const PATH  = 'office/agents';
 
-// ── Positions (% left within building) ───────────────
-const DESK  = { alpha: '12%', beta: '33%', gamma: '54%' };
-const COUCH = { alpha: '71%', beta: '78%', gamma: '85%' };
+/* ── Positions ── */
+const DESK_POS = {
+  alpha: { left: '82px',  top: '400px' },
+  beta:  { left: '372px', top: '400px' },
+  gamma: { left: '662px', top: '400px' }
+};
+const COUCH_POS = {
+  alpha: { left: '250px', top: '42px' },
+  beta:  { left: '390px', top: '42px' },
+  gamma: { left: '530px', top: '42px' }
+};
 
-// ── State tracking ────────────────────────────────────
-const atBreak  = { alpha: false, beta: false, gamma: false };
-const timers   = {};
-const WALK_MS  = 1000;
+/* ── State ── */
+const atBreak = { alpha: false, beta: false, gamma: false };
+const timers  = {};
+const WALK_MS  = 1200;
+const SIT_MS   = 380;
+const STAND_MS = 480;
 
-// ── Apply agent state to DOM ──────────────────────────
+const BADGE_TEXT = { working: 'ARBEITET', break: 'PAUSE', idle: 'IDLE' };
+
+function updateBadge(card, status) {
+  const badge = card.querySelector('.status-badge');
+  if (badge) badge.textContent = BADGE_TEXT[status] || 'IDLE';
+}
+
+/* ── Animation engine ── */
 function applyAgent(id, status, task) {
-  const sp     = document.getElementById(`sp-${id}`);
-  const bub    = document.getElementById(`bub-${id}`);
-  const ws     = document.getElementById(`ws-${id}`);
-  const card   = document.getElementById(`card-${id}`);
-  const ctask  = document.getElementById(`ctask-${id}`);
+  const sp    = document.getElementById(`sp-${id}`);
+  const bub   = document.getElementById(`bub-${id}`);
+  const ws    = document.getElementById(`ws-${id}`);
+  const card  = document.getElementById(`card-${id}`);
+  const ctask = document.getElementById(`ctask-${id}`);
+
+  if (!sp || !bub || !card || !ctask) return;
 
   if (timers[id]) clearTimeout(timers[id]);
 
-  // ── Helper: start walking toward target ──
-  function walkTo(targetLeft, facingRight, onArrival) {
-    sp.classList.remove('typing', 'sitting');
-    sp.classList.add('walking');
-    // scaleX for facing direction (applied via style directly to avoid
-    // conflicting with the bob animation that uses transform too)
-    sp.style.setProperty('--flip', facingRight ? '1' : '-1');
-    // We manually handle the flip by wrapping in a scaleX on the element
-    // Since `animation: bob` uses `transform: scaleX(var(--flip)) translateY(...)`,
-    // we need to set --flip before the animation runs.
-    sp.style.left = targetLeft;
-    bub.textContent = '…';
+  function clearAnimClasses() {
+    sp.classList.remove('walking','typing','seated','sitting-down','standing-up');
+  }
 
+  function setPos(posObj) {
+    sp.style.left = posObj.left;
+    sp.style.top  = posObj.top;
+  }
+
+  function startWalk(targetPos, goingRight, onArrival) {
+    clearAnimClasses();
+    sp.style.setProperty('--fx', goingRight ? '1' : '-1');
+    sp.classList.add('walking');
+    setPos(targetPos);
+    bub.textContent = '…';
     timers[id] = setTimeout(() => {
       sp.classList.remove('walking');
-      sp.style.removeProperty('--flip');
+      sp.style.removeProperty('--fx');
       onArrival();
     }, WALK_MS);
   }
 
-  // ── BREAK ──
+  function sitDown(onDone) {
+    sp.classList.add('sitting-down');
+    timers[id] = setTimeout(() => {
+      sp.classList.remove('sitting-down');
+      sp.classList.add('seated');
+      onDone();
+    }, SIT_MS);
+  }
+
+  function standUp(onDone) {
+    sp.classList.remove('seated','typing');
+    sp.classList.add('standing-up');
+    timers[id] = setTimeout(() => {
+      sp.classList.remove('standing-up');
+      onDone();
+    }, STAND_MS);
+  }
+
+  /* BREAK */
   if (status === 'break') {
-    ws.classList.remove('working');
+    if (ws) ws.classList.remove('working');
+    card.className = 'agent-card break';
+    updateBadge(card, 'break');
+    ctask.textContent = 'Pause ☕';
+    ctask.className = 'ctask';
+
     if (!atBreak[id]) {
       atBreak[id] = true;
-      walkTo(COUCH[id], true, () => {
-        sp.classList.add('sitting');
-        bub.textContent = '☕';
-      });
+      if (sp.classList.contains('typing') || sp.classList.contains('seated')) {
+        standUp(() => {
+          startWalk(COUCH_POS[id], true, () => {
+            sitDown(() => { bub.textContent = '☕'; });
+          });
+        });
+      } else {
+        startWalk(COUCH_POS[id], true, () => {
+          sitDown(() => { bub.textContent = '☕'; });
+        });
+      }
     } else {
-      sp.classList.remove('typing', 'walking');
-      sp.classList.add('sitting');
+      clearAnimClasses();
+      setPos(COUCH_POS[id]);
+      sp.classList.add('seated');
       bub.textContent = '☕';
     }
-    card.className  = 'agent-card break';
-    ctask.textContent = 'Pause ☕';
-    ctask.className   = 'ctask';
 
-  // ── WORKING ──
+  /* WORKING */
   } else if (status === 'working') {
+    card.className = 'agent-card working';
+    updateBadge(card, 'working');
+    ctask.textContent = task || 'Arbeitet…';
+    ctask.className = 'ctask';
+
     if (atBreak[id]) {
       atBreak[id] = false;
-      walkTo(DESK[id], false, () => {
+      standUp(() => {
+        startWalk(DESK_POS[id], false, () => {
+          sitDown(() => {
+            sp.classList.add('typing');
+            bub.textContent = task || 'Arbeitet…';
+            if (ws) ws.classList.add('working');
+          });
+        });
+      });
+    } else {
+      clearAnimClasses();
+      setPos(DESK_POS[id]);
+      sitDown(() => {
         sp.classList.add('typing');
         bub.textContent = task || 'Arbeitet…';
-        ws.classList.add('working');
+        if (ws) ws.classList.add('working');
       });
-    } else {
-      sp.classList.remove('sitting', 'walking');
-      sp.classList.add('typing');
-      sp.style.left = DESK[id];
-      bub.textContent = task || 'Arbeitet…';
-      ws.classList.add('working');
     }
-    card.className    = 'agent-card working';
-    ctask.textContent = task || 'Arbeitet…';
-    ctask.className   = 'ctask';
 
-  // ── IDLE ──
+  /* IDLE */
   } else {
-    ws.classList.remove('working');
+    if (ws) ws.classList.remove('working');
+    card.className = 'agent-card idle';
+    updateBadge(card, 'idle');
+    ctask.textContent = 'Wartet auf Aufgabe…';
+    ctask.className = 'ctask empty';
+
     if (atBreak[id]) {
       atBreak[id] = false;
-      walkTo(DESK[id], false, () => {
-        bub.textContent = 'Bereit';
+      standUp(() => {
+        startWalk(DESK_POS[id], false, () => {
+          bub.textContent = 'Bereit';
+        });
       });
     } else {
-      sp.classList.remove('typing', 'sitting', 'walking');
-      sp.style.left = DESK[id];
+      clearAnimClasses();
+      setPos(DESK_POS[id]);
       bub.textContent = 'Bereit';
     }
-    card.className    = 'agent-card idle';
-    ctask.textContent = 'Wartet auf Aufgabe…';
-    ctask.className   = 'ctask empty';
   }
 }
 
-// ── Write to Firebase ─────────────────────────────────
+/* ── Write helper ── */
 function setAgent(id, status, task = '') {
   db.ref(`${PATH}/${id}`).set({ status, task: task.trim() });
 }
 
-// ── Listen for changes ────────────────────────────────
+/* ── Realtime listener ── */
 db.ref(PATH).on('value', snap => {
   const d = snap.val() || {};
   ['alpha','beta','gamma'].forEach(id => {
@@ -868,7 +1430,7 @@ db.ref(PATH).on('value', snap => {
   });
 });
 
-// ── Init defaults if empty ────────────────────────────
+/* ── Init defaults if empty ── */
 db.ref(PATH).once('value', snap => {
   if (!snap.val()) {
     ['alpha','beta','gamma'].forEach(id =>
@@ -877,5 +1439,6 @@ db.ref(PATH).once('value', snap => {
   }
 });
 </script>
+
 </body>
 </html>

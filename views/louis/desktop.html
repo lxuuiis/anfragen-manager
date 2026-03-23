@@ -678,8 +678,14 @@ function buildRow(sid, p, idx) {
     ${buildJnCell(sid, idx, 'fw', p.fw||'Nein')}
     ${buildMoebelCell(sid, idx, p)}
     <td class="td-abh"><div class="abh-wrap" id="abh-${sid}-${idx}" ${abhVis}>
-      <input type="date" value="${abhISO}" onchange="up(${sid},${idx},'abh_datum',isoToDE(this.value));renderDayOverview()" />
-      <input type="time" value="${esc(p.abh_zeit)}" onchange="up(${sid},${idx},'abh_zeit',this.value);renderDayOverview()" />
+      <input class="abh-input abh-date" type="text" inputmode="numeric" placeholder="TT.MM.JJ" maxlength="10"
+        value="${esc(p.abh_datum)}"
+        oninput="upAbhDatum(${sid},${idx},this.value)"
+        onblur="fmtAbhDatum(this,${sid},${idx})" />
+      <input class="abh-input abh-time" type="text" inputmode="numeric" placeholder="HH:MM" maxlength="5"
+        value="${esc(p.abh_zeit)}"
+        oninput="upAbhZeit(${sid},${idx},this.value)"
+        onblur="fmtAbhZeit(this,${sid},${idx})" />
     </div></td>
     <td class="td-bem"><input type="text" value="${esc(p.bem)}" placeholder="—" class="bem-input" title="${esc(p.bem)}" style="width:100%" oninput="up(${sid},${idx},'bem',this.value);this.title=this.value" /></td>
     <td class="td-action"><button class="rm-btn" onclick="removePerson(${sid},${idx})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
@@ -690,6 +696,43 @@ function buildRow(sid, p, idx) {
 function up(sid, idx, field, val) {
   const s = sessions.find(x => String(x.id) === String(sid));
   if (s && s.personen[idx]) { s.personen[idx][field] = val; _dirtyIds.add(String(sid)); scheduleSave(); }
+}
+
+// ── Abholung Datum/Zeit Helpers ──────────────────────────────────
+function upAbhDatum(sid, idx, raw) {
+  // Autofill dots: 2 → 02., 2303 → 23.03., etc.
+  up(sid, idx, 'abh_datum', raw);
+}
+function fmtAbhDatum(el, sid, idx) {
+  let v = el.value.trim().replace(/[^0-9.]/g,'');
+  // Try to parse DD.MM.YYYY or DD.MM.YY or DDMMYYYY
+  const m = v.replace(/\./g,'');
+  if (m.length >= 4) {
+    const dd = m.slice(0,2), mm = m.slice(2,4);
+    let yy = m.slice(4);
+    if (!yy) yy = new Date().getFullYear().toString();
+    else if (yy.length === 2) yy = '20' + yy;
+    v = `${dd}.${mm}.${yy}`;
+  }
+  el.value = v;
+  up(sid, idx, 'abh_datum', v);
+  renderDayOverview();
+}
+function upAbhZeit(sid, idx, raw) {
+  up(sid, idx, 'abh_zeit', raw);
+}
+function fmtAbhZeit(el, sid, idx) {
+  let v = el.value.trim().replace(/[^0-9:]/g,'');
+  const digits = v.replace(/:/g,'');
+  if (digits.length >= 3) {
+    v = digits.slice(0,2) + ':' + digits.slice(2,4);
+  } else if (digits.length === 2 && !v.includes(':')) {
+    // just hours — add :00
+    v = digits + ':00';
+  }
+  el.value = v;
+  up(sid, idx, 'abh_zeit', v);
+  renderDayOverview();
 }
 
 /* ── Status-Änderung mit Bestandsabzug + Firebase-Archiv ── */

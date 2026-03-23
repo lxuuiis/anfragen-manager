@@ -706,9 +706,23 @@ tr.archiv-row td { background: var(--success-light); opacity: 0.85; }
 tr.archiv-row:hover td { filter: brightness(0.97); }
 
 /* ── Abholung wrap ── */
-.abh-wrap { display: flex; align-items: center; gap: 4px; }
-.abh-wrap input[type=date] { width: 128px; font-size: 11px; }
-.abh-wrap input[type=time] { width: 68px; font-size: 11px; }
+.abh-wrap { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
+.abh-input {
+  font-size: 12px; font-family: var(--font); color: var(--text);
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 7px; outline: none;
+  transition: border-color 0.12s, box-shadow 0.12s;
+  -webkit-appearance: none; appearance: none;
+}
+.abh-input:focus { border-color: var(--purple,#7c3aed); box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }
+.abh-input::placeholder { color: var(--text-3); }
+.abh-input.abh-date { width: 90px; }
+.abh-input.abh-time { width: 58px; }
+/* Hide native date/time chrome — keep as hidden fallback */
+.abh-wrap input[type=date],
+.abh-wrap input[type=time] {
+  position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;
+}
 
 /* ── Notification bar ── */
 #notifBar { background: var(--warning-light); border-bottom: 1px solid rgba(176,120,0,0.18); display: none; }

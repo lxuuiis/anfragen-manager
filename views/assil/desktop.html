@@ -816,10 +816,14 @@ function buildRow(sid, p, idx) {
     </td>
     <td class="td-abh">
       <div class="abh-wrap" id="abh-${sid}-${idx}" ${abhVis}>
-        <input type="date" value="${abhISO}"
-          onchange="upPerson(${sid},${idx},'abh_datum',isoToDE(this.value)); renderDayOverview()" />
-        <input type="time" value="${esc(p.abh_zeit||'')}"
-          onchange="upPerson(${sid},${idx},'abh_zeit',this.value); renderDayOverview()" />
+        <input class="abh-input abh-date" type="text" inputmode="numeric" placeholder="TT.MM.JJ" maxlength="10"
+          value="${esc(p.abh_datum||'')}"
+          oninput="upPerson(${sid},${idx},'abh_datum',this.value)"
+          onblur="fmtAbhDatumA(this,${sid},${idx})" />
+        <input class="abh-input abh-time" type="text" inputmode="numeric" placeholder="HH:MM" maxlength="5"
+          value="${esc(p.abh_zeit||'')}"
+          oninput="upPerson(${sid},${idx},'abh_zeit',this.value)"
+          onblur="fmtAbhZeitA(this,${sid},${idx})" />
       </div>
     </td>
     <td class="td-bem">
@@ -845,6 +849,29 @@ function upPerson(sid, idx, field, val) {
   s.personen[idx][field] = val;
   scheduleSave(sid);
   updatePersonCount(sid, s);
+}
+function fmtAbhDatumA(el, sid, idx) {
+  let v = el.value.trim().replace(/[^0-9.]/g,'');
+  const m = v.replace(/\./g,'');
+  if (m.length >= 4) {
+    const dd=m.slice(0,2), mm=m.slice(2,4);
+    let yy=m.slice(4);
+    if (!yy) yy=new Date().getFullYear().toString();
+    else if (yy.length===2) yy='20'+yy;
+    v=`${dd}.${mm}.${yy}`;
+  }
+  el.value = v;
+  upPerson(sid, idx, 'abh_datum', v);
+  renderDayOverview();
+}
+function fmtAbhZeitA(el, sid, idx) {
+  let v = el.value.trim().replace(/[^0-9:]/g,'');
+  const d = v.replace(/:/g,'');
+  if (d.length >= 3) v = d.slice(0,2)+':'+d.slice(2,4);
+  else if (d.length===2 && !v.includes(':')) v = d+':00';
+  el.value = v;
+  upPerson(sid, idx, 'abh_zeit', v);
+  renderDayOverview();
 }
 
 function upSession(sid, field, val) {
