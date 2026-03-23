@@ -202,6 +202,24 @@
   tr.archiv-row { opacity: 0.8; }
   tr.archiv-row td { background: #f7fdf9; }
   tr.archiv-row:hover td { background: #edfaf2 !important; }
+
+  /* ── Notifications ── */
+  #notifBar { background: linear-gradient(135deg,#fff8e6,#fffdf0); border-bottom: 1px solid #ffe08a; display: none; }
+  #notifBar.has-notifs { display: block; }
+  .notif-list { max-width: 960px; margin: 0 auto; padding: 8px 20px; display: flex; flex-direction: column; gap: 6px; }
+  .notif-item { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #ffe08a; border-radius: 10px; padding: 9px 14px; cursor: pointer; transition: 0.15s ease; animation: notifPop 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+  .notif-item:hover { background: #fffdf0; box-shadow: 0 2px 8px rgba(0,0,0,0.07); transform: translateY(-1px); }
+  @keyframes notifPop { from { opacity:0; transform:translateY(-6px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+  .notif-bell { font-size: 16px; flex-shrink: 0; }
+  .notif-text { flex: 1; font-size: 13px; color: #1d1d1f; }
+  .notif-text strong { font-weight: 700; }
+  .notif-badge-from { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; }
+  .notif-badge-from.rohat { background: #e8f8ee; color: #1a7a36; }
+  .notif-badge-from.assil { background: #f3eeff; color: #7c3aed; }
+  .notif-badge-from.louis { background: #e8f1fb; color: #0071e3; }
+  .notif-arrow { font-size: 12px; color: #b07800; flex-shrink: 0; }
+  .notif-dismiss { background: none; border: none; cursor: pointer; font-size: 16px; color: #aeaeb2; padding: 0 2px; line-height: 1; flex-shrink: 0; transition: 0.12s; }
+  .notif-dismiss:hover { color: #ff3b30; transform: scale(1.2); }
 </style>
 </head>
 <body>
@@ -230,6 +248,11 @@
     </button>
   </div>
 </nav>
+
+<!-- Notification-Bar -->
+<div id="notifBar">
+  <div class="notif-list" id="notifList"></div>
+</div>
 
 <main>
   <div class="setup-banner" id="setupBanner">
@@ -409,6 +432,9 @@ function initFirebase() {
         renderAll();
       }
     });
+
+    // Notifications starten
+    initNotifications();
   } catch(e) { setSyncStatus('error', 'Init-Fehler'); console.error(e); }
 }
 
@@ -868,10 +894,60 @@ function confirmTransfer() {
     const newSession = { id: newId, datum: s.datum, uhrzeit: s.uhrzeit, collapsed: false, owner: 'louis', personen: [personCopy] };
     firebase.database().ref('sessions/' + newId).set(newSession);
     firebase.database().ref('sessions/' + _transferSid).set({...s, owner: OWNER});
+    // Notification für Louis schreiben
+    const notifId = newId + '_n';
+    firebase.database().ref('notifications/louis/' + notifId).set({
+      id: notifId, from: 'Rohat', personName: personCopy.name,
+      sessionId: newId, datum: s.datum, uhrzeit: s.uhrzeit,
+      ts: Date.now(), gelesen: false
+    });
   }
   writeLog('Person verschoben', `${personCopy.name} → Louis`);
   renderAll(); save();
   toast(`${personCopy.name} → Louis verschoben ✓`);
+}
+
+// ── Notifications ──────────────────────────────────────────────
+function initNotifications() {
+  if (!db) return;
+  db.ref('notifications/rohat').on('value', snap => {
+    const raw = snap.val();
+    const bar  = document.getElementById('notifBar');
+    const list = document.getElementById('notifList');
+    if (!raw) { bar.classList.remove('has-notifs'); list.innerHTML = ''; return; }
+    const items = Object.values(raw).filter(n => !n.gelesen).sort((a,b) => (b.ts||0)-(a.ts||0));
+    if (!items.length) { bar.classList.remove('has-notifs'); list.innerHTML = ''; return; }
+    bar.classList.add('has-notifs');
+    list.innerHTML = items.map(n => {
+      const fromLow = (n.from||'').toLowerCase();
+      return `<div class="notif-item" onclick="notifJump('${n.id}','${n.sessionId}')">
+        <span class="notif-bell">🔔</span>
+        <span class="notif-text"><strong>${esc(n.from)}</strong> hat <strong>${esc(n.personName)}</strong> zu dir verschoben · Termin: ${esc(n.datum)} ${esc(n.uhrzeit)}</span>
+        <span class="notif-badge-from ${fromLow}">${esc(n.from)}</span>
+        <span class="notif-arrow">→ Zum Termin</span>
+        <button class="notif-dismiss" onclick="notifDismiss(event,'${n.id}')" title="Schließen">×</button>
+      </div>`;
+    }).join('');
+  });
+}
+function notifJump(notifId, sessionId) {
+  notifDismissById(notifId);
+  const sid = Number(sessionId) || sessionId;
+  const tryJump = (attempts) => {
+    const s = sessions.find(x => String(x.id) === String(sid));
+    if (s) {
+      if (s.collapsed) { s.collapsed = false; const card = document.querySelector(`.session-card[data-id="${sid}"]`); if(card) card.classList.remove('collapsed'); }
+      setTimeout(() => {
+        const card = document.querySelector(`.session-card[data-id="${sid}"]`);
+        if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); card.style.transition='box-shadow 0.3s'; card.style.boxShadow='0 0 0 3px #ffcc00, 0 8px 32px rgba(0,0,0,0.12)'; setTimeout(()=>{ card.style.boxShadow=''; },2200); }
+      }, 80);
+    } else if (attempts > 0) { setTimeout(() => tryJump(attempts-1), 300); }
+  };
+  tryJump(10);
+}
+function notifDismiss(e, notifId) { e.stopPropagation(); notifDismissById(notifId); }
+function notifDismissById(notifId) {
+  if (db) db.ref('notifications/rohat/' + notifId).update({ gelesen: true });
 }
 function deleteSession(id){if(!confirm('Termin wirklich löschen?'))return;const s=sessions.find(x=>x.id===id);writeLog('Termin gelöscht',s?s.datum+' · '+s.uhrzeit:String(id));sessions=sessions.filter(x=>x.id!==id);if(isConfigured&&db){firebase.database().ref(DB_PATH+'/'+id).remove();}renderAll();toast('Termin gelöscht');}
 function exportCSV(){const bom='\uFEFF',lines=['Anfragen Export – Rohat\n'];sessions.forEach(s=>{lines.push('Datum: '+s.datum+' | Uhrzeit: '+s.uhrzeit);lines.push('Name,Status,Abholdatum,Abholzeit,Formular erhalten,Formular weitergeleitet,Tische,Stühle,Bemerkung');s.personen.filter(p=>p.name.trim()).forEach(p=>{lines.push([p.name,p.status,p.abh_datum||'',p.abh_zeit?fmtTime(p.abh_zeit):'',p.fe,p.fw,p.tische||0,p.stuehle||0,p.bem].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));});lines.push('');});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bom+lines.join('\n')],{type:'text/csv;charset=utf-8;'}));a.download='Anfragen_Rohat.csv';a.click();toast('CSV exportiert ✓');}
