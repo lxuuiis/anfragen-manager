@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Office</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sky:    #a8c8e8;
+  --wall-o: #f5f0e0;
+  --wall-b: #e8f0e0;
+  --floor:  #c49a6c;
+  --ol:     #0d0d0d;
+}
+
+body {
+  background: var(--sky);
+  background-image: radial-gradient(ellipse 60% 40% at 30% 25%, #cde4f5 0%, transparent 70%);
+  font-family: 'Arial Black', 'Impact', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 32px;
+  gap: 14px;
+}
+
+/* ── TITLE ──────────────────────────────────────────── */
+h1 {
+  font-size: 22px;
+  color: var(--ol);
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.12);
+  letter-spacing: 1px;
+  font-weight: 900;
+}
+
+/* ── BUILDING ───────────────────────────────────────── */
+.building {
+  width: 100%;
+  max-width: 880px;
+  height: 320px;
+  display: flex;
+  border: 4px solid var(--ol);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.25);
+}
+
+/* wall grid texture */
+.room::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* floor strip */
+.room::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 32px;
+  background: var(--floor);
+  border-top: 3px solid var(--ol);
+  z-index: 0;
+}
+
+.room-label {
+  position: absolute;
+  top: 10px; left: 14px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* ── BÜRO (left) ────────────────────────────────────── */
+.work-room {
+  flex: 2.2;
+  background: var(--wall-o);
+  border-right: 3px solid var(--ol);
+  position: relative;
+}
+
+/* Door in divider wall */
+.door {
+  position: absolute;
+  bottom: 32px; right: -4px;
+  width: 44px; height: 68px;
+  background: #d4a96a;
+  border: 3px solid var(--ol);
+  border-bottom: none;
+  border-right: none;
+  z-index: 3;
+}
+.door-knob {
+  position: absolute;
+  top: 28px; right: 7px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #f0c030;
+  border: 2px solid var(--ol);
+}
+
+/* Workstations */
+.workstations {
+  position: absolute;
+  bottom: 32px; left: 0; right: 0;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: flex-end;
+  padding: 0 18px;
+  z-index: 1;
+}
+
+.ws {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* Monitor */
+.monitor {
+  width: 54px; height: 40px;
+  background: #111;
+  border: 3px solid var(--ol);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  transition: box-shadow 0.4s;
+}
+.ws.working .monitor {
+  box-shadow: 0 0 14px rgba(0,200,100,0.7);
+}
+.monitor-stand {
+  width: 12px; height: 6px;
+  background: #555;
+  border: 2px solid var(--ol);
+  margin: 0 auto;
+}
+.monitor-base {
+  width: 28px; height: 4px;
+  background: #444;
+  border: 2px solid var(--ol);
+  border-radius: 1px;
+  margin: 0 auto;
+}
+.code-scroll {
+  position: absolute;
+  top: 5px; left: 5px; right: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  animation: scroll-up 5s linear infinite paused;
+}
+.ws.working .code-scroll { animation-play-state: running; }
+@keyframes scroll-up { to { transform: translateY(-50%); } }
+.cl {
+  height: 2.5px;
+  border-radius: 1px;
+  background: #22c55e;
+  opacity: 0.15;
+  transition: opacity 0.4s;
+}
+.ws.working .cl { opacity: 0.85; }
+
+.desk {
+  width: 70px; height: 12px;
+  background: #a0642a;
+  border: 3px solid var(--ol);
+  border-radius: 2px;
+  box-shadow: 0 5px 0 #6a3a10, 0 5px 0 3px var(--ol);
+  margin-top: 2px;
+}
+
+.ws-name {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.3);
+  margin-top: 38px;
+}
+
+/* ── PAUSENRAUM (right) ─────────────────────────────── */
+.break-room {
+  flex: 1;
+  background: var(--wall-b);
+  position: relative;
+}
+
+.break-plant {
+  position: absolute;
+  bottom: 32px; left: 10px;
+  font-size: 30px;
+  z-index: 1;
+  filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.15));
+}
+
+/* Window */
+.window {
+  position: absolute;
+  top: 22px; right: 18px;
+  width: 52px; height: 52px;
+  background: linear-gradient(140deg, #87ceeb, #b8e4ff);
+  border: 3px solid var(--ol);
+  z-index: 1;
+}
+.window::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; width: 3px; height: 100%;
+  background: var(--ol);
+  transform: translateX(-50%);
+}
+.window::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 0; height: 3px; width: 100%;
+  background: var(--ol);
+  transform: translateY(-50%);
+}
+
+/* Couch */
+.couch-wrap {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+.couch-back {
+  width: 118px; height: 26px;
+  background: #8B4FC8;
+  border: 3px solid var(--ol);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+}
+.couch-seat {
+  width: 118px; height: 18px;
+  background: #7a3eb8;
+  border: 3px solid var(--ol);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 5px 0 #4a1e80, 0 5px 0 3px var(--ol);
+}
+.couch-seat::after {
+  content: '';
+  display: block;
+  margin: 4px auto 0;
+  width: 80%;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+/* Coffee table */
+.coffee-tbl {
+  position: absolute;
+  bottom: 32px; right: 12px;
+  z-index: 1;
+}
+.ct-cup { font-size: 16px; text-align: center; }
+.ct-top {
+  width: 32px; height: 8px;
+  background: #a0642a;
+  border: 2.5px solid var(--ol);
+  border-radius: 2px;
+  box-shadow: 0 4px 0 #6a3a10, 0 4px 0 2.5px var(--ol);
+}
+
+/* ── CHARACTER LAYER ────────────────────────────────── */
+/* Sits on top of the entire building, covers both rooms */
+.chars-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Individual South Park character */
+.sp {
+  position: absolute;
+  bottom: 32px;    /* stand on floor */
+  width: 32px;
+  /* visual height ~58px incl hat */
+  transition: left 1s cubic-bezier(0.45, 0, 0.25, 1);
+}
+
+/* Hat */
+.sp .hat {
+  position: absolute;
+  top: -14px; left: 2px;
+  width: 28px; height: 18px;
+  background: var(--jc);
+  border: 2.5px solid var(--ol);
+  border-radius: 6px 6px 0 0;
+}
+.sp .hat::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: -3px; right: -3px;
+  height: 6px;
+  background: var(--jc);
+  border: 2.5px solid var(--ol);
+  border-top: none;
+  border-radius: 0 0 2px 2px;
+}
+
+/* Head */
+.sp .head {
+  position: absolute;
+  top: 0; left: 1px;
+  width: 30px; height: 28px;
+  background: #FDBCB4;
+  border: 2.5px solid var(--ol);
+  border-radius: 50%;
+}
+/* Eyes */
+.sp .head::before {
+  content: '';
+  position: absolute;
+  top: 10px; left: 7px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--ol);
+  box-shadow: 9px 0 0 var(--ol);
+}
+/* Mouth */
+.sp .head::after {
+  content: '';
+  position: absolute;
+  bottom: 6px; left: 9px;
+  width: 12px; height: 4px;
+  border-radius: 0 0 4px 4px;
+  border: 2.5px solid var(--ol);
+  border-top: none;
+}
+
+/* Body (puffy jacket) */
+.sp .body {
+  position: absolute;
+  top: 24px; left: 0;
+  width: 32px; height: 24px;
+  background: var(--jc);
+  border: 2.5px solid var(--ol);
+  border-radius: 45% 45% 20% 20%;
+}
+
+/* Arms */
+.sp .arm {
+  position: absolute;
+  top: 27px;
+  width: 7px; height: 15px;
+  background: var(--jc);
+  border: 2.5px solid var(--ol);
+  border-radius: 3px;
+  transform-origin: top center;
+}
+.sp .arm.l { left: -5px;  transform: rotate(-12deg); }
+.sp .arm.r { right: -5px; transform: rotate(12deg); }
+
+/* Legs */
+.sp .leg {
+  position: absolute;
+  bottom: 0;
+  width: 12px; height: 16px;
+  background: #2a2848;
+  border: 2.5px solid var(--ol);
+  border-radius: 0 0 5px 5px;
+  transform-origin: top center;
+}
+.sp .leg.l { left: 3px; }
+.sp .leg.r { right: 3px; }
+
+/* ── Speech Bubble ── */
+.sp-bubble {
+  position: absolute;
+  bottom: calc(100% + 18px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 2.5px solid var(--ol);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 9px;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #333;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+  z-index: 30;
+  transition: opacity 0.2s;
+}
+.sp-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -7px; left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--ol);
+}
+.sp-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #fff;
+  z-index: 1;
+}
+
+/* ═══ ANIMATIONS ═══ */
+
+/* Typing */
+@keyframes type-l { 0%,100% { transform: rotate(-32deg); } 50% { transform: rotate(18deg); } }
+@keyframes type-r { 0%,100% { transform: rotate(32deg);  } 50% { transform: rotate(-18deg); } }
+@keyframes nod    { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+
+.sp.typing .arm.l { animation: type-l 0.2s ease-in-out infinite; }
+.sp.typing .arm.r { animation: type-r 0.2s ease-in-out infinite; }
+.sp.typing .head  { animation: nod   0.4s ease-in-out infinite; }
+
+/* Walking */
+@keyframes wlk-l { 0%,100% { transform: rotate(-28deg); } 50% { transform: rotate(22deg); } }
+@keyframes wlk-r { 0%,100% { transform: rotate(22deg);  } 50% { transform: rotate(-28deg); } }
+@keyframes wlk-al { 0%,100% { transform: rotate(22deg); }  50% { transform: rotate(-18deg); } }
+@keyframes wlk-ar { 0%,100% { transform: rotate(-22deg); } 50% { transform: rotate(18deg); } }
+@keyframes bob    { 0%,100% { transform: scaleX(var(--flip,1)) translateY(0); }
+                    50%      { transform: scaleX(var(--flip,1)) translateY(-3px); } }
+
+.sp.walking .leg.l { animation: wlk-l  0.26s ease-in-out infinite; }
+.sp.walking .leg.r { animation: wlk-r  0.26s ease-in-out infinite; }
+.sp.walking .arm.l { animation: wlk-al 0.26s ease-in-out infinite; }
+.sp.walking .arm.r { animation: wlk-ar 0.26s ease-in-out infinite; }
+.sp.walking        { animation: bob    0.26s ease-in-out infinite; }
+
+/* Sitting on couch */
+.sp.sitting .leg.l { transform: rotate(-38deg) translateX(-2px); transition: transform 0.3s; }
+.sp.sitting .leg.r { transform: rotate(38deg) translateX(2px);   transition: transform 0.3s; }
+.sp.sitting .arm.l { transform: rotate(25deg);  transition: transform 0.3s; }
+.sp.sitting .arm.r { transform: rotate(-25deg); transition: transform 0.3s; }
+
+/* Idle breathe */
+@keyframes breathe { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(1.06); } }
+.sp:not(.typing):not(.walking):not(.sitting) .body { animation: breathe 2.5s ease-in-out infinite; }
+
+/* ── STATUS PANEL ───────────────────────────────────── */
+.status-panel {
+  width: 100%; max-width: 880px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.agent-card {
+  background: #fff;
+  border: 3px solid var(--ol);
+  border-radius: 5px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.18);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.agent-card.working { background: #f0fff4; border-color: #16a34a; box-shadow: 4px 4px 0 rgba(22,163,74,0.3); }
+.agent-card.break   { background: #fffbeb; border-color: #d97706; }
+
+.card-swatch {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--jc);
+  border: 2.5px solid var(--ol);
+  flex-shrink: 0;
+}
+.agent-card.working .card-swatch {
+  animation: pulse-swatch 1s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.3);
+}
+@keyframes pulse-swatch { 0%,100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.3); } 50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } }
+
+.card-info .cname { font-size: 11px; font-weight: 900; color: #1a1a1a; letter-spacing: 1px; text-transform: uppercase; }
+.card-info .ctask { font-size: 10px; font-family: Arial, sans-serif; color: #555; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+.card-info .ctask.empty { color: #aaa; font-style: italic; }
+
+/* ── CONTROLS ───────────────────────────────────────── */
+.ctrl-section {
+  width: 100%; max-width: 880px;
+  background: #fff;
+  border: 3px solid var(--ol);
+  border-radius: 5px;
+  padding: 12px 16px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.18);
+}
+.ctrl-title { font-size: 10px; font-weight: 900; color: #333; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase; }
+.ctrl-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.ctrl-row:last-child { margin-bottom: 0; }
+.ctrl-name { font-size: 10px; font-weight: 900; width: 52px; text-transform: uppercase; }
+.ctrl-btn {
+  padding: 4px 11px;
+  font-size: 9px;
+  font-family: 'Arial Black', sans-serif;
+  font-weight: 900;
+  border: 2.5px solid var(--ol);
+  border-radius: 4px;
+  background: #f0f0f0;
+  color: #333;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  transition: transform 0.08s, box-shadow 0.08s;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.ctrl-btn:hover { background: #e0e0e0; }
+.ctrl-btn:active { transform: translate(2px,2px); box-shadow: none; }
+.ctrl-task {
+  flex: 1;
+  font-size: 9px;
+  font-family: Arial, sans-serif;
+  padding: 4px 8px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  background: #fafafa;
+}
+.ctrl-task:focus { border-color: #888; }
+.ctrl-task::placeholder { color: #bbb; font-style: italic; }
+
+footer {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.2);
+}
+</style>
+</head>
+<body>
+
+<h1>🏢 AGENT OFFICE</h1>
+
+<!-- ═══════════ BUILDING ═══════════ -->
+<div class="building">
+
+  <!-- BÜRO -->
+  <div class="room work-room">
+    <div class="room-label">Büro</div>
+
+    <!-- Door to break room -->
+    <div class="door"><div class="door-knob"></div></div>
+
+    <div class="workstations">
+
+      <!-- Alpha desk -->
+      <div class="ws" id="ws-alpha">
+        <div class="monitor">
+          <div class="code-scroll">
+            <div class="cl" style="width:85%"></div><div class="cl" style="width:60%"></div>
+            <div class="cl" style="width:40%"></div><div class="cl" style="width:75%"></div>
+            <div class="cl" style="width:90%"></div><div class="cl" style="width:50%"></div>
+            <div class="cl" style="width:65%"></div><div class="cl" style="width:80%"></div>
+            <div class="cl" style="width:85%"></div><div class="cl" style="width:60%"></div>
+            <div class="cl" style="width:40%"></div><div class="cl" style="width:75%"></div>
+          </div>
+        </div>
+        <div class="monitor-stand"></div><div class="monitor-base"></div>
+        <div class="desk"></div>
+        <div class="ws-name">Alpha</div>
+      </div>
+
+      <!-- Beta desk -->
+      <div class="ws" id="ws-beta">
+        <div class="monitor">
+          <div class="code-scroll" style="animation-delay:-1.8s">
+            <div class="cl" style="width:70%"></div><div class="cl" style="width:45%"></div>
+            <div class="cl" style="width:90%"></div><div class="cl" style="width:30%"></div>
+            <div class="cl" style="width:60%"></div><div class="cl" style="width:80%"></div>
+            <div class="cl" style="width:55%"></div><div class="cl" style="width:95%"></div>
+            <div class="cl" style="width:70%"></div><div class="cl" style="width:45%"></div>
+            <div class="cl" style="width:90%"></div><div class="cl" style="width:30%"></div>
+          </div>
+        </div>
+        <div class="monitor-stand"></div><div class="monitor-base"></div>
+        <div class="desk"></div>
+        <div class="ws-name">Beta</div>
+      </div>
+
+      <!-- Gamma desk -->
+      <div class="ws" id="ws-gamma">
+        <div class="monitor">
+          <div class="code-scroll" style="animation-delay:-3.4s">
+            <div class="cl" style="width:50%"></div><div class="cl" style="width:88%"></div>
+            <div class="cl" style="width:65%"></div><div class="cl" style="width:35%"></div>
+            <div class="cl" style="width:78%"></div><div class="cl" style="width:55%"></div>
+            <div class="cl" style="width:92%"></div><div class="cl" style="width:40%"></div>
+            <div class="cl" style="width:50%"></div><div class="cl" style="width:88%"></div>
+            <div class="cl" style="width:65%"></div><div class="cl" style="width:35%"></div>
+          </div>
+        </div>
+        <div class="monitor-stand"></div><div class="monitor-base"></div>
+        <div class="desk"></div>
+        <div class="ws-name">Gamma</div>
+      </div>
+
+    </div>
+  </div><!-- /work-room -->
+
+  <!-- PAUSENRAUM -->
+  <div class="room break-room">
+    <div class="room-label">Pausenraum</div>
+    <div class="break-plant">🪴</div>
+    <div class="window"></div>
+    <div class="couch-wrap">
+      <div class="couch-back"></div>
+      <div class="couch-seat"></div>
+    </div>
+    <div class="coffee-tbl">
+      <div class="ct-cup">☕</div>
+      <div class="ct-top"></div>
+    </div>
+  </div><!-- /break-room -->
+
+  <!-- ═══ CHARACTERS (float over everything) ═══ -->
+  <div class="chars-layer">
+
+    <!-- ALPHA – blue jacket -->
+    <div class="sp" id="sp-alpha" style="--jc:#3b82f6; left:12%">
+      <div class="sp-bubble" id="bub-alpha">Bereit</div>
+      <div class="hat"></div>
+      <div class="head"></div>
+      <div class="body"></div>
+      <div class="arm l"></div>
+      <div class="arm r"></div>
+      <div class="leg l"></div>
+      <div class="leg r"></div>
+    </div>
+
+    <!-- BETA – red jacket -->
+    <div class="sp" id="sp-beta" style="--jc:#ef4444; left:33%">
+      <div class="sp-bubble" id="bub-beta">Bereit</div>
+      <div class="hat"></div>
+      <div class="head"></div>
+      <div class="body"></div>
+      <div class="arm l"></div>
+      <div class="arm r"></div>
+      <div class="leg l"></div>
+      <div class="leg r"></div>
+    </div>
+
+    <!-- GAMMA – orange jacket -->
+    <div class="sp" id="sp-gamma" style="--jc:#f97316; left:54%">
+      <div class="sp-bubble" id="bub-gamma">Bereit</div>
+      <div class="hat"></div>
+      <div class="head"></div>
+      <div class="body"></div>
+      <div class="arm l"></div>
+      <div class="arm r"></div>
+      <div class="leg l"></div>
+      <div class="leg r"></div>
+    </div>
+
+  </div><!-- /chars-layer -->
+
+</div><!-- /building -->
+
+
+<!-- ═══════════ STATUS PANEL ═══════════ -->
+<div class="status-panel">
+
+  <div class="agent-card idle" id="card-alpha" style="--jc:#3b82f6">
+    <div class="card-swatch"></div>
+    <div class="card-info">
+      <div class="cname" style="color:#3b82f6">Alpha</div>
+      <div class="ctask empty" id="ctask-alpha">Wartet auf Aufgabe…</div>
+    </div>
+  </div>
+
+  <div class="agent-card idle" id="card-beta" style="--jc:#ef4444">
+    <div class="card-swatch"></div>
+    <div class="card-info">
+      <div class="cname" style="color:#ef4444">Beta</div>
+      <div class="ctask empty" id="ctask-beta">Wartet auf Aufgabe…</div>
+    </div>
+  </div>
+
+  <div class="agent-card idle" id="card-gamma" style="--jc:#f97316">
+    <div class="card-swatch"></div>
+    <div class="card-info">
+      <div class="cname" style="color:#f97316">Gamma</div>
+      <div class="ctask empty" id="ctask-gamma">Wartet auf Aufgabe…</div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════ CONTROLS ═══════════ -->
+<div class="ctrl-section">
+  <div class="ctrl-title">⚙ Agent steuern</div>
+
+  <div class="ctrl-row">
+    <span class="ctrl-name" style="color:#3b82f6">Alpha</span>
+    <button class="ctrl-btn" onclick="setAgent('alpha','working',document.getElementById('t-alpha').value)">Arbeitet</button>
+    <button class="ctrl-btn" onclick="setAgent('alpha','break')">Pause</button>
+    <button class="ctrl-btn" onclick="setAgent('alpha','idle')">Idle</button>
+    <input class="ctrl-task" id="t-alpha" placeholder="Aufgabe…">
+  </div>
+
+  <div class="ctrl-row">
+    <span class="ctrl-name" style="color:#ef4444">Beta</span>
+    <button class="ctrl-btn" onclick="setAgent('beta','working',document.getElementById('t-beta').value)">Arbeitet</button>
+    <button class="ctrl-btn" onclick="setAgent('beta','break')">Pause</button>
+    <button class="ctrl-btn" onclick="setAgent('beta','idle')">Idle</button>
+    <input class="ctrl-task" id="t-beta" placeholder="Aufgabe…">
+  </div>
+
+  <div class="ctrl-row">
+    <span class="ctrl-name" style="color:#f97316">Gamma</span>
+    <button class="ctrl-btn" onclick="setAgent('gamma','working',document.getElementById('t-gamma').value)">Arbeitet</button>
+    <button class="ctrl-btn" onclick="setAgent('gamma','break')">Pause</button>
+    <button class="ctrl-btn" onclick="setAgent('gamma','idle')">Idle</button>
+    <input class="ctrl-task" id="t-gamma" placeholder="Aufgabe…">
+  </div>
+</div>
+
+<footer>agent office · firebase live · local</footer>
+
+
+<!-- ═══════════ LOGIC ═══════════ -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// ── Firebase ─────────────────────────────────────────
+const FB = {
+  apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
+  authDomain:        "manager-3cf2b.firebaseapp.com",
+  databaseURL:       "https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "manager-3cf2b",
+  storageBucket:     "manager-3cf2b.firebasestorage.app",
+  messagingSenderId: "55315892331",
+  appId:             "1:55315892331:web:9889b92c74e535a85a892e"
+};
+const app = firebase.initializeApp(FB, 'office');
+const db  = firebase.database(app);
+const PATH = 'office/agents';
+
+// ── Positions (% left within building) ───────────────
+const DESK  = { alpha: '12%', beta: '33%', gamma: '54%' };
+const COUCH = { alpha: '71%', beta: '78%', gamma: '85%' };
+
+// ── State tracking ────────────────────────────────────
+const atBreak  = { alpha: false, beta: false, gamma: false };
+const timers   = {};
+const WALK_MS  = 1000;
+
+// ── Apply agent state to DOM ──────────────────────────
+function applyAgent(id, status, task) {
+  const sp     = document.getElementById(`sp-${id}`);
+  const bub    = document.getElementById(`bub-${id}`);
+  const ws     = document.getElementById(`ws-${id}`);
+  const card   = document.getElementById(`card-${id}`);
+  const ctask  = document.getElementById(`ctask-${id}`);
+
+  if (timers[id]) clearTimeout(timers[id]);
+
+  // ── Helper: start walking toward target ──
+  function walkTo(targetLeft, facingRight, onArrival) {
+    sp.classList.remove('typing', 'sitting');
+    sp.classList.add('walking');
+    // scaleX for facing direction (applied via style directly to avoid
+    // conflicting with the bob animation that uses transform too)
+    sp.style.setProperty('--flip', facingRight ? '1' : '-1');
+    // We manually handle the flip by wrapping in a scaleX on the element
+    // Since `animation: bob` uses `transform: scaleX(var(--flip)) translateY(...)`,
+    // we need to set --flip before the animation runs.
+    sp.style.left = targetLeft;
+    bub.textContent = '…';
+
+    timers[id] = setTimeout(() => {
+      sp.classList.remove('walking');
+      sp.style.removeProperty('--flip');
+      onArrival();
+    }, WALK_MS);
+  }
+
+  // ── BREAK ──
+  if (status === 'break') {
+    ws.classList.remove('working');
+    if (!atBreak[id]) {
+      atBreak[id] = true;
+      walkTo(COUCH[id], true, () => {
+        sp.classList.add('sitting');
+        bub.textContent = '☕';
+      });
+    } else {
+      sp.classList.remove('typing', 'walking');
+      sp.classList.add('sitting');
+      bub.textContent = '☕';
+    }
+    card.className  = 'agent-card break';
+    ctask.textContent = 'Pause ☕';
+    ctask.className   = 'ctask';
+
+  // ── WORKING ──
+  } else if (status === 'working') {
+    if (atBreak[id]) {
+      atBreak[id] = false;
+      walkTo(DESK[id], false, () => {
+        sp.classList.add('typing');
+        bub.textContent = task || 'Arbeitet…';
+        ws.classList.add('working');
+      });
+    } else {
+      sp.classList.remove('sitting', 'walking');
+      sp.classList.add('typing');
+      sp.style.left = DESK[id];
+      bub.textContent = task || 'Arbeitet…';
+      ws.classList.add('working');
+    }
+    card.className    = 'agent-card working';
+    ctask.textContent = task || 'Arbeitet…';
+    ctask.className   = 'ctask';
+
+  // ── IDLE ──
+  } else {
+    ws.classList.remove('working');
+    if (atBreak[id]) {
+      atBreak[id] = false;
+      walkTo(DESK[id], false, () => {
+        bub.textContent = 'Bereit';
+      });
+    } else {
+      sp.classList.remove('typing', 'sitting', 'walking');
+      sp.style.left = DESK[id];
+      bub.textContent = 'Bereit';
+    }
+    card.className    = 'agent-card idle';
+    ctask.textContent = 'Wartet auf Aufgabe…';
+    ctask.className   = 'ctask empty';
+  }
+}
+
+// ── Write to Firebase ─────────────────────────────────
+function setAgent(id, status, task = '') {
+  db.ref(`${PATH}/${id}`).set({ status, task: task.trim() });
+}
+
+// ── Listen for changes ────────────────────────────────
+db.ref(PATH).on('value', snap => {
+  const d = snap.val() || {};
+  ['alpha','beta','gamma'].forEach(id => {
+    const a = d[id] || { status: 'idle', task: '' };
+    applyAgent(id, a.status, a.task || '');
+  });
+});
+
+// ── Init defaults if empty ────────────────────────────
+db.ref(PATH).once('value', snap => {
+  if (!snap.val()) {
+    ['alpha','beta','gamma'].forEach(id =>
+      db.ref(`${PATH}/${id}`).set({ status: 'idle', task: '' })
+    );
+  }
+});
+</script>
+</body>
+</html>

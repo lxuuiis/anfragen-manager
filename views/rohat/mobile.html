@@ -744,10 +744,16 @@ function addSession() {
   renderAll(); save(); toast('Termin erstellt ✓');
 }
 function deleteSession(id) {
-  if (!confirm('Termin wirklich löschen?')) return;
+  if (!confirm('Termin in den Papierkorb verschieben?')) return;
+  const s = sessions.find(x => String(x.id) === String(id));
+  if (isConfigured && db && s) {
+    const trashId = 'trash_' + id;
+    firebase.database().ref('trash/' + trashId).set({
+      ...s, _trashedAt: Date.now(), _trashedBy: 'Rohat', _trashId: trashId
+    }).then(() => { firebase.database().ref(DB_PATH + '/' + id).remove(); });
+  }
   sessions = sessions.filter(s => String(s.id) !== String(id));
-  if (isConfigured && db) firebase.database().ref(DB_PATH + '/' + id).remove();
-  renderAll(); toast('Termin gelöscht');
+  renderAll(); toast('In Papierkorb verschoben');
 }
 
 // ── Transfer ──────────────────────────────────────────────────

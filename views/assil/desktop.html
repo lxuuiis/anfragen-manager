@@ -944,9 +944,17 @@ function confirmTransfer(target) {
 }
 
 function deleteSession(id) {
-  if (!confirm('Termin wirklich löschen?')) return;
-  if (asilDb) asilDb.ref('sessions/' + id).remove();
-  toast('Termin gelöscht');
+  if (!confirm('Termin in den Papierkorb verschieben?')) return;
+  const s = allSessions.find(x => x.id === id);
+  if (asilDb && s) {
+    const trashId = 'trash_' + id;
+    firebase.database().ref('trash/' + trashId).set({
+      ...s, _trashedAt: Date.now(), _trashedBy: 'Assil', _trashId: trashId
+    }).then(() => { asilDb.ref('sessions/' + id).remove(); });
+  } else if (asilDb) {
+    asilDb.ref('sessions/' + id).remove();
+  }
+  toast('In Papierkorb verschoben');
 }
 
 /* ── Archiv ───────────────────────────────────────────────────── */

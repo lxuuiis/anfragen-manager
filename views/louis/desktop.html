@@ -850,12 +850,19 @@ function addSession() {
   renderAll(); save(); toast('Neuer Termin erstellt ✓');
 }
 function deleteSession(id) {
-  if (!confirm('Termin wirklich löschen?')) return;
+  if (!confirm('Termin in den Papierkorb verschieben?')) return;
   const s = sessions.find(x => x.id === id);
-  writeLog('Termin gelöscht', s ? `${s.datum} · ${s.uhrzeit}` : String(id));
+  if (isConfigured && db && s) {
+    const trashId = 'trash_' + id;
+    firebase.database().ref('trash/' + trashId).set({
+      ...s, _trashedAt: Date.now(), _trashedBy: 'Louis', _trashId: trashId
+    }).then(() => {
+      firebase.database().ref(DB_PATH + '/' + id).remove();
+    });
+  }
+  writeLog('Termin gelöscht (Papierkorb)', s ? `${s.datum} · ${s.uhrzeit}` : String(id));
   sessions = sessions.filter(s => s.id !== id);
-  if (isConfigured && db) { firebase.database().ref(DB_PATH + '/' + id).remove(); }
-  renderAll(); toast('Termin gelöscht');
+  renderAll(); toast('In Papierkorb verschoben – wiederherstellbar unter anfragen-manager.vercel.app/trash');
 }
 function exportCSV() {
   const bom = '\uFEFF', lines = ['Anfragen Export – Louis\n'];
