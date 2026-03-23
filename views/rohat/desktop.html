@@ -283,6 +283,20 @@ const DB_PATH     = 'sessions';
 const STATUS_OPTS = ['Offen','Reservierung','Abholung','Abgeschlossen'];
 const FB_MOEBEL   = 'https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app';
 
+/* ── Activity-Log ── */
+function writeLog(aktion, details) {
+  if (!db) return;
+  const entry = {
+    ts:      Date.now(),
+    datum:   new Date().toLocaleDateString('de-DE'),
+    uhrzeit: new Date().toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' }),
+    user:    'Rohat',
+    aktion,
+    details: details || ''
+  };
+  db.ref('logs/' + entry.ts + '_' + Math.random().toString(36).slice(2,5)).set(entry);
+}
+
 /* ── Möbel-Katalog (identisch mit moebel.html) ── */
 let MOEBEL_KATALOG = [
   { id:'schreibtisch_160', label:'Schreibtisch 160×80', subs:[
@@ -749,6 +763,8 @@ function statusChanged(sid, idx, newStatus) {
         scheduleSave();
         renderCard(sid);
         renderDayOverview();
+        const moebelInfo = moebel.length > 0 ? ` · ${moebel.map(m=>`${m.qty}× ${m.sub||m.kat}`).join(', ')}` : '';
+        writeLog('Abgeschlossen / Archiviert', `${p.name||'–'}${moebelInfo}`);
         if (moebel.length > 0)
           toast(`${p.name||'Person'} → Archiv ✓ · ${moebel.reduce((a,m)=>a+m.qty,0)} Möbel abgezogen`);
         else
@@ -759,6 +775,7 @@ function statusChanged(sid, idx, newStatus) {
   }
 
   // Alle anderen Status-Änderungen (Offen, Reservierung, Abholung) normal speichern
+  writeLog('Status geändert', `${p.name||'–'}: → ${newStatus}`);
   up(sid, idx, 'status', newStatus);
   renderCard(sid);
   renderDayOverview();
@@ -812,7 +829,8 @@ function renderCard(sid) {
 }
 function addPerson(sid){const s=sessions.find(x=>x.id===sid);if(!s)return;s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''});renderCard(sid);updateSession(sid,'datum',s.datum);scheduleSave();setTimeout(()=>document.querySelector('#tbody-'+sid+' tr:last-child input[type=text]')?.focus(),50);}
 function removePerson(sid,idx){const s=sessions.find(x=>x.id===sid);if(!s)return;s.personen.splice(idx,1);if(!s.personen.length)s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''});renderCard(sid);updateSession(sid,'datum',s.datum);scheduleSave();renderDayOverview();}
-function addSession(){const datum=document.getElementById('newDatum').value.trim(),uhrzeit=document.getElementById('newUhrzeit').value.trim();if(!datum||!uhrzeit){toast('Bitte Datum und Uhrzeit eingeben.');return;}const newS={id:Date.now(),datum,uhrzeit,collapsed:false,owner:OWNER,personen:[{name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''}]};sessions.push(newS);document.getElementById('newDatum').value='';document.getElementById('newUhrzeit').value='';renderAll();save();toast('Neuer Termin erstellt ✓');}
+function addSession(){const datum=document.getElementById('newDatum').value.trim(),uhrzeit=document.getElementById('newUhrzeit').value.trim();if(!datum||!uhrzeit){toast('Bitte Datum und Uhrzeit eingeben.');return;}const newS={id:Date.now(),datum,uhrzeit,collapsed:false,owner:OWNER,personen:[{name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''}]};sessions.push(newS);document.getElementById('newDatum').value='';document.getElementById('newUhrzeit').value='';writeLog('Termin erstellt',datum+' · '+uhrzeit);renderAll();save();toast('Neuer Termin erstellt ✓');}
+function deleteSession(id){if(!confirm('Termin wirklich löschen?'))return;const s=sessions.find(x=>x.id===id);writeLog('Termin gelöscht',s?s.datum+' · '+s.uhrzeit:String(id));sessions=sessions.filter(x=>x.id!==id);if(isConfigured&&db)db.ref(DB_PATH+'/'+id).remove();renderAll();toast('Termin gelöscht');}
 
 // ── Person verschieben ──────────────────────────────────────────
 let _transferSid = null, _transferIdx = null;
@@ -851,10 +869,11 @@ function confirmTransfer() {
     firebase.database().ref('sessions/' + newId).set(newSession);
     firebase.database().ref('sessions/' + _transferSid).set({...s, owner: OWNER});
   }
+  writeLog('Person verschoben', `${personCopy.name} → Louis`);
   renderAll(); save();
   toast(`${personCopy.name} → Louis verschoben ✓`);
 }
-function deleteSession(id){if(!confirm('Termin wirklich löschen?'))return;sessions=sessions.filter(s=>s.id!==id);if(isConfigured&&db){firebase.database().ref(DB_PATH+'/'+id).remove();}renderAll();toast('Termin gelöscht');}
+function deleteSession(id){if(!confirm('Termin wirklich löschen?'))return;const s=sessions.find(x=>x.id===id);writeLog('Termin gelöscht',s?s.datum+' · '+s.uhrzeit:String(id));sessions=sessions.filter(x=>x.id!==id);if(isConfigured&&db){firebase.database().ref(DB_PATH+'/'+id).remove();}renderAll();toast('Termin gelöscht');}
 function exportCSV(){const bom='\uFEFF',lines=['Anfragen Export – Rohat\n'];sessions.forEach(s=>{lines.push('Datum: '+s.datum+' | Uhrzeit: '+s.uhrzeit);lines.push('Name,Status,Abholdatum,Abholzeit,Formular erhalten,Formular weitergeleitet,Tische,Stühle,Bemerkung');s.personen.filter(p=>p.name.trim()).forEach(p=>{lines.push([p.name,p.status,p.abh_datum||'',p.abh_zeit?fmtTime(p.abh_zeit):'',p.fe,p.fw,p.tische||0,p.stuehle||0,p.bem].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));});lines.push('');});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bom+lines.join('\n')],{type:'text/csv;charset=utf-8;'}));a.download='Anfragen_Rohat.csv';a.click();toast('CSV exportiert ✓');}
 let toastTimer;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2400);}

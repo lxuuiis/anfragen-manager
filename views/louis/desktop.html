@@ -323,6 +323,20 @@ const DB_PATH     = 'sessions'; // Root-Pfad in Firebase
 const STATUS_OPTS = ['Offen','Reservierung','Abholung','Abgeschlossen'];
 const FB_MOEBEL   = 'https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app';
 
+/* ── Activity-Log ── */
+function writeLog(aktion, details) {
+  if (!db) return;
+  const entry = {
+    ts:     Date.now(),
+    datum:  new Date().toLocaleDateString('de-DE'),
+    uhrzeit: new Date().toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' }),
+    user:   'Louis',
+    aktion,
+    details: details || ''
+  };
+  db.ref('logs/' + entry.ts + '_' + Math.random().toString(36).slice(2,5)).set(entry);
+}
+
 /* ── Möbel-Katalog — wird dynamisch aus Firebase geladen (Fallback: hardcodiert) ── */
 let MOEBEL_KATALOG = [
   { id:'schreibtisch_160', label:'Schreibtisch 160×80', subs:[
@@ -940,6 +954,8 @@ function statusChanged(sid, idx, newStatus) {
         scheduleSave();
         renderCard(sid);
         renderDayOverview();
+        const moebelInfo = moebel.length > 0 ? ` · ${moebel.map(m=>`${m.qty}× ${m.sub||m.kat}`).join(', ')}` : '';
+        writeLog('Abgeschlossen / Archiviert', `${p.name||'–'}${moebelInfo}`);
         if (moebel.length > 0)
           toast(`${p.name||'Person'} → Archiv ✓ · ${moebel.reduce((a,m)=>a+m.qty,0)} Möbel abgezogen`);
         else
@@ -950,6 +966,7 @@ function statusChanged(sid, idx, newStatus) {
   }
 
   // Alle anderen Status-Änderungen (Offen, Reservierung, Abholung) normal speichern
+  writeLog('Status geändert', `${p.name||'–'}: → ${newStatus}`);
   up(sid, idx, 'status', newStatus);
   renderCard(sid);
   renderDayOverview();
@@ -1044,10 +1061,13 @@ function addSession() {
   sessions.push(newS);
   document.getElementById('newDatum').value = '';
   document.getElementById('newUhrzeit').value = '';
+  writeLog('Termin erstellt', `${datum} · ${uhrzeit}`);
   renderAll(); save(); toast('Neuer Termin erstellt ✓');
 }
 function deleteSession(id) {
   if (!confirm('Termin wirklich löschen?')) return;
+  const s = sessions.find(x => x.id === id);
+  writeLog('Termin gelöscht', s ? `${s.datum} · ${s.uhrzeit}` : String(id));
   sessions = sessions.filter(s => s.id !== id);
   if (isConfigured && db) { firebase.database().ref(DB_PATH + '/' + id).remove(); }
   renderAll(); toast('Termin gelöscht');
@@ -1110,6 +1130,7 @@ function confirmTransfer() {
     firebase.database().ref('sessions/' + newId).set(newSession);
     firebase.database().ref('sessions/' + _transferSid).set({...s, owner: OWNER});
   }
+  writeLog('Person verschoben', `${personCopy.name} → Rohat`);
   renderAll(); save();
   toast(`${personCopy.name} → Rohat verschoben ✓`);
 }
