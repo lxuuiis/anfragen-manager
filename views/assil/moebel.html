@@ -4,112 +4,110 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Möbel Übersicht · Assil</title>
-<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script src="../../theme.js"></script>
+<link rel="stylesheet" href="../../shared.css" />
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f5f5f7; --surface: #ffffff; --surface2: #f5f5f7;
-    --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.14);
-    --text: #1d1d1f; --text-secondary: #6e6e73; --text-tertiary: #aeaeb2;
-    --accent: #ff9500; --accent-hover: #e08600; --accent-light: #fff8e6;
-    --danger: #ff3b30;
-    --success: #34c759; --warning: #ff9500;
-    --radius: 14px; --radius-sm: 9px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
-    --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-    --tr: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
-  nav { background: rgba(255,255,255,0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 200; padding: 0 28px; height: 52px; display: flex; align-items: center; justify-content: space-between; }
-  .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
-  .owner-tag { background: #7c3aed; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; }
-  .nav-actions { display: flex; align-items: center; gap: 8px; }
-  .back-btn { display:flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--text-secondary); text-decoration:none; padding:5px 10px; border-radius:8px; border:1px solid rgba(0,0,0,0.14); transition:0.15s ease; }
-  .back-btn:hover { background:rgba(0,0,0,0.05); color:var(--text); }
-  .sync-indicator { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-tertiary); }
-  .sync-indicator.synced { color: var(--success); }
-  .sync-indicator.syncing { color: var(--warning); }
-  .sync-indicator.error { color: var(--danger); }
-  .sync-indicator .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: var(--tr); white-space: nowrap; }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
-  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-strong); }
-  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
-  .btn-green { background: #34c759; color: #fff; }
-  .btn-green:hover { background: #28a347; transform: translateY(-1px); }
-  main { max-width: 1340px; margin: 0 auto; padding: 28px 20px 80px; display: flex; flex-direction: column; gap: 28px; }
+  :root { --owner-color: var(--assil-c); }
+  .nav-brand .owner-tag { background: var(--assil-c); color: #fff; }
+  .btn-green { background: var(--success); color: #fff; border-color: var(--success); }
+  .btn-green:hover { filter: brightness(1.08); }
+  main { max-width: 1300px; margin: 0 auto; padding: 24px 20px 80px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── Summary Strip ── */
   .summary-strip { display: flex; gap: 10px; flex-wrap: wrap; }
-  .sum-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow); padding: 12px 16px; flex: 1; min-width: 110px; }
-  .sum-card .s-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); margin-bottom: 4px; }
-  .sum-card .s-num { font-size: 22px; font-weight: 700; line-height: 1; }
-  .sum-card .s-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-  .sum-card.warn .s-num { color: var(--danger); }
-  .sum-card.ok   .s-num { color: var(--success); }
-  .kat-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
-  .kat-head { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: var(--surface2); border-bottom: 1px solid var(--border); }
-  .kat-emoji { font-size: 20px; }
-  .kat-title { font-size: 15px; font-weight: 700; }
-  .kat-gesamtbadge { margin-left: auto; font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 20px; background: var(--accent-light); color: var(--accent); border: 1px solid rgba(255,149,0,0.25); }
+  .sum-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; min-width: 140px; flex: 1; box-shadow: var(--shadow-sm); }
+  .sum-card.ok   { border-left: 3px solid var(--success); }
+  .sum-card.warn { border-left: 3px solid var(--danger); }
+  .s-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-2); margin-bottom: 5px; }
+  .s-num { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+  .s-sub { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+  /* legacy sum-chip aliases (backward compat) */
+  .sum-chip { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; min-width: 130px; box-shadow: var(--shadow-sm); }
+  .sum-chip-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-2); margin-bottom: 4px; }
+  .sum-chip-val { font-size: 22px; font-weight: 700; color: var(--text); }
+  .sum-chip-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+  /* ── Kategorie-Karte ── */
+  .kat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+  .kat-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .kat-emoji { font-size: 16px; flex-shrink: 0; }
+  .kat-title { font-size: 14px; font-weight: 700; flex: 1; color: var(--text); }
+  .kat-gesamtbadge { font-size: 11px; font-weight: 700; color: var(--text-2); background: var(--surface3); border-radius: 20px; padding: 2px 9px; white-space: nowrap; }
+  .rm-kat-btn { display: flex; align-items: center; gap: 5px; background: none; border: 1px solid rgba(217,48,37,0.2); color: var(--danger); border-radius: var(--radius-sm); padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: var(--font); transition: 0.12s; }
+  .rm-kat-btn:hover { background: var(--danger-light); }
+
+  /* ── Tabelle ── */
   .tbl-wrap { overflow-x: auto; }
-  .mtbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .mtbl thead th { padding: 10px 16px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-secondary); background: #fafafa; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
-  .mtbl tbody tr { border-bottom: 1px solid var(--border); transition: background var(--tr); }
-  .mtbl tbody tr:last-child { border-bottom: none; }
-  .mtbl tbody tr:hover { background: #fffbf2; }
-  .mtbl td { padding: 11px 16px; vertical-align: middle; }
-  .fchip { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
-  .fdot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-  .stepper { display: inline-flex; align-items: center; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; background: var(--surface); }
-  .s-btn { background: none; border: none; width: 36px; height: 36px; font-size: 17px; font-weight: 700; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: var(--tr); user-select: none; }
-  .s-btn:hover { background: #ebebef; color: var(--text); }
-  .s-btn:active { background: #e0e0e5; }
-  .s-val { min-width: 52px; text-align: center; font-size: 17px; font-weight: 700; border-left: 1px solid var(--border); border-right: 1px solid var(--border); padding: 0 6px; line-height: 36px; cursor: pointer; transition: color var(--tr); }
-  .s-val.pos { color: var(--success); }
-  .s-val.zero { color: var(--text-tertiary); }
-  .sbadge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
-  .sbadge.viel   { background: #e8f8ee; color: #1a7a36; }
-  .sbadge.mittel { background: #fff8e6; color: #b07800; }
-  .sbadge.leer   { background: #fff0f0; color: var(--danger); }
-  .notiz { font-family: var(--font); font-size: 12px; color: var(--text); background: transparent; border: 1px solid transparent; border-radius: 7px; padding: 5px 8px; outline: none; transition: var(--tr); width: 100%; min-width: 140px; }
-  .notiz:hover { border-color: var(--border-strong); background: var(--surface2); }
-  .notiz:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(255,149,0,0.12); }
-  .notiz::placeholder { color: var(--text-tertiary); }
-  .ts { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; }
-  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: rgba(29,29,31,0.92); backdrop-filter: blur(12px); color:#fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; white-space: nowrap; }
-  #toast.show { transform: translateX(-50%) translateY(0); }
-  .edit-overlay { position: fixed; inset:0; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); z-index:500; display:none; align-items:center; justify-content:center; }
-  .edit-overlay.open { display:flex; }
-  .edit-box { background:#fff; border-radius:18px; padding:28px; width:320px; max-width:95vw; box-shadow:0 24px 60px rgba(0,0,0,0.2); }
-  .edit-box h3 { font-size:16px; font-weight:700; margin-bottom:6px; }
-  .edit-box p  { font-size:12px; color:var(--text-secondary); margin-bottom:18px; }
-  .edit-box input { width:100%; font-size:28px; font-weight:700; text-align:center; border:2px solid var(--border-strong); border-radius:10px; padding:12px; font-family:var(--font); outline:none; }
-  .edit-box input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,149,0,0.15); }
-  .edit-box-actions { display:flex; gap:8px; margin-top:18px; }
-  .edit-box-actions .btn { flex:1; justify-content:center; }
-  /* Katalog-Editor */
-  .kat-add-row { display:flex; gap:8px; align-items:center; padding:10px 20px; background:var(--surface2); border-top:1px solid var(--border); }
-  .kat-add-row input { flex:1; font-size:13px; font-family:var(--font); padding:7px 12px; border:1px solid var(--border-strong); border-radius:8px; outline:none; background:#fff; }
-  .kat-add-row input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,149,0,0.12); }
-  .add-sub-btn { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:#0071e3; background:none; border:none; cursor:pointer; padding:5px 8px; border-radius:7px; white-space:nowrap; }
-  .add-sub-btn:hover { background:#e8f1fb; }
-  .rm-row-btn { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:6px; background:none; border:none; cursor:pointer; color:var(--text-tertiary); font-size:14px; flex-shrink:0; }
-  .rm-row-btn:hover { background:#fff0f0; color:var(--danger); }
-  .rm-kat-btn { margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--danger); background:none; border:1px solid rgba(255,59,48,0.3); border-radius:8px; padding:4px 10px; cursor:pointer; }
-  .rm-kat-btn:hover { background:#fff0f0; }
-  .add-kat-card { background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); border:2px dashed var(--border-strong); display:flex; align-items:center; justify-content:center; gap:10px; padding:22px; cursor:pointer; transition:var(--tr); }
-  .add-kat-card:hover { border-color:var(--accent); background:var(--accent-light); }
-  .add-kat-card span { font-size:14px; font-weight:600; color:var(--text-secondary); }
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); backdrop-filter:blur(4px); z-index:600; display:none; align-items:center; justify-content:center; }
-  .modal-overlay.open { display:flex; }
-  .modal-box { background:#fff; border-radius:18px; padding:28px; width:380px; max-width:95vw; box-shadow:0 24px 60px rgba(0,0,0,0.2); }
-  .modal-box h3 { font-size:16px; font-weight:700; margin-bottom:16px; }
-  .modal-field { margin-bottom:14px; }
-  .modal-field label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary); margin-bottom:5px; }
-  .modal-field input { width:100%; font-size:14px; font-family:var(--font); padding:9px 12px; border:1.5px solid var(--border-strong); border-radius:9px; outline:none; }
-  .modal-field input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,149,0,0.12); }
-  .modal-actions { display:flex; gap:8px; margin-top:18px; }
-  .modal-actions .btn { flex:1; justify-content:center; }
+  .mtbl { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 700px; }
+  .mtbl col.c-name   { width: auto; }
+  .mtbl col.c-bestand{ width: 130px; }
+  .mtbl col.c-status { width: 120px; }
+  .mtbl col.c-notiz  { width: 200px; }
+  .mtbl col.c-ts     { width: 130px; }
+  .mtbl col.c-rm     { width: 36px; }
+  .mtbl thead th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-3); padding: 8px 14px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface2); white-space: nowrap; }
+  .mtbl tbody tr:hover td { background: var(--surface2); }
+  .mtbl td { padding: 8px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; overflow: hidden; }
+  .mtbl tbody tr:last-child td { border-bottom: none; }
+
+  /* ── Farb-Chip ── */
+  .fchip { display: flex; align-items: center; gap: 7px; font-weight: 500; color: var(--text); }
+  .fdot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 1px solid var(--border); }
+
+  /* ── Stepper ── */
+  .stepper { display: flex; align-items: center; gap: 6px; }
+  .s-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; color: var(--text-2); transition: 0.12s; flex-shrink: 0; }
+  .s-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .s-val { font-size: 15px; font-weight: 700; width: 36px; text-align: center; color: var(--text); cursor: pointer; border-radius: 6px; padding: 2px 0; transition: 0.12s; }
+  .s-val:hover { background: var(--accent-light); color: var(--accent); }
+  .s-val.zero { color: var(--text-3); }
+
+  /* ── Status-Badge ── */
+  .sbadge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .sbadge.ok     { background: var(--success-light); color: var(--success); }
+  .sbadge.wenig  { background: var(--warning-light); color: var(--warning); }
+  .sbadge.leer   { background: var(--danger-light);  color: var(--danger); }
+  .sbadge.mittel { background: var(--warning-light); color: var(--warning); }
+  .sbadge.viel   { background: var(--success-light); color: var(--success); }
+
+  /* ── Notiz-Input ── */
+  .notiz { width: 100%; background: none; border: none; border-bottom: 1px solid transparent; font-size: 12px; font-family: var(--font); color: var(--text-2); padding: 3px 0; outline: none; transition: 0.12s; }
+  .notiz:focus { border-bottom-color: var(--accent); color: var(--text); }
+  .notiz::placeholder { color: var(--text-3); }
+
+  /* ── Timestamp ── */
+  .ts { font-size: 11px; color: var(--text-3); white-space: nowrap; }
+
+  /* ── Löschen-Button ── */
+  .rm-row-btn { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 4px; transition: 0.12s; }
+  .rm-row-btn:hover { color: var(--danger); background: var(--danger-light); }
+
+  /* ── Eintrag hinzufügen ── */
+  .kat-add-row { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; }
+  .kat-add-row input[type="text"] { flex: 1; min-width: 180px; font-size: 12px; font-family: var(--font); padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; transition: 0.12s; }
+  .kat-add-row input[type="number"] { width: 80px; font-size: 12px; font-family: var(--font); padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; transition: 0.12s; }
+  .kat-add-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .add-sub-btn { display: flex; align-items: center; gap: 5px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font); transition: 0.12s; white-space: nowrap; }
+  .add-sub-btn:hover { filter: brightness(1.1); }
+
+  /* ── Edit-Overlay ── */
+  .edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .edit-overlay.open { display: flex; }
+  .edit-box { background: var(--surface); border-radius: var(--radius-lg); padding: 26px 28px; max-width: 340px; width: 90%; box-shadow: var(--shadow-modal); border: 1px solid var(--border); }
+  .edit-box h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+  .edit-box p  { font-size: 13px; color: var(--text-2); margin-bottom: 16px; }
+  .edit-box input { width: 100%; font-size: 22px; font-weight: 700; text-align: center; font-family: var(--font); padding: 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none; background: var(--surface2); color: var(--text); margin-bottom: 16px; }
+  .edit-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .edit-box-actions { display: flex; gap: 8px; }
+  .edit-box-actions .btn { flex: 1; justify-content: center; }
+
+  /* ── Modal fields ── */
+  .modal-field { margin-bottom: 14px; }
+  .modal-field label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-2); margin-bottom: 5px; }
+  .modal-field input { width: 100%; font-size: 14px; font-family: var(--font); padding: 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none; background: var(--surface2); color: var(--text); }
+  .modal-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .modal-actions { display: flex; gap: 8px; margin-top: 18px; }
+  .modal-actions .btn { flex: 1; justify-content: center; }
 </style>
 </head>
 <body>
@@ -134,12 +132,19 @@
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       Excel Export
     </button>
+    <button class="dm-toggle" id="dmToggle" title="Dark Mode">
+      <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun"  width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
   </div>
 </nav>
 
 <main>
   <div>
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-secondary);margin-bottom:10px;">Gesamt-Übersicht</div>
+    <div class="sec-label" style="margin-bottom:10px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      Gesamt-Übersicht
+    </div>
     <div class="summary-strip" id="summaryStrip"></div>
   </div>
   <div id="katContainer"></div>
@@ -485,13 +490,14 @@ function buildDOM() {
       </div>
       <div class="tbl-wrap">
         <table class="mtbl">
+          <colgroup><col class="c-name"/><col class="c-bestand"/><col class="c-status"/><col class="c-notiz"/><col class="c-ts"/><col class="c-rm"/></colgroup>
           <thead><tr>
-            <th style="min-width:220px">Typ / Farbe / Maße</th>
-            <th style="min-width:170px">Bestand <small style="font-weight:400;text-transform:none">(klick = direkt)</small></th>
-            <th style="min-width:110px">Status</th>
-            <th style="min-width:180px">Notiz</th>
-            <th style="min-width:110px">Geändert</th>
-            <th style="width:40px"></th>
+            <th>Typ / Farbe / Maße</th>
+            <th>Bestand <small style="font-weight:400;text-transform:none">(klick = direkt)</small></th>
+            <th>Status</th>
+            <th>Notiz</th>
+            <th>Geändert</th>
+            <th></th>
           </tr></thead>
           <tbody id="tbody-${kat.id}">${rows}</tbody>
         </table>

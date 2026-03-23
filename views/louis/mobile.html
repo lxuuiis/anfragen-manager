@@ -112,11 +112,34 @@
   .jn-opt.active-nein { background: #e5e5ea; color: var(--text); }
   .jn-opt.active-ja { background: #e8f8ee; color: #1a7a36; }
 
-  /* Möbel */
-  .moebel-row { display: flex; gap: 8px; }
-  .moebel-item { display: flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: 8px; padding: 5px 10px; flex: 1; }
-  .moebel-input { font-family: var(--font); font-size: 16px; font-weight: 600; color: var(--text); background: transparent; border: none; outline: none; width: 40px; text-align: center; }
-  .moebel-label { font-size: 11px; color: var(--text-secondary); }
+  /* Möbel — neue Auswahl */
+  .moebel-list { display: flex; flex-direction: column; gap: 6px; }
+  .moebel-tag { display: flex; align-items: center; gap: 6px; background: #eef4ff; border: 1px solid #c5d9f5; border-radius: 10px; padding: 8px 10px; }
+  .moebel-tag-texts { display: flex; flex-direction: column; flex: 1; min-width: 0; cursor: pointer; }
+  .moebel-tag-kat { font-size: 11px; font-weight: 700; color: #0052a3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .moebel-tag-sub { font-size: 12px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .moebel-qty-wrap { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .moebel-qty-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; line-height: 1; }
+  .moebel-qty-btn:active { background: var(--accent-light); }
+  .moebel-qty-val { font-size: 15px; font-weight: 700; color: var(--text); min-width: 20px; text-align: center; }
+  .moebel-rm-btn { background: none; border: none; color: #aac4e0; font-size: 18px; line-height: 1; cursor: pointer; padding: 0 2px; flex-shrink: 0; }
+  .moebel-rm-btn:active { color: var(--danger); }
+  .moebel-add-btn { background: none; border: 1px dashed var(--border-strong); border-radius: 8px; color: var(--accent); font-size: 13px; font-weight: 600; padding: 8px; width: 100%; cursor: pointer; font-family: var(--font); display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .moebel-add-btn:active { background: var(--accent-light); }
+
+  /* Möbel Bottom-Sheet */
+  .mpick-sheet { position: fixed; inset: 0; z-index: 4000; display: flex; flex-direction: column; justify-content: flex-end; }
+  .mpick-sheet-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(3px); animation: fadeIn 0.15s ease; }
+  .mpick-sheet-inner { position: relative; background: var(--surface); border-radius: 22px 22px 0 0; padding: 0 0 calc(20px + env(safe-area-inset-bottom,0px)); max-height: 82vh; display: flex; flex-direction: column; animation: slideUp 0.22s cubic-bezier(0.34,1.56,0.64,1); }
+  .mpick-sheet-handle { width: 40px; height: 4px; background: var(--border-strong); border-radius: 2px; margin: 12px auto 0; flex-shrink: 0; }
+  .mpick-sheet-title { font-size: 14px; font-weight: 700; padding: 12px 18px 8px; color: var(--text); flex-shrink: 0; border-bottom: 1px solid var(--border); }
+  .mpick-tabs { display: flex; gap: 0; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+  .mpick-tab { flex: 1; padding: 10px; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent; transition: 0.15s; background: none; border-top: none; border-left: none; border-right: none; font-family: var(--font); }
+  .mpick-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .mpick-chips { padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 8px; overflow-y: auto; flex: 1; align-content: flex-start; }
+  .mpick-chip { padding: 8px 14px; border-radius: 20px; border: 1.5px solid var(--border-strong); background: var(--surface2); font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text); transition: 0.12s; }
+  .mpick-chip:active { background: var(--accent-light); }
+  .mpick-chip.sel { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
 
   /* Abholung */
   .abh-row { display: flex; gap: 8px; }
@@ -134,7 +157,8 @@
   .session-del-btn:active { color: var(--danger); }
 
   /* ── TRANSFER MODAL ── */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 3000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); animation: fadeIn 0.15s ease; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 3000; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.15s ease; }
   .modal-sheet { background: var(--surface); border-radius: 20px 20px 0 0; padding: 20px 20px calc(20px + var(--safe-bottom)); width: 100%; max-width: 600px; animation: slideUp 0.22s cubic-bezier(0.34,1.56,0.64,1); }
   .modal-sheet h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
   .modal-sheet p { font-size: 14px; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.5; }
@@ -219,6 +243,205 @@ let db = null, isConfigured = false;
 let _dirtyIds = new Set();
 
 // ── Firebase ──────────────────────────────────────────────────
+/* ── Möbel-Katalog ── */
+let MOEBEL_KATALOG = [
+  { id:'schreibtisch_160', label:'Schreibtisch 160×80', subs:[
+    { id:'weiss', label:'Weiß' }, { id:'grau', label:'Grau' },
+    { id:'grau_manuel_rad', label:'Grau manuell Rädchen' }, { id:'grau_manuel_schr', label:'Grau manuell Schrauben' }, { id:'grau_auseinander', label:'Grau auseinandergebaut' },
+  ]},
+  { id:'schreibtisch_120', label:'Schreibtisch 120×80', subs:[{ id:'holz_rollen', label:'Holz auf Rollen' }]},
+  { id:'schreibtisch_240', label:'Schreibtisch 240×80 Winkel', subs:[{ id:'weiss', label:'Weiß' }]},
+  { id:'buerostuehle', label:'Bürostühle', subs:[
+    { id:'jeansblau', label:'Jeansblau' }, { id:'grau', label:'Grau' }, { id:'dunkelblau', label:'Dunkelblau (geteilte RL)' },
+  ]},
+  { id:'besprechungsstuehle', label:'Besprechungsstühle', subs:[
+    { id:'dunkelblau', label:'Dunkelblau' }, { id:'jeansblau', label:'Jeansblau' }, { id:'grau', label:'Grau' }, { id:'grau_ohne_arm', label:'Grau ohne Armlehne' },
+  ]},
+  { id:'beistelltisch', label:'Beistelltisch', subs:[
+    { id:'weiss_120x60', label:'Weiß 120×60' }, { id:'weiss_160x80', label:'Weiß 160×80' }, { id:'weiss_180x60', label:'Weiß 180×60' }, { id:'weiss_180x80', label:'Weiß 180×80' }, { id:'weiss_190x90', label:'Weiß 190×90' },
+    { id:'grau_120x60', label:'Grau 120×60' }, { id:'grau_160x60', label:'Grau 160×60' }, { id:'grau_160x80', label:'Grau 160×80' }, { id:'grau_180x80', label:'Grau 180×80' }, { id:'grau_200x100', label:'Grau 200×100' }, { id:'holz_160x80', label:'Holz 160×80' },
+  ]},
+  { id:'rc', label:'Rollcontainer (RC)', subs:[
+    { id:'grau_h51', label:'Grau H51' }, { id:'grau_h57', label:'Grau H57' }, { id:'weiss', label:'Weiß' },
+  ]},
+  { id:'sideboard', label:'Sideboard', subs:[
+    { id:'holz_jalousie', label:'Holz Jalousie 120×80' }, { id:'holz_schiebe78', label:'Holz Schiebetür 120×78' }, { id:'holz_schiebe152', label:'Holz Schiebetür 120×152' },
+    { id:'weiss_80', label:'Weiß 80×80' }, { id:'weiss_100', label:'Weiß 100×80' }, { id:'weiss_120', label:'Weiß 120×80' }, { id:'weiss_160', label:'Weiß 160×80' }, { id:'weiss_100_117', label:'Weiß 100×117' }, { id:'weiss_120_117', label:'Weiß 120×117' }, { id:'grau_jalousie', label:'Grau Jalousie 160×117' },
+  ]},
+  { id:'schrank', label:'Schrank', subs:[
+    { id:'grau_schiebe', label:'Grau Schiebetür 100×115' }, { id:'grau_doppel', label:'Grau Doppelflügel 100×190' }, { id:'grau_jalousie80', label:'Grau Jalousie 100×117' }, { id:'grau_jalousie190', label:'Grau Jalousie 80×190' },
+  ]},
+  { id:'besprechungstisch', label:'Besprechungstisch', subs:[
+    { id:'holz_140', label:'Holz 140×80' }, { id:'holz_200', label:'Holz 200×80 IT' }, { id:'holz_210', label:'Holz 210×120 IT' },
+    { id:'grau_oval160', label:'Grau 160×90 oval' }, { id:'grau_160', label:'Grau 160×90' }, { id:'grau_r140', label:'Grau rund Ø140' }, { id:'grau_r120', label:'Grau rund Ø120' },
+    { id:'weiss_r120', label:'Weiß rund Ø120' }, { id:'weiss_160x160', label:'Weiß 160×160 IT' }, { id:'weiss_160x160b', label:'Weiß 160×160' },
+  ]},
+  { id:'apothekerschrank', label:'Apothekerschrank', subs:[
+    { id:'weiss_li', label:'Weiß links' }, { id:'weiss_esche_li', label:'Weiß/Esche links' }, { id:'weiss_esche_re', label:'Weiß/Esche rechts' },
+  ]},
+  { id:'whiteboard', label:'Whiteboard', subs:[
+    { id:'100x150_neu', label:'100×150 neu' }, { id:'100x200_neu', label:'100×200 neu' }, { id:'120x150_neu', label:'120×150 neu' }, { id:'100x200_gb', label:'100×200 gebraucht' }, { id:'120x200_gb', label:'120×200 gebraucht' },
+  ]},
+  { id:'garderobe', label:'Garderobe', subs:[
+    { id:'weiss', label:'Weiß' }, { id:'divers', label:'Divers' }, { id:'rollen', label:'Auf Rollen' },
+  ]},
+  { id:'pulttisch', label:'Pulttisch mit Sitz', subs:[{ id:'standard', label:'Standard' }]},
+  { id:'luefter', label:'Lüfter', subs:[
+    { id:'ansio', label:'Ansio' }, { id:'tecvance', label:'TecVance' }, { id:'honey_chr', label:'Honeywell Chrom' }, { id:'honey_schw', label:'Honeywell Schwarz' },
+  ]},
+  { id:'ventilator', label:'Ventilator', subs:[
+    { id:'honeywell', label:'Honeywell' }, { id:'aeg', label:'AEG' }, { id:'profi', label:'Profi & Care' },
+  ]},
+  { id:'kleiderschrank', label:'Kleiderschrank', subs:[{ id:'weiss', label:'Weiß 60×198' }, { id:'grau', label:'Grau 60×186' }]},
+];
+
+/* ── Mobile Möbel-Picker (Bottom-Sheet) ── */
+let _mpick = { sid: null, idx: null, mi: null, tab: 'kat' };
+
+function mpickOpen(sid, idx, mi) {
+  _mpick = { sid, idx, mi, tab: 'kat' };
+  const s = sessions.find(x => String(x.id) === String(sid));
+  const m = s?.personen[idx]?.moebel?.[mi];
+  if (!m) return;
+  // Wenn Kategorie bereits gewählt, direkt Sub-Tab zeigen
+  if (m.kat) _mpick.tab = 'sub';
+  renderMpickSheet();
+}
+
+function renderMpickSheet() {
+  const existing = document.getElementById('mpickSheet');
+  if (existing) existing.remove();
+
+  const { sid, idx, mi, tab } = _mpick;
+  const s = sessions.find(x => String(x.id) === String(sid));
+  const m = s?.personen[idx]?.moebel?.[mi];
+  if (!m) return;
+
+  const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
+  const katLabel = katObj ? katObj.label : 'Kategorie wählen';
+
+  let chipsHtml = '';
+  if (tab === 'kat') {
+    chipsHtml = MOEBEL_KATALOG.map(k =>
+      `<button class="mpick-chip${m.kat === k.id ? ' sel' : ''}" onclick="mpickSelKat('${k.id}')">${k.label}</button>`
+    ).join('');
+  } else {
+    if (katObj) {
+      chipsHtml = katObj.subs.map(s =>
+        `<button class="mpick-chip${m.sub === s.id ? ' sel' : ''}" onclick="mpickSelSub('${s.id}')">${s.label}</button>`
+      ).join('');
+    }
+  }
+
+  const el = document.createElement('div');
+  el.className = 'mpick-sheet'; el.id = 'mpickSheet';
+  el.innerHTML = `
+    <div class="mpick-sheet-bg" onclick="mpickClose()"></div>
+    <div class="mpick-sheet-inner">
+      <div class="mpick-sheet-handle"></div>
+      <div class="mpick-sheet-title">Möbel auswählen</div>
+      <div class="mpick-tabs">
+        <button class="mpick-tab${tab==='kat'?' active':''}" onclick="mpickSwitchTab('kat')">Kategorie</button>
+        <button class="mpick-tab${tab==='sub'?' active':''}" onclick="mpickSwitchTab('sub')">${katLabel}</button>
+      </div>
+      <div class="mpick-chips">${chipsHtml}</div>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+function mpickSwitchTab(tab) {
+  _mpick.tab = tab;
+  renderMpickSheet();
+}
+
+function mpickSelKat(katId) {
+  const { sid, idx, mi } = _mpick;
+  const s = sessions.find(x => String(x.id) === String(sid));
+  if (!s?.personen[idx]?.moebel?.[mi]) return;
+  const katObj = MOEBEL_KATALOG.find(k => k.id === katId);
+  s.personen[idx].moebel[mi].kat = katId;
+  s.personen[idx].moebel[mi].sub = katObj?.subs[0]?.id || '';
+  _dirtyIds.add(String(sid)); scheduleSave();
+  _mpick.tab = 'sub';
+  renderMpickSheet();
+  renderMoebelTags(sid, idx);
+}
+
+function mpickSelSub(subId) {
+  const { sid, idx, mi } = _mpick;
+  const s = sessions.find(x => String(x.id) === String(sid));
+  if (!s?.personen[idx]?.moebel?.[mi]) return;
+  s.personen[idx].moebel[mi].sub = subId;
+  _dirtyIds.add(String(sid)); scheduleSave();
+  mpickClose();
+  renderMoebelTags(sid, idx);
+}
+
+function mpickClose() {
+  document.getElementById('mpickSheet')?.remove();
+  _mpick = { sid: null, idx: null, mi: null, tab: 'kat' };
+}
+
+function moebelAdd(sid, idx) {
+  const s = sessions.find(x => String(x.id) === String(sid)); if (!s?.personen[idx]) return;
+  if (!Array.isArray(s.personen[idx].moebel)) s.personen[idx].moebel = [];
+  const kat = MOEBEL_KATALOG[0];
+  s.personen[idx].moebel.push({ kat: kat.id, sub: kat.subs[0].id, qty: 1 });
+  _dirtyIds.add(String(sid)); scheduleSave();
+  renderMoebelTags(sid, idx);
+  // Sofort Picker für neuen Eintrag öffnen
+  const mi = s.personen[idx].moebel.length - 1;
+  _mpick = { sid, idx, mi, tab: 'kat' };
+  renderMpickSheet();
+}
+
+function moebelRemove(sid, idx, mi) {
+  const s = sessions.find(x => String(x.id) === String(sid)); if (!s?.personen[idx]) return;
+  s.personen[idx].moebel.splice(mi, 1);
+  _dirtyIds.add(String(sid)); scheduleSave();
+  renderMoebelTags(sid, idx);
+}
+
+function moebelQtyChange(sid, idx, mi, delta) {
+  const s = sessions.find(x => String(x.id) === String(sid)); if (!s?.personen[idx]?.moebel?.[mi]) return;
+  s.personen[idx].moebel[mi].qty = Math.max(1, (s.personen[idx].moebel[mi].qty || 1) + delta);
+  _dirtyIds.add(String(sid)); scheduleSave();
+  renderMoebelTags(sid, idx);
+}
+
+function renderMoebelTags(sid, idx) {
+  const container = document.getElementById(`moebel-tags-${sid}-${idx}`);
+  if (!container) return;
+  const s = sessions.find(x => String(x.id) === String(sid));
+  const moebel = Array.isArray(s?.personen[idx]?.moebel) ? s.personen[idx].moebel : [];
+  container.innerHTML = buildMoebelTagsHtml(sid, idx, moebel);
+}
+
+function buildMoebelTagsHtml(sid, idx, moebel) {
+  const tags = moebel.map((m, mi) => {
+    const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
+    const subObj = katObj?.subs.find(s => s.id === m.sub);
+    const katLabel = katObj ? katObj.label : '–';
+    const subLabel = subObj ? subObj.label : '–';
+    return `<div class="moebel-tag">
+      <div class="moebel-tag-texts" onclick="mpickOpen('${sid}',${idx},${mi})">
+        <span class="moebel-tag-kat">${katLabel}</span>
+        <span class="moebel-tag-sub">${subLabel}</span>
+      </div>
+      <div class="moebel-qty-wrap">
+        <button class="moebel-qty-btn" onclick="moebelQtyChange('${sid}',${idx},${mi},-1)">−</button>
+        <span class="moebel-qty-val">${m.qty || 1}</span>
+        <button class="moebel-qty-btn" onclick="moebelQtyChange('${sid}',${idx},${mi},+1)">+</button>
+      </div>
+      <button class="moebel-rm-btn" onclick="moebelRemove('${sid}',${idx},${mi})">×</button>
+    </div>`;
+  }).join('');
+  return tags + `<button class="moebel-add-btn" onclick="moebelAdd('${sid}',${idx})">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Möbel hinzufügen
+  </button>`;
+}
+
 function initFirebase() {
   try {
     const app = firebase.initializeApp(FIREBASE_CONFIG);
@@ -399,17 +622,8 @@ function buildPersonRow(sid, p, idx) {
       </div>
       <div class="field-group">
         <span class="field-label">Möbel</span>
-        <div class="moebel-row">
-          <div class="moebel-item">
-            <input class="moebel-input" type="number" min="0" max="99" value="${p.tische||0}"
-              oninput="up('${sid}',${idx},'tische',+this.value)" />
-            <span class="moebel-label">Ti</span>
-          </div>
-          <div class="moebel-item">
-            <input class="moebel-input" type="number" min="0" max="99" value="${p.stuehle||0}"
-              oninput="up('${sid}',${idx},'stuehle',+this.value)" />
-            <span class="moebel-label">St</span>
-          </div>
+        <div class="moebel-list" id="moebel-tags-${sid}-${idx}">
+          ${buildMoebelTagsHtml(sid, idx, Array.isArray(p.moebel) ? p.moebel : [])}
         </div>
       </div>
       <div class="field-group">
@@ -491,7 +705,7 @@ function renderCard(sid) {
 }
 function addPerson(sid) {
   const s = sessions.find(x => String(x.id) === String(sid)); if (!s) return;
-  s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',tische:0,stuehle:0,bem:'',abh_datum:'',abh_zeit:''});
+  s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''});
   _dirtyIds.add(String(sid));
   renderCard(sid); scheduleSave();
   setTimeout(() => {
@@ -502,7 +716,7 @@ function addPerson(sid) {
 function removePerson(sid, idx) {
   const s = sessions.find(x => String(x.id) === String(sid)); if (!s) return;
   s.personen.splice(idx, 1);
-  if (!s.personen.length) s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',tische:0,stuehle:0,bem:'',abh_datum:'',abh_zeit:''});
+  if (!s.personen.length) s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''});
   _dirtyIds.add(String(sid));
   renderCard(sid); renderOverview(); scheduleSave();
 }
@@ -510,7 +724,7 @@ function addSession() {
   const datum = document.getElementById('newDatum').value.trim();
   const uhrzeit = document.getElementById('newUhrzeit').value.trim();
   if (!datum || !uhrzeit) { toast('Bitte Datum und Uhrzeit eingeben.'); return; }
-  const newS = { id: Date.now(), datum, uhrzeit, collapsed: false, owner: OWNER, personen: [{name:'',status:'Offen',fe:'Nein',fw:'Nein',tische:0,stuehle:0,bem:'',abh_datum:'',abh_zeit:''}] };
+  const newS = { id: Date.now(), datum, uhrzeit, collapsed: false, owner: OWNER, personen: [{name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''}] };
   sessions.push(newS);
   document.getElementById('newDatum').value = '';
   document.getElementById('newUhrzeit').value = '';
@@ -532,7 +746,7 @@ function openTransfer(sid, idx) {
   const existing = document.getElementById('transferModal');
   if (existing) existing.remove();
   const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay'; overlay.id = 'transferModal';
+  overlay.className = 'modal-overlay open'; overlay.id = 'transferModal';
   overlay.innerHTML = `<div class="modal-sheet">
     <h3>👤 Person verschieben</h3>
     <p><strong>${esc(p.name)}</strong> zu Rohat verschieben?</p>
@@ -550,7 +764,7 @@ function confirmTransfer() {
   const p = s.personen[_tIdx]; if (!p) return;
   const personCopy = {...p};
   s.personen.splice(_tIdx, 1);
-  if (!s.personen.length) s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',tische:0,stuehle:0,bem:'',abh_datum:'',abh_zeit:''});
+  if (!s.personen.length) s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''});
   if (isConfigured && db) {
     const newId = Date.now();
     firebase.database().ref('sessions/' + newId).set({ id: newId, datum: s.datum, uhrzeit: s.uhrzeit, collapsed: false, owner: 'rohat', personen: [personCopy] });
