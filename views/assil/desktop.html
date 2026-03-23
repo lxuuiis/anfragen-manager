@@ -375,6 +375,15 @@ function buildStatusCell(sid, idx, currentStatus) {
 
 function setStatus(sid, idx, newStatus) {
   if (newStatus === 'Abgeschlossen') {
+    const s = allSessions.find(x => x.id === sid);
+    const p = s && s.personen[idx];
+    const name = p && p.name ? p.name : 'diesen Kunden';
+    if (!confirm(`„${name}" wirklich abschließen und ins Archiv verschieben?`)) {
+      // Dropdown zurücksetzen
+      const cell = document.getElementById(`sc-${sid}-${idx}`);
+      if (cell) cell.outerHTML = buildStatusCell(sid, idx, p.status || 'Offen');
+      return;
+    }
     archivePerson(sid, idx);
     return;
   }
