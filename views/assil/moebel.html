@@ -373,40 +373,7 @@ function saveKatalog() {
     _db = firebase.database(app);
 
     // Erst Katalog laden, dann Bestandsdaten
-    _db.ref('moebelKatalog').once('value', snapKat => {
-      const fbKat = snapKat.val();
-      if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
-        // Katalog aus Firebase übernehmen (neue Kategorien/Einträge)
-        fbKat.forEach(fbK => {
-          const existing = KATEGORIEN.find(k => k.id === fbK.id);
-          if (existing) {
-            // Neue Zeilen ergänzen (vorhandene behalten, fehlende hinzufügen)
-            fbK.zeilen.forEach(fbZ => {
-              if (!existing.zeilen.find(z => z.id === fbZ.id)) {
-                existing.zeilen.push({ id: fbZ.id, label: fbZ.label, farbe: '#aeaeb2', rand: null, start: 0 });
-              }
-            });
-            // Zeilen die in Firebase fehlen → entfernen
-            existing.zeilen = existing.zeilen.filter(z => fbK.zeilen.find(fbZ => fbZ.id === z.id));
-          } else {
-            // Komplett neue Kategorie
-            KATEGORIEN.push({
-              id: fbK.id, titel: fbK.titel, emoji: fbK.emoji || '📦',
-              zeilen: fbK.zeilen.map(z => ({ id: z.id, label: z.label, farbe: '#aeaeb2', rand: null, start: 0 }))
-            });
-          }
-        });
-        // Kategorien die in Firebase nicht mehr existieren → entfernen
-        for (let i = KATEGORIEN.length - 1; i >= 0; i--) {
-          if (!fbKat.find(fbK => fbK.id === KATEGORIEN[i].id)) {
-            KATEGORIEN.splice(i, 1);
-          }
-        }
-      } else {
-        // Erster Start: Katalog initial in Firebase speichern
-        saveKatalog();
-      }
-
+    function startMoebelListener() {
       // Initialisiere _data für alle (inkl. neue) Kategorien
       KATEGORIEN.forEach(kat => {
         if (!_data[kat.id]) _data[kat.id] = {};
@@ -438,6 +405,46 @@ function saveKatalog() {
         renderAll();
         setSync('synced', 'Live ✓');
       }, () => { setSync('error','Firebase Fehler'); renderAll(); });
+    }
+
+    _db.ref('moebelKatalog').once('value', snapKat => {
+      const fbKat = snapKat.val();
+      if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
+        // Katalog aus Firebase übernehmen (neue Kategorien/Einträge)
+        fbKat.forEach(fbK => {
+          if (!fbK || !Array.isArray(fbK.zeilen)) return;
+          const existing = KATEGORIEN.find(k => k.id === fbK.id);
+          if (existing) {
+            // Neue Zeilen ergänzen (vorhandene behalten, fehlende hinzufügen)
+            fbK.zeilen.forEach(fbZ => {
+              if (!existing.zeilen.find(z => z.id === fbZ.id)) {
+                existing.zeilen.push({ id: fbZ.id, label: fbZ.label, farbe: '#aeaeb2', rand: null, start: 0 });
+              }
+            });
+            // Zeilen die in Firebase fehlen → entfernen
+            existing.zeilen = existing.zeilen.filter(z => fbK.zeilen.find(fbZ => fbZ.id === z.id));
+          } else {
+            // Komplett neue Kategorie
+            KATEGORIEN.push({
+              id: fbK.id, titel: fbK.titel, emoji: fbK.emoji || '📦',
+              zeilen: fbK.zeilen.map(z => ({ id: z.id, label: z.label, farbe: '#aeaeb2', rand: null, start: 0 }))
+            });
+          }
+        });
+        // Kategorien die in Firebase nicht mehr existieren → entfernen
+        for (let i = KATEGORIEN.length - 1; i >= 0; i--) {
+          if (!fbKat.find(fbK => fbK.id === KATEGORIEN[i].id)) {
+            KATEGORIEN.splice(i, 1);
+          }
+        }
+      } else {
+        // Erster Start: Katalog initial in Firebase speichern
+        saveKatalog();
+      }
+      startMoebelListener();
+    }, () => {
+      // Katalog nicht lesbar → trotzdem Bestandsdaten laden
+      startMoebelListener();
     });
   } catch(e) { setSync('error','Init-Fehler'); console.error(e); renderAll(); }
 })();

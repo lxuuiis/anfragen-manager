@@ -215,6 +215,9 @@ function initFirebase() {
         fbKat.forEach(k => MOEBEL_KATALOG.push(k));
       }
       startSessionListener();
+    }, () => {
+      // Katalog nicht lesbar → trotzdem Sessions laden
+      startSessionListener();
     });
 
     // Live-Updates wenn Katalog in moebel.html geändert wird
@@ -403,7 +406,7 @@ function buildMoebelCell(sid, idx, p) {
   const moebel = Array.isArray(p.moebel) ? p.moebel : [];
   const rows = moebel.map((m, mi) => {
     const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
-    const subObj = katObj ? katObj.subs.find(s => s.id === m.sub) : null;
+    const subObj = (katObj && Array.isArray(katObj.subs)) ? katObj.subs.find(s => s.id === m.sub) : null;
     const katLabel = katObj ? esc(katObj.label) : '–';
     const subLabel = subObj ? esc(subObj.label) : '–';
     return `<div class="moebel-posten" id="mp-${sid}-${idx}-${mi}">
@@ -609,7 +612,8 @@ function moebelAdd(sid, idx) {
   if (!s || !s.personen[idx]) return;
   if (!Array.isArray(s.personen[idx].moebel)) s.personen[idx].moebel = [];
   const kat = MOEBEL_KATALOG[0];
-  s.personen[idx].moebel.push({ kat: kat.id, sub: kat.subs[0].id, qty: 1 });
+  const firstSub = (kat && Array.isArray(kat.subs) && kat.subs.length > 0) ? kat.subs[0].id : '';
+  s.personen[idx].moebel.push({ kat: kat ? kat.id : '', sub: firstSub, qty: 1 });
   _dirtyIds.add(String(sid)); scheduleSave(); renderCard(sid);
 }
 function moebelRemove(sid, idx, mi) {

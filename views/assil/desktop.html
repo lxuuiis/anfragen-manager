@@ -1040,7 +1040,7 @@ function renderArchiv() {
       if (e.moebel && e.moebel.length > 0) {
         moebelText = e.moebel.map(m => {
           const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
-          const subObj = katObj ? katObj.subs.find(s => s.id === m.sub) : null;
+          const subObj = (katObj && Array.isArray(katObj.subs)) ? katObj.subs.find(s => s.id === m.sub) : null;
           const label  = subObj ? subObj.label : (katObj ? katObj.label : (m.sub || m.kat || '?'));
           return `${m.qty}× ${label}`;
         }).join(', ');
@@ -1143,7 +1143,7 @@ function buildMoebelCell(sid, idx, p) {
   const moebel = Array.isArray(p.moebel) ? p.moebel : [];
   const rows = moebel.map((m, mi) => {
     const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
-    const subObj = katObj ? katObj.subs.find(s => s.id === m.sub) : null;
+    const subObj = (katObj && Array.isArray(katObj.subs)) ? katObj.subs.find(s => s.id === m.sub) : null;
     const katLabel = katObj ? katObj.label : (m.kat || '–');
     const subLabel = subObj ? subObj.label : (m.sub || '–');
     return `<div class="moebel-posten" id="mp-${sid}-${idx}-${mi}">
