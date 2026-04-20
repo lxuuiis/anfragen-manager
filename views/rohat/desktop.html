@@ -476,7 +476,7 @@ function mpickRenderKat(m) {
 function mpickRenderSub(m) {
   const col = document.getElementById('mpickSubCol');
   const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
-  if (!katObj) { col.innerHTML = ''; return; }
+  if (!katObj || !Array.isArray(katObj.subs)) { col.innerHTML = ''; return; }
   col.innerHTML = katObj.subs.map(s => {
     const active = s.id === m.sub ? ' active' : '';
     return `<div class="mpick-sub-item${active}" onmousedown="event.preventDefault();mpickSelectSub('${esc(s.id)}')">${esc(s.label)}</div>`;
@@ -489,14 +489,14 @@ function mpickSelectKat(katId) {
   if (!s || !s.personen[idx] || !s.personen[idx].moebel[mi]) return;
   const katObj = MOEBEL_KATALOG.find(k => k.id === katId);
   s.personen[idx].moebel[mi].kat = katId;
-  s.personen[idx].moebel[mi].sub = katObj ? katObj.subs[0].id : '';
+  s.personen[idx].moebel[mi].sub = (katObj && Array.isArray(katObj.subs) && katObj.subs.length) ? katObj.subs[0].id : '';
   _dirtyIds.add(String(sid)); scheduleSave();
   const m = s.personen[idx].moebel[mi];
   mpickRenderKat(m);
   mpickRenderSub(m);
   const posten = document.getElementById(`mp-${sid}-${idx}-${mi}`);
   if (posten) {
-    const subObj = katObj ? katObj.subs[0] : null;
+    const subObj = (katObj && Array.isArray(katObj.subs) && katObj.subs.length) ? katObj.subs[0] : null;
     posten.querySelector('.mpick-trigger-kat').textContent = katObj ? katObj.label : '–';
     posten.querySelector('.mpick-trigger-sub').textContent = subObj ? subObj.label : '–';
   }
