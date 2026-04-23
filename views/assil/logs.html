@@ -74,6 +74,7 @@
   .aktion-badge.archiviert { background: var(--purple-light);  color: var(--assil-c); }
   .aktion-badge.status     { background: var(--accent-light);  color: var(--accent); }
   .aktion-badge.verschoben { background: var(--warning-light); color: var(--warning); }
+  .aktion-badge.moebel     { background: #fff8e6; color: #b07800; }
 
   /* ── Search ── */
   .search-wrap { position: relative; display: flex; align-items: center; }
@@ -192,6 +193,7 @@ function aktionClass(a) {
   if (l.includes('erstellt'))   return 'erstellt';
   if (l.includes('gelöscht') || l.includes('geloscht')) return 'geloescht';
   if (l.includes('archiviert') || l.includes('abgeschlossen')) return 'archiviert';
+  if (l.includes('möbel') || l.includes('moebel'))  return 'moebel';
   if (l.includes('status'))     return 'status';
   if (l.includes('verschoben')) return 'verschoben';
   return 'other';
@@ -202,6 +204,7 @@ function aktionIcon(a) {
   if (l.includes('erstellt'))   return '✚';
   if (l.includes('gelöscht') || l.includes('geloscht')) return '✕';
   if (l.includes('archiviert') || l.includes('abgeschlossen')) return '✓';
+  if (l.includes('möbel') || l.includes('moebel')) return '🪑';
   if (l.includes('status'))     return '↻';
   if (l.includes('verschoben')) return '⇄';
   return '•';

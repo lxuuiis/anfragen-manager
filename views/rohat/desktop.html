@@ -177,6 +177,7 @@ let MOEBEL_KATALOG = [
   { id:'schreibtisch_160', label:'Schreibtisch 160×80', subs:[
     { id:'weiss', label:'Weiß' }, { id:'grau', label:'Grau' },
     { id:'grau_manuel_rad', label:'Grau manuell Rädchen' }, { id:'grau_manuel_schr', label:'Grau manuell Schrauben' }, { id:'grau_auseinander', label:'Grau auseinandergebaut' },
+    { id:'holz_rollen', label:'Holz manuell auf Rollen' },
   ]},
   { id:'schreibtisch_120', label:'Schreibtisch 120×80', subs:[{ id:'holz_rollen', label:'Holz auf Rollen' }]},
   { id:'schreibtisch_240', label:'Schreibtisch 240×80 Winkel', subs:[{ id:'weiss', label:'Weiß' }]},
@@ -747,8 +748,8 @@ function statusChanged(sid, idx, newStatus) {
         scheduleSave();
         renderCard(sid);
         renderDayOverview();
-        const moebelInfo = moebel.length > 0 ? ` · ${moebel.map(m=>`${m.qty}× ${m.sub||m.kat}`).join(', ')}` : '';
-        writeLog('Abgeschlossen / Archiviert', `${p.name||'–'}${moebelInfo}`);
+        const moebelInfo = moebel.length > 0 ? ' · ' + moebel.map(m => { const _k=MOEBEL_KATALOG.find(k=>k.id===m.kat); const _s=_k?.subs?.find(s=>s.id===m.sub); return `${m.qty}× ${_s?.label||_k?.label||m.sub||m.kat}`; }).join(', ') : '';
+        writeLog('Möbel Abschluss', `${p.name||'–'}${moebelInfo}`);
         if (moebel.length > 0)
           toast(`${p.name||'Person'} → Archiv ✓ · ${moebel.reduce((a,m)=>a+m.qty,0)} Möbel abgezogen`);
         else
@@ -759,7 +760,8 @@ function statusChanged(sid, idx, newStatus) {
   }
 
   // Alle anderen Status-Änderungen (Offen, Reservierung, Abholung) normal speichern
-  writeLog('Status geändert', `${p.name||'–'}: → ${newStatus}`);
+  const _mInfo = Array.isArray(p.moebel) && p.moebel.length > 0 ? ' [' + p.moebel.map(m=>`${m.qty}× ${m.sub||m.kat}`).join(', ') + ']' : '';
+  writeLog('Status geändert', `${p.name||'–'}: → ${newStatus}${_mInfo}`);
   up(sid, idx, 'status', newStatus);
   renderCard(sid);
   renderDayOverview();
@@ -773,12 +775,18 @@ function moebelAdd(sid, idx) {
   const kat = MOEBEL_KATALOG[0];
   const firstSub = (kat && Array.isArray(kat.subs) && kat.subs.length > 0) ? kat.subs[0].id : '';
   s.personen[idx].moebel.push({ kat: kat ? kat.id : '', sub: firstSub, qty: 1 });
+  writeLog('Möbel hinzugefügt', `${s.personen[idx].name||'–'}: +1× ${kat?.label||'?'} – ${kat?.subs?.[0]?.label||'?'}`);
   _dirtyIds.add(String(sid)); scheduleSave(); renderCard(sid);
 }
 function moebelRemove(sid, idx, mi) {
   const s = sessions.find(x => String(x.id) === String(sid));
   if (!s || !s.personen[idx] || !Array.isArray(s.personen[idx].moebel)) return;
+  const m = s.personen[idx].moebel[mi];
+  const _katO = m ? MOEBEL_KATALOG.find(k => k.id === m.kat) : null;
+  const _subO = (_katO && Array.isArray(_katO.subs)) ? _katO.subs.find(ss => ss.id === m.sub) : null;
+  const _mLbl = m ? `${m.qty}× ${_katO?.label||m.kat||'?'} – ${_subO?.label||m.sub||'?'}` : '?';
   s.personen[idx].moebel.splice(mi, 1);
+  writeLog('Möbel entfernt', `${s.personen[idx].name||'–'}: −${_mLbl}`);
   _dirtyIds.add(String(sid)); scheduleSave(); renderCard(sid);
 }
 function moebelKatChange(sid, idx, mi, newKat) {

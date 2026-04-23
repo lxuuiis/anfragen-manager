@@ -1104,8 +1104,8 @@ function archivePerson(sid, idx) {
         saveSession(sid);
       }
       const moebelInfo = archivEntry.moebel && archivEntry.moebel.length > 0
-        ? ` · ${archivEntry.moebel.map(m=>`${m.qty}× ${m.sub||m.kat}`).join(', ')}` : '';
-      writeLog('Abgeschlossen / Archiviert', `${p.name||'–'}${moebelInfo}`);
+        ? ' · ' + archivEntry.moebel.map(m => { const _k=MOEBEL_KATALOG.find(k=>k.id===m.kat); const _s=_k?.subs?.find(ss=>ss.id===m.sub); return `${m.qty}× ${_s?.label||_k?.label||m.sub||m.kat}`; }).join(', ') : '';
+      writeLog('Möbel Abschluss', `${p.name||'–'}${moebelInfo}`);
       toast((p.name||'Person') + ' → Archiv verschoben ✓');
     })
     .catch(err => toast('Fehler: ' + err.message));
@@ -1264,6 +1264,7 @@ function moebelAdd(sid, idx) {
   if (!s.personen[idx].moebel) s.personen[idx].moebel = [];
   const firstKat = MOEBEL_KATALOG[0] || { id:'', subs:[{id:'',label:''}] };
   s.personen[idx].moebel.push({ kat: firstKat.id, sub: (firstKat.subs[0]||{}).id||'', qty: 1 });
+  writeLog('Möbel hinzugefügt', `${s.personen[idx].name||'–'}: +1× ${firstKat.label||'?'} – ${firstKat.subs?.[0]?.label||'?'}`);
   reRenderRow(sid, idx);
   scheduleSave(sid);
 }
@@ -1271,7 +1272,12 @@ function moebelAdd(sid, idx) {
 function moebelRemove(sid, idx, mi) {
   const s = allSessions.find(x => String(x.id) === String(sid)); if (!s) return;
   if (!Array.isArray(s.personen[idx].moebel)) return;
+  const m = s.personen[idx].moebel[mi];
+  const _katO = m ? MOEBEL_KATALOG.find(k => k.id === m.kat) : null;
+  const _subO = (_katO && Array.isArray(_katO.subs)) ? _katO.subs.find(ss => ss.id === m.sub) : null;
+  const _mLbl = m ? `${m.qty}× ${_katO?.label||m.kat||'?'} – ${_subO?.label||m.sub||'?'}` : '?';
   s.personen[idx].moebel.splice(mi, 1);
+  writeLog('Möbel entfernt', `${s.personen[idx].name||'–'}: −${_mLbl}`);
   reRenderRow(sid, idx);
   scheduleSave(sid);
 }

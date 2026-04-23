@@ -38,7 +38,7 @@
 
   /* ── Tabelle ── */
   .tbl-wrap { overflow-x: auto; }
-  .mtbl { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 700px; }
+  .mtbl { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 900px; }
   .mtbl col.c-name   { width: auto; }
   .mtbl col.c-bestand{ width: 130px; }
   .mtbl col.c-status { width: 120px; }
@@ -81,6 +81,16 @@
   /* ── Löschen-Button ── */
   .rm-row-btn { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px; border-radius: 4px; transition: 0.12s; }
   .rm-row-btn:hover { color: var(--danger); background: var(--danger-light); }
+
+  /* ── Reserviert / Verfügbar Spalten ── */
+  .mtbl col.c-reserviert { width: 100px; }
+  .mtbl col.c-verfuegbar { width: 120px; }
+  .res-badge { font-size:11px; font-weight:600; color:#b07800; background:#fff8e6; border-radius:20px; padding:2px 8px; white-space:nowrap; }
+  .res-badge.none { color:var(--text-3); background:none; font-weight:400; }
+  .avail-val { font-size:13px; font-weight:700; white-space:nowrap; }
+  .avail-pos  { color:var(--success); }
+  .avail-warn { color:var(--warning); }
+  .avail-neg  { color:var(--danger); }
 
   /* ── Eintrag hinzufügen ── */
   .kat-add-row { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); background: var(--surface2); flex-wrap: wrap; }
@@ -367,6 +377,7 @@ let _data = {};
 let _db   = null;
 let _saveTimer = null;
 let _domBuilt  = false;
+let _reserviert = {}; // { katId: { subId: qty } }
 
 // Initialisiere mit Startwerten
 KATEGORIEN.forEach(kat => {
@@ -416,6 +427,10 @@ function saveKatalog() {
         });
       });
 
+      // Katalog-Sync beim Start: sicherstellen dass Louis/Rohat aktuelle Dropdown-Daten haben
+      saveKatalog(); syncKatalogToDropdown();
+      // Reservierungsanzeige: Session-Listener starten
+      listenToSessions();
       // Jetzt Bestandsdaten live hören
       _db.ref('moebel').on('value', snap => {
         const fbData = snap.val();
@@ -470,6 +485,8 @@ function saveKatalog() {
               .then(() => console.log('Wiederhergestellte Einträge:', Object.keys(_updates)))
               .catch(e => console.error('Restore-Fehler:', e));
           }
+          // Katalog nach Restore immer synchron halten
+          saveKatalog(); syncKatalogToDropdown();
         }
         _domBuilt = false; // DOM neu aufbauen bei Katalogänderungen
         renderAll();
@@ -539,6 +556,8 @@ function buildDOM() {
             <button class="s-btn" onclick="change('${kat.id}','${z.id}',1)">+</button>
           </div>
         </td>
+        <td><span class="res-badge none" id="res-${kat.id}-${z.id}">–</span></td>
+        <td><span class="avail-val" id="avail-${kat.id}-${z.id}">–</span></td>
         <td><span class="sbadge leer" id="b-${kat.id}-${z.id}">Leer</span></td>
         <td><input class="notiz" id="n-${kat.id}-${z.id}" placeholder="Notiz…" oninput="noteChange('${kat.id}','${z.id}',this.value)" /></td>
         <td><span class="ts" id="t-${kat.id}-${z.id}">–</span></td>
@@ -562,10 +581,12 @@ function buildDOM() {
       </div>
       <div class="tbl-wrap">
         <table class="mtbl">
-          <colgroup><col class="c-name"/><col class="c-bestand"/><col class="c-status"/><col class="c-notiz"/><col class="c-ts"/><col class="c-rm"/></colgroup>
+          <colgroup><col class="c-name"/><col class="c-bestand"/><col class="c-reserviert"/><col class="c-verfuegbar"/><col class="c-status"/><col class="c-notiz"/><col class="c-ts"/><col class="c-rm"/></colgroup>
           <thead><tr>
             <th>Typ / Farbe / Maße</th>
             <th>Bestand <small style="font-weight:400;text-transform:none">(klick = direkt)</small></th>
+            <th>Reserviert</th>
+            <th>Verfügbar</th>
             <th>Status</th>
             <th>Notiz</th>
             <th>Geändert</th>
@@ -610,6 +631,20 @@ function updateValues() {
 
       const tsEl = document.getElementById(`t-${kat.id}-${z.id}`);
       if (tsEl) tsEl.textContent = d.updatedAt || '–';
+
+      const resEl = document.getElementById(`res-${kat.id}-${z.id}`);
+      const availEl = document.getElementById(`avail-${kat.id}-${z.id}`);
+      if (resEl) {
+        const res = (_reserviert[kat.id] || {})[z.id] || 0;
+        if (res > 0) { resEl.textContent = res + ' reserv.'; resEl.className = 'res-badge'; }
+        else { resEl.textContent = '–'; resEl.className = 'res-badge none'; }
+      }
+      if (availEl) {
+        const res = (_reserviert[kat.id] || {})[z.id] || 0;
+        const avail = v - res;
+        availEl.textContent = avail;
+        availEl.className = 'avail-val ' + (avail < 0 ? 'avail-neg' : avail <= 5 ? 'avail-warn' : 'avail-pos');
+      }
     });
 
     const totEl = document.getElementById(`kat-tot-${kat.id}`);
@@ -742,6 +777,31 @@ function syncKatalogToDropdown() {
     subs: k.zeilen.map(z => ({ id: z.id, label: z.label }))
   }));
   _db.ref('moebelDropdownKatalog').set(katalog);
+}
+
+/* ── Session-Listener für Reservierungsanzeige ── */
+function listenToSessions() {
+  if (!_db) return;
+  _db.ref('sessions').on('value', snap => {
+    const all = snap.val();
+    const newRes = {};
+    if (all) {
+      Object.values(all).forEach(session => {
+        if (!session || !session.personen) return;
+        session.personen.forEach(p => {
+          if (!p || !['Offen','Reservierung','Abholung'].includes(p.status)) return;
+          if (!Array.isArray(p.moebel)) return;
+          p.moebel.forEach(m => {
+            if (!m || !m.kat || !m.sub || !(m.qty > 0)) return;
+            if (!newRes[m.kat]) newRes[m.kat] = {};
+            newRes[m.kat][m.sub] = (newRes[m.kat][m.sub] || 0) + m.qty;
+          });
+        });
+      });
+    }
+    _reserviert = newRes;
+    updateValues();
+  });
 }
 
 function scheduleSave() { clearTimeout(_saveTimer); _saveTimer = setTimeout(save, 700); }
