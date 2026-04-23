@@ -112,6 +112,39 @@
 </head>
 <body>
 
+<!-- ── Passwort-Schutz ── -->
+<div id="pwOverlay" style="position:fixed;inset:0;background:var(--bg,#f5f5f7);z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:var(--surface,#fff);border:1px solid var(--border,#e0e0e0);border-radius:14px;padding:36px 30px;max-width:340px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.14);text-align:center;">
+    <div style="font-size:32px;margin-bottom:14px;">🔒</div>
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:6px;color:var(--text,#1c1c1e);">Möbel Übersicht</h2>
+    <p style="font-size:13px;color:var(--text-2,#6e6e73);margin-bottom:22px;">Bitte Passwort eingeben, um fortzufahren</p>
+    <input type="password" id="pwInput" placeholder="Passwort…" autocomplete="current-password" style="width:100%;font-size:15px;padding:11px 14px;border:1.5px solid var(--border,#e0e0e0);border-radius:8px;outline:none;margin-bottom:10px;font-family:inherit;box-sizing:border-box;" />
+    <div id="pwError" style="font-size:12px;color:#d93025;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="checkPw()" style="width:100%;background:#0071e3;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Weiter →</button>
+  </div>
+</div>
+<script>
+(function(){
+  const PW = 'Moebel2026';
+  if(sessionStorage.getItem('moebelPwOk')==='1'){
+    document.getElementById('pwOverlay').style.display='none';
+  } else {
+    setTimeout(()=>document.getElementById('pwInput').focus(),80);
+    document.getElementById('pwInput').addEventListener('keydown',function(e){ if(e.key==='Enter') checkPw(); });
+  }
+  window.checkPw = function(){
+    if(document.getElementById('pwInput').value===PW){
+      sessionStorage.setItem('moebelPwOk','1');
+      document.getElementById('pwOverlay').style.display='none';
+    } else {
+      document.getElementById('pwError').textContent='Falsches Passwort – bitte erneut versuchen';
+      document.getElementById('pwInput').value='';
+      document.getElementById('pwInput').focus();
+    }
+  };
+})();
+</script>
+
 <nav>
   <div class="nav-brand">
     <a href="../../index.html" class="back-btn">
@@ -225,6 +258,7 @@ const KATEGORIEN = [
     { id:'grau_manuel_rad',  label:'Grau manuell mit Rädchen',    farbe:'#8e8e93', rand:null,   start:2  },
     { id:'grau_manuel_schr', label:'Grau manuell mit Schrauben',  farbe:'#8e8e93', rand:null,   start:4  },
     { id:'grau_auseinander', label:'Grau manuell auseinandergebaut',farbe:'#8e8e93',rand:null,  start:1  },
+    { id:'holz_rollen',      label:'Holz manuell auf Rollen',         farbe:'#c8a96e',rand:null,  start:6  },
   ]},
   { id:'schreibtisch_120', titel:'Schreibtisch 120×80 höhenverstellbar', emoji:'🖥️', zeilen:[
     { id:'holz_rollen', label:'Holz manuell auf Rollen', farbe:'#c8a96e', rand:null, start:4 },
@@ -401,6 +435,42 @@ function saveKatalog() {
             }
           });
         }
+        // Einmalig: fehlende Einträge aus letztem bekannten Stand wiederherstellen
+        if (!window._restoreDone) {
+          window._restoreDone = true;
+          const _restoreData = {
+            'buerostuehle': {
+              'jeansblau':  { anzahl:31, notiz:'', updatedAt:'24.03. 13:04' },
+              'grau':       { anzahl:4,  notiz:'', updatedAt:'' },
+              'dunkelblau': { anzahl:59, notiz:'', updatedAt:'16.04. 10:09' },
+            },
+            'schreibtisch_160': {
+              'weiss':            { anzahl:30, notiz:'', updatedAt:'' },
+              'grau':             { anzahl:55, notiz:'', updatedAt:'' },
+              'grau_manuel_rad':  { anzahl:2,  notiz:'', updatedAt:'' },
+              'grau_manuel_schr': { anzahl:4,  notiz:'', updatedAt:'' },
+              'grau_auseinander': { anzahl:1,  notiz:'', updatedAt:'' },
+              'holz_rollen':      { anzahl:6,  notiz:'', updatedAt:'20.03. 16:03' },
+            },
+            'schreibtisch_120': {
+              'holz_rollen': { anzahl:4, notiz:'', updatedAt:'' },
+            }
+          };
+          const _fbNow = snap.val() || {};
+          const _updates = {};
+          Object.keys(_restoreData).forEach(katId => {
+            Object.keys(_restoreData[katId]).forEach(zeilId => {
+              if (!_fbNow[katId] || _fbNow[katId][zeilId] === undefined || _fbNow[katId][zeilId] === null) {
+                _updates['moebel/' + katId + '/' + zeilId] = _restoreData[katId][zeilId];
+              }
+            });
+          });
+          if (Object.keys(_updates).length > 0) {
+            _db.ref('/').update(_updates)
+              .then(() => console.log('Wiederhergestellte Einträge:', Object.keys(_updates)))
+              .catch(e => console.error('Restore-Fehler:', e));
+          }
+        }
         _domBuilt = false; // DOM neu aufbauen bei Katalogänderungen
         renderAll();
         setSync('synced', 'Live ✓');
@@ -421,8 +491,7 @@ function saveKatalog() {
                 existing.zeilen.push({ id: fbZ.id, label: fbZ.label, farbe: '#aeaeb2', rand: null, start: 0 });
               }
             });
-            // Zeilen die in Firebase fehlen → entfernen
-            existing.zeilen = existing.zeilen.filter(z => fbK.zeilen.find(fbZ => fbZ.id === z.id));
+            // KEIN Entfernen von lokal definierten Zeilen – verhindert versehentliche Datenlöschung
           } else {
             // Komplett neue Kategorie
             KATEGORIEN.push({
@@ -431,12 +500,8 @@ function saveKatalog() {
             });
           }
         });
-        // Kategorien die in Firebase nicht mehr existieren → entfernen
-        for (let i = KATEGORIEN.length - 1; i >= 0; i--) {
-          if (!fbKat.find(fbK => fbK.id === KATEGORIEN[i].id)) {
-            KATEGORIEN.splice(i, 1);
-          }
-        }
+        // KEIN Entfernen von lokal definierten Kategorien – verhindert versehentliche Datenlöschung
+        // (nur dynamisch hinzugefügte Kategorien mit Timestamp-ID werden entfernt wenn explizit gelöscht)
       } else {
         // Erster Start: Katalog initial in Firebase speichern
         saveKatalog();
@@ -684,7 +749,15 @@ function scheduleSave() { clearTimeout(_saveTimer); _saveTimer = setTimeout(save
 function save() {
   if (!_db) return;
   setSync('syncing','Speichern…');
-  _db.ref('moebel').set(_data)
+  // Granulares Update statt set() – verhindert versehentliches Löschen anderer Kategorien
+  const updates = {};
+  KATEGORIEN.forEach(kat => {
+    kat.zeilen.forEach(z => {
+      const d = (_data[kat.id]||{})[z.id];
+      if (d) updates['moebel/' + kat.id + '/' + z.id] = d;
+    });
+  });
+  _db.ref('/').update(updates)
     .then(()=>{ setSync('synced','Gespeichert ✓'); toast('Gespeichert ✓'); })
     .catch(e=>{ setSync('error','Fehler'); console.error(e); });
 }

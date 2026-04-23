@@ -10,6 +10,31 @@
   :root { --owner-color: var(--rohat-c); }
   .nav-brand .owner-tag { background: var(--rohat-c); color: #fff; }
   main { display: flex; flex-direction: column; gap: 20px; }
+  /* ── Externe Verkäufe ── */
+  .extern-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .extern-section-hdr { display:flex; align-items:center; gap:8px; padding:11px 18px; background:var(--surface2); border-bottom:1px solid var(--border); }
+  .extern-section-hdr h2 { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2); display:flex; align-items:center; gap:6px; margin:0; }
+  .extern-count-badge { font-size:10px; font-weight:700; background:#f97316; color:#fff; border-radius:20px; padding:1px 8px; }
+  .extern-list { padding:8px 12px; display:flex; flex-direction:column; gap:8px; }
+  .extern-card { border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; border-left:3px solid #f97316; background:var(--surface); }
+  .extern-card-top { display:flex; align-items:center; gap:10px; padding:10px 14px; flex-wrap:wrap; }
+  .extern-card-name { font-size:13px; font-weight:700; color:var(--text); flex:1; }
+  .extern-card-meta { font-size:12px; color:var(--text-2); }
+  .extern-tag { font-size:10px; font-weight:700; background:#fff7ed; color:#f97316; border:1px solid #fed7aa; border-radius:20px; padding:1px 7px; text-transform:uppercase; letter-spacing:0.4px; }
+  .extern-moebel-row { padding:0 14px 8px; display:flex; flex-wrap:wrap; gap:5px; }
+  .extern-m-chip { font-size:11px; background:var(--surface2); color:var(--text-2); border-radius:4px; padding:2px 7px; border:1px solid var(--border); }
+  .extern-bem-row { padding:0 14px 8px; font-size:12px; color:var(--text-3); font-style:italic; }
+  .extern-card-footer { display:flex; justify-content:flex-end; padding:8px 14px; border-top:1px solid var(--border); background:var(--surface2); }
+  .claim-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; display:flex; align-items:center; justify-content:center; }
+  .claim-box { background:var(--surface); border-radius:var(--radius); box-shadow:0 20px 60px rgba(0,0,0,0.2); max-width:440px; width:92%; padding:24px; }
+  .claim-box h3 { font-size:15px; font-weight:700; margin-bottom:16px; }
+  .claim-detail { font-size:13px; color:var(--text); margin-bottom:4px; }
+  .claim-detail strong { color:var(--text-2); font-weight:600; }
+  .claim-moebel { margin:10px 0; display:flex; flex-direction:column; gap:5px; }
+  .claim-moebel-item { display:flex; gap:8px; align-items:center; font-size:13px; background:var(--surface2); border-radius:6px; padding:6px 10px; }
+  .claim-qty { font-weight:700; color:var(--text); }
+  .claim-stock-banner { background:#f0fdf4; border:1px solid #86efac; border-radius:var(--radius); padding:10px 14px; margin:14px 0 0; font-size:13px; color:#15803d; font-weight:600; display:flex; align-items:center; gap:6px; }
+  .claim-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
 </style>
 </head>
 <body>
@@ -66,6 +91,18 @@
     </div>
   </div>
 
+  <!-- Externe Verkäufe (von Assil erfasst) -->
+  <div class="extern-section" id="externSection">
+    <div class="extern-section-hdr">
+      <h2>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Externe Verkäufe
+        <span class="extern-count-badge" id="externCountBadge">0</span>
+      </h2>
+    </div>
+    <div class="extern-list" id="externList"></div>
+  </div>
+
   <div class="day-overview" id="dayOverview"></div>
   <div class="sessions-list" id="sessionsList">
     <div class="empty-state" id="emptyState" style="display:none">
@@ -74,6 +111,27 @@
     </div>
   </div>
 </main>
+
+<!-- Claim Confirm Modal -->
+<div class="claim-overlay" id="claimOverlay" style="display:none" onclick="if(event.target===this)closeClaimModal()">
+  <div class="claim-box" onclick="event.stopPropagation()">
+    <h3>Externen Verkauf übernehmen</h3>
+    <div class="claim-detail"><strong>Kunde: </strong><span id="claimName"></span></div>
+    <div class="claim-detail"><strong>Datum: </strong><span id="claimDatum"></span></div>
+    <div class="claim-moebel" id="claimMoebelList"></div>
+    <div class="claim-stock-banner">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Bitte bestätigen: Lagerbestand für alle Möbel vorhanden?
+    </div>
+    <div class="claim-actions">
+      <button class="btn btn-ghost" onclick="closeClaimModal()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="confirmClaimExtern()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Lagerbestand vorhanden – Übernehmen
+      </button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -191,7 +249,106 @@ const INITIAL_DATA = [
 
 let sessions = [];
 let db = null, dbRef = null, saveTimers = {}, isConfigured = false;
-let _dirtyIds = new Set(); // IDs die lokal geändert aber noch nicht bestätigt gespeichert sind
+let _dirtyIds = new Set();
+
+// ── Externe Verkäufe ─────────────────────────────────────────────
+let externSales     = [];
+let _pendingClaimId = null;
+
+function startExternListener() {
+  if (!db) return;
+  db.ref('extern_verkauf').on('value', snap => {
+    const raw = snap.val();
+    externSales = raw ? Object.values(raw).filter(e => e.status === 'offen') : [];
+    renderExternSales();
+  });
+}
+
+function renderExternSales() {
+  const section = document.getElementById('externSection');
+  const list    = document.getElementById('externList');
+  const badge   = document.getElementById('externCountBadge');
+  badge.textContent = externSales.length;
+  badge.style.display = externSales.length ? '' : 'none';
+  if (!externSales.length) {
+    list.innerHTML = '<p style="padding:14px 16px;font-size:13px;color:var(--text-3)">Keine offenen externen Verkäufe.</p>';
+    return;
+  }
+  list.innerHTML = externSales.map(e => {
+    const mChips = (e.moebel||[]).map(m => {
+      const kat = MOEBEL_KATALOG.find(k => k.id === m.kat);
+      const sub = kat?.subs?.find(s => s.id === m.sub);
+      return `<span class="extern-m-chip">${m.qty}× ${esc(kat?.label||m.kat)} ${esc(sub?.label||m.sub)}</span>`;
+    }).join('');
+    return `<div class="extern-card">
+      <div class="extern-card-top">
+        <span class="extern-card-name">${esc(e.name)}</span>
+        ${e.datum    ? `<span class="extern-card-meta">${esc(e.datum)}</span>` : ''}
+        ${e.uhrzeit  ? `<span class="extern-card-meta">${esc(e.uhrzeit)}</span>` : ''}
+        <span class="extern-tag">Extern</span>
+      </div>
+      ${mChips ? `<div class="extern-moebel-row">${mChips}</div>` : ''}
+      ${e.bem  ? `<div class="extern-bem-row">${esc(e.bem)}</div>` : ''}
+      <div class="extern-card-footer">
+        <button class="btn btn-primary" onclick="openClaimConfirm('${e.id}')">Übernehmen</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openClaimConfirm(id) {
+  const e = externSales.find(x => String(x.id) === String(id));
+  if (!e) return;
+  _pendingClaimId = id;
+  document.getElementById('claimName').textContent  = e.name || '–';
+  document.getElementById('claimDatum').textContent = [e.datum, e.uhrzeit].filter(Boolean).join(' · ') || '–';
+  const mHtml = (e.moebel||[]).map(m => {
+    const kat = MOEBEL_KATALOG.find(k => k.id === m.kat);
+    const sub = kat?.subs?.find(s => s.id === m.sub);
+    return `<div class="claim-moebel-item"><span class="claim-qty">${m.qty}×</span><span>${esc(kat?.label||m.kat)} — ${esc(sub?.label||m.sub)}</span></div>`;
+  }).join('');
+  document.getElementById('claimMoebelList').innerHTML = mHtml || '<p style="font-size:13px;color:var(--text-3)">Keine Möbel angegeben</p>';
+  document.getElementById('claimOverlay').style.display = '';
+}
+
+function closeClaimModal() {
+  document.getElementById('claimOverlay').style.display = 'none';
+  _pendingClaimId = null;
+}
+
+function confirmClaimExtern() {
+  const e = externSales.find(x => String(x.id) === String(_pendingClaimId));
+  if (!e || !db) return;
+  const newId = Date.now();
+  const newSession = {
+    id: newId,
+    datum:    e.datum || '',
+    uhrzeit:  e.uhrzeit || '',
+    collapsed: false,
+    owner:    OWNER,
+    personen: [{
+      name:      e.name || '',
+      status:    'Offen',
+      fe:        'Nein',
+      fw:        'Nein',
+      moebel:    (e.moebel||[]).map(m=>({...m})),
+      bem:       e.bem || '',
+      abh_datum: '',
+      abh_zeit:  ''
+    }]
+  };
+  sessions.push(newSession);
+  _dirtyIds.add(String(newId));
+  const updates = {};
+  updates['sessions/' + newId] = { ...newSession };
+  updates['extern_verkauf/' + e.id + '/status']    = 'übernommen';
+  updates['extern_verkauf/' + e.id + '/claimedBy'] = OWNER;
+  firebase.database().ref().update(updates)
+    .then(() => { toast('Übernommen ✓'); _dirtyIds.delete(String(newId)); })
+    .catch(err => toast('Fehler: ' + err.message));
+  closeClaimModal();
+  renderAll();
+}
 
 function initFirebase() {
   if (FIREBASE_CONFIG.apiKey === 'DEIN_API_KEY') {
@@ -215,9 +372,11 @@ function initFirebase() {
         fbKat.forEach(k => MOEBEL_KATALOG.push(k));
       }
       startSessionListener();
+      startExternListener();
     }, () => {
       // Katalog nicht lesbar → trotzdem Sessions laden
       startSessionListener();
+      startExternListener();
     });
 
     // Live-Updates wenn Katalog in moebel.html geändert wird

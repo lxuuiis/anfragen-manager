@@ -99,6 +99,40 @@
   .section-count { font-size: 12px; color: var(--text-3); background: var(--surface2); border-radius: 20px; padding: 2px 9px; margin-left: auto; }
   .empty-section { font-size: 13px; color: var(--text-3); padding: 20px; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius); margin: 8px 0; }
 
+  /* ── Externe Verkäufe ── */
+  .extern-entry-btn { display:flex; align-items:center; gap:6px; background:#fff7ed; border:1px solid #fed7aa; color:#c2410c; border-radius:20px; padding:5px 14px; font-size:12px; font-weight:700; cursor:pointer; transition:0.15s; }
+  .extern-entry-btn:hover { background:#ffedd5; }
+  .extern-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-bottom:20px; }
+  .extern-section-hdr { display:flex; align-items:center; gap:8px; padding:11px 18px; background:var(--surface2); border-bottom:1px solid var(--border); cursor:pointer; user-select:none; }
+  .extern-section-hdr h2 { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2); display:flex; align-items:center; gap:6px; flex:1; }
+  .extern-count-badge { font-size:10px; font-weight:700; background:#f97316; color:#fff; border-radius:20px; padding:1px 8px; }
+  .extern-list-inner { padding:8px 12px; display:flex; flex-direction:column; gap:8px; }
+  .extern-row { border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; border-left:3px solid #f97316; background:var(--surface); }
+  .extern-row-top { display:flex; align-items:center; gap:10px; padding:9px 14px; flex-wrap:wrap; }
+  .extern-row-name { font-size:13px; font-weight:700; color:var(--text); flex:1; }
+  .extern-row-datum { font-size:12px; color:var(--text-2); }
+  .extern-row-tag { font-size:10px; font-weight:700; background:#fff7ed; color:#f97316; border:1px solid #fed7aa; border-radius:20px; padding:1px 7px; }
+  .extern-row-tag.übernommen { background:#f0fdf4; color:#16a34a; border-color:#86efac; }
+  .extern-row-moebel { padding:0 14px 8px; display:flex; flex-wrap:wrap; gap:4px; }
+  .extern-m-chip { font-size:11px; background:var(--surface2); color:var(--text-2); border-radius:4px; padding:2px 7px; border:1px solid var(--border); }
+  .extern-row-bem { padding:0 14px 8px; font-size:12px; color:var(--text-3); font-style:italic; }
+  .extern-row-footer { display:flex; justify-content:flex-end; gap:6px; padding:7px 14px; border-top:1px solid var(--border); background:var(--surface2); }
+  /* Extern Modal */
+  .extern-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; display:flex; align-items:center; justify-content:center; }
+  .extern-box { background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow-lg,0 20px 60px rgba(0,0,0,0.2)); max-width:520px; width:94%; max-height:90vh; overflow-y:auto; padding:24px; }
+  .extern-box h3 { font-size:16px; font-weight:700; margin-bottom:18px; color:var(--text); }
+  .extern-fields { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+  .extern-fields .full { grid-column:1/-1; }
+  .extern-field label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; color:var(--text-2); margin-bottom:4px; }
+  .extern-field input, .extern-field textarea { width:100%; padding:7px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit; color:var(--text); background:var(--surface); outline:none; }
+  .extern-field input:focus, .extern-field textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,113,227,0.15); }
+  .extern-field textarea { resize:vertical; min-height:56px; }
+  .extern-m-rows { display:flex; flex-direction:column; gap:7px; margin-bottom:8px; }
+  .extern-m-row { display:flex; align-items:center; gap:6px; }
+  .extern-m-sel { flex:1; padding:5px 8px; border:1px solid var(--border); border-radius:8px; font-size:12px; font-family:inherit; color:var(--text); background:var(--surface); }
+  .extern-m-qty { width:56px; padding:5px 8px; border:1px solid var(--border); border-radius:8px; font-size:12px; font-family:inherit; color:var(--text); background:var(--surface); }
+  .extern-m-rm { background:none; border:none; color:var(--danger,#e02020); font-size:18px; cursor:pointer; padding:0 2px; line-height:1; }
+  .extern-modal-footer { display:flex; gap:8px; justify-content:flex-end; margin-top:18px; }
   /* ── Archiv-Section ── */
   .archiv-section { margin-top: 32px; }
   .archiv-header { display: flex; align-items: center; gap: 10px; padding: 13px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; user-select: none; box-shadow: var(--shadow); }
@@ -146,9 +180,17 @@
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Neuer Termin
     </button>
+    <button class="btn btn-ghost" onclick="openExterneModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+      Externe Verkäufe
+    </button>
     <button class="btn btn-ghost" onclick="exportCSVAll()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Export
+    </button>
+    <button class="extern-entry-btn" onclick="openExternModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      Externer Verkauf
     </button>
     <a href="logs.html" class="btn btn-ghost" style="text-decoration:none;">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -156,7 +198,7 @@
     </a>
     <button class="dm-toggle" id="dmToggle" title="Dark Mode">
       <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="icon-sun"  width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg class="icon-sun"  width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
     </button>
   </div>
 </nav>
@@ -178,6 +220,19 @@
   <!-- Tagesübersicht -->
   <div class="day-overview" id="dayOverview"></div>
 
+  <!-- Externe Verkäufe Section -->
+  <div class="extern-section" id="asilExternSection" style="display:none">
+    <div class="extern-section-hdr" onclick="this.closest('.extern-section').classList.toggle('ov-collapsed')">
+      <h2>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Externe Verkäufe
+        <span class="extern-count-badge" id="asilExternBadge">0</span>
+      </h2>
+      <svg class="ov-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="extern-list-inner" id="asilExternList"></div>
+  </div>
+
   <!-- Filter -->
   <div class="filter-bar">
     <span style="font-size:12px;font-weight:600;color:var(--text-tertiary)">Anzeigen:</span>
@@ -196,6 +251,43 @@
     </div>
     <div class="archiv-body" id="archivBody">
       <div class="archiv-empty" id="archivEmpty">Noch keine abgeschlossenen Anfragen.</div>
+    </div>
+  </div>
+
+  <!-- Extern Modal (fixed overlay) -->
+  <div class="extern-overlay" id="externOverlay" style="display:none" onclick="if(event.target===this)closeExternModal()">
+    <div class="extern-box">
+      <h3>Externer Verkauf erfassen</h3>
+      <div class="extern-fields">
+        <div class="extern-field full">
+          <label>Kundenname</label>
+          <input id="externName" type="text" placeholder="Name / Firma">
+        </div>
+        <div class="extern-field">
+          <label>Datum</label>
+          <input id="externDatum" type="text" placeholder="TT.MM.JJJJ">
+        </div>
+        <div class="extern-field">
+          <label>Uhrzeit</label>
+          <input id="externUhrzeit" type="text" placeholder="z.B. 10:00 Uhr">
+        </div>
+        <div class="extern-field full">
+          <label>Möbel</label>
+          <div class="extern-m-rows" id="externMRows"></div>
+          <button class="btn btn-ghost" style="font-size:12px;margin-top:4px" onclick="externMoebelAdd()">+ Möbel hinzufügen</button>
+        </div>
+        <div class="extern-field full">
+          <label>Bemerkung</label>
+          <textarea id="externBem" placeholder="Optionale Notiz…"></textarea>
+        </div>
+      </div>
+      <div class="extern-modal-footer">
+        <button class="btn btn-ghost" onclick="closeExternModal()">Abbrechen</button>
+        <button class="btn btn-primary" onclick="saveExternVerkauf()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Speichern
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1155,7 +1247,10 @@ function buildMoebelCell(sid, idx, p) {
         <button class="moebel-rm" onmousedown="event.preventDefault();moebelRemove(${sid},${idx},${mi})" title="Entfernen">×</button>
       </div>
       <div class="moebel-posten-bot">
-        <span class="mpick-trigger-sub">${esc(subLabel)}</span>
+        <button class="mpick-trigger" onmousedown="event.preventDefault();mpickOpen(event,${sid},${idx},${mi})">
+          <span class="mpick-trigger-sub">${esc(subLabel)}</span>
+          <svg class="mpick-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
         <input class="moebel-qty" type="number" min="1" max="99" value="${m.qty||1}"
           onchange="moebelQtyChange(${sid},${idx},${mi},+this.value)" title="Anzahl" />
       </div>
@@ -1368,6 +1463,115 @@ function notifDismissById(notifId) {
   if (asilDb) asilDb.ref('notifications/assil/' + notifId).update({ gelesen: true });
 }
 
+/* ══════════════════════════════════════════════════════
+   EXTERNE VERKÄUFE
+   ══════════════════════════════════════════════════════ */
+let _externMoebel = [];
+
+function openExternModal() {
+  _externMoebel = [];
+  document.getElementById('externName').value    = '';
+  document.getElementById('externDatum').value   = '';
+  document.getElementById('externUhrzeit').value = '';
+  document.getElementById('externBem').value     = '';
+  renderExternMRows();
+  document.getElementById('externOverlay').style.display = '';
+  document.getElementById('externName').focus();
+}
+function closeExternModal() { document.getElementById('externOverlay').style.display = 'none'; }
+
+function renderExternMRows() {
+  const wrap = document.getElementById('externMRows');
+  if (!_externMoebel.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = _externMoebel.map((m, i) => {
+    const katOpts = MOEBEL_KATALOG.map(k =>
+      `<option value="${esc(k.id)}" ${k.id===m.kat?'selected':''}>${esc(k.label)}</option>`).join('');
+    const katObj = MOEBEL_KATALOG.find(k => k.id === m.kat);
+    const subOpts = (katObj?.subs || []).map(s =>
+      `<option value="${esc(s.id)}" ${s.id===m.sub?'selected':''}>${esc(s.label)}</option>`).join('');
+    return `<div class="extern-m-row">
+      <select class="extern-m-sel" onchange="externKatChange(${i},this.value)">${katOpts}</select>
+      <select class="extern-m-sel" onchange="externSubChange(${i},this.value)">${subOpts}</select>
+      <input class="extern-m-qty" type="number" min="1" max="99" value="${m.qty||1}" onchange="externQtyChange(${i},+this.value)" title="Anzahl">
+      <button class="extern-m-rm" onclick="externMoebelRemove(${i})" title="Entfernen">×</button>
+    </div>`;
+  }).join('');
+}
+
+function externMoebelAdd() {
+  const first = MOEBEL_KATALOG[0];
+  if (!first) return;
+  _externMoebel.push({ kat: first.id, sub: (first.subs||[])[0]?.id||'', qty: 1 });
+  renderExternMRows();
+}
+function externMoebelRemove(i) { _externMoebel.splice(i, 1); renderExternMRows(); }
+function externKatChange(i, katId) {
+  const katObj = MOEBEL_KATALOG.find(k => k.id === katId);
+  _externMoebel[i].kat = katId;
+  _externMoebel[i].sub = (katObj?.subs||[])[0]?.id || '';
+  renderExternMRows();
+}
+function externSubChange(i, subId) { _externMoebel[i].sub = subId; }
+function externQtyChange(i, val)  { _externMoebel[i].qty = Math.max(1, val||1); }
+
+function saveExternVerkauf() {
+  const name = document.getElementById('externName').value.trim();
+  if (!name) { toast('Bitte Kundenname angeben'); return; }
+  if (!asilDb) { toast('Keine Firebase-Verbindung'); return; }
+  const id = Date.now();
+  const entry = {
+    id,
+    name,
+    datum:   document.getElementById('externDatum').value.trim(),
+    uhrzeit: document.getElementById('externUhrzeit').value.trim(),
+    moebel:  _externMoebel.map(m => ({...m})),
+    bem:     document.getElementById('externBem').value.trim(),
+    status:  'offen'
+  };
+  asilDb.ref('extern_verkauf/' + id).set(entry)
+    .then(() => { toast('Externer Verkauf gespeichert ✓'); closeExternModal(); })
+    .catch(() => toast('Fehler beim Speichern'));
+}
+
+function deleteExternVerkauf(id) {
+  if (!asilDb) return;
+  if (!confirm('Eintrag löschen?')) return;
+  asilDb.ref('extern_verkauf/' + id).remove()
+    .then(() => toast('Gelöscht ✓'))
+    .catch(() => toast('Fehler'));
+}
+
+function renderAsilExternSales(sales) {
+  const section = document.getElementById('asilExternSection');
+  const list    = document.getElementById('asilExternList');
+  const badge   = document.getElementById('asilExternBadge');
+  if (!sales.length) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  badge.textContent = sales.length;
+  list.innerHTML = sales.map(e => {
+    const mChips = (e.moebel||[]).map(m => {
+      const kat = MOEBEL_KATALOG.find(k => k.id === m.kat);
+      const sub = kat?.subs?.find(s => s.id === m.sub);
+      return `<span class="extern-m-chip">${m.qty}× ${esc(kat?.label||m.kat)} ${esc(sub?.label||m.sub)}</span>`;
+    }).join('');
+    const tagClass = e.status === 'übernommen' ? 'übernommen' : '';
+    const tagText  = e.status === 'übernommen' ? 'Übernommen' : 'Offen';
+    return `<div class="extern-row">
+      <div class="extern-row-top">
+        <span class="extern-row-name">${esc(e.name)}</span>
+        ${e.datum ? `<span class="extern-row-datum">${esc(e.datum)}</span>` : ''}
+        ${e.uhrzeit ? `<span class="extern-row-datum">${esc(e.uhrzeit)}</span>` : ''}
+        <span class="extern-row-tag ${tagClass}">${tagText}</span>
+      </div>
+      ${mChips ? `<div class="extern-row-moebel">${mChips}</div>` : ''}
+      ${e.bem  ? `<div class="extern-row-bem">${esc(e.bem)}</div>` : ''}
+      ${e.status === 'offen' ? `<div class="extern-row-footer">
+        <button class="btn btn-ghost" style="font-size:11px;color:var(--danger)" onclick="deleteExternVerkauf('${e.id}')">Löschen</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
 /* ── Start ────────────────────────────────────────────────────── */
 function initFirebaseAndKatalog() {
   try {
@@ -1424,6 +1628,11 @@ function startAsilListeners() {
     const raw = snap.val();
     allArchiv = raw ? Object.values(raw) : [];
     renderArchiv();
+  });
+  asilDb.ref('extern_verkauf').on('value', snap => {
+    const raw = snap.val();
+    const sales = raw ? Object.values(raw).sort((a,b)=>(b.id||0)-(a.id||0)) : [];
+    renderAsilExternSales(sales);
   });
   loadMoebel();
 }
