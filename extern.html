@@ -540,11 +540,15 @@ function save() {
   if (!_db) return;
   setSync('syncing', 'Speichern…');
 
+  // Nur anzahl + updatedAt granular schreiben – notiz von moebel.html bleibt erhalten
   const updates = {};
   Object.keys(_pendingLogs).forEach(key => {
     const [katId, zeilId] = key.split('/');
     const d = (_data[katId]||{})[zeilId];
-    if (d) updates['moebel/' + katId + '/' + zeilId] = d;
+    if (d) {
+      updates['moebel/' + katId + '/' + zeilId + '/anzahl']    = d.anzahl;
+      updates['moebel/' + katId + '/' + zeilId + '/updatedAt'] = d.updatedAt;
+    }
   });
 
   const logsToWrite = Object.assign({}, _pendingLogs);
