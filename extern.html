@@ -27,7 +27,7 @@
 
   /* ── Tabelle ── */
   .tbl-wrap { overflow-x: auto; }
-  .mtbl { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 500px; }
+  .mtbl { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 700px; }
   .mtbl col.c-name    { width: auto; }
   .mtbl col.c-bestand { width: 140px; }
   .mtbl col.c-status  { width: 120px; }
@@ -57,6 +57,16 @@
 
   /* ── Timestamp ── */
   .ts { font-size: 11px; color: var(--text-3); white-space: nowrap; }
+
+  /* ── Reserviert / Verfügbar Spalten ── */
+  .mtbl col.c-reserviert { width: 100px; }
+  .mtbl col.c-verfuegbar { width: 120px; }
+  .res-badge { font-size:11px; font-weight:600; color:#b07800; background:#fff8e6; border-radius:20px; padding:2px 8px; white-space:nowrap; }
+  .res-badge.none { color:var(--text-3); background:none; font-weight:400; }
+  .avail-val { font-size:13px; font-weight:700; white-space:nowrap; }
+  .avail-pos  { color:var(--success); }
+  .avail-warn { color:var(--warning); }
+  .avail-neg  { color:var(--danger); }
 
   /* ── Edit-Overlay ── */
   .edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
@@ -295,6 +305,7 @@ let _data         = {};
 let _db           = null;
 let _saveTimer    = null;
 let _domBuilt     = false;
+let _reserviert   = {}; // { katId: { subId: qty } }
 // Tracks net change per item for batch logging on save
 let _pendingLogs  = {}; // key: 'katId/zeilId' → { katLabel, zLabel, oldVal }
 
@@ -362,6 +373,7 @@ function writeLog(aktion, details) {
       }
       initData();
       startMoebelListener();
+      listenToSessions();
     }, () => {
       // Katalog nicht erreichbar → Fallback
       KATEGORIEN = KATEGORIEN_DEFAULT.map(k => ({
@@ -370,6 +382,7 @@ function writeLog(aktion, details) {
       }));
       initData();
       startMoebelListener();
+      listenToSessions();
     });
   } catch(e) { setSync('error','Init-Fehler'); console.error(e); }
 })();
@@ -429,6 +442,8 @@ function buildDOM() {
             <button class="s-btn" onclick="change('${kat.id}','${z.id}',1)">+</button>
           </div>
         </td>
+        <td><span class="res-badge none" id="res-${kat.id}-${z.id}">–</span></td>
+        <td><span class="avail-val" id="avail-${kat.id}-${z.id}">–</span></td>
         <td><span class="sbadge leer" id="b-${kat.id}-${z.id}">Leer</span></td>
         <td><span class="ts" id="t-${kat.id}-${z.id}">–</span></td>
       </tr>`).join('');
@@ -443,10 +458,12 @@ function buildDOM() {
       </div>
       <div class="tbl-wrap">
         <table class="mtbl">
-          <colgroup><col class="c-name"/><col class="c-bestand"/><col class="c-status"/><col class="c-ts"/></colgroup>
+          <colgroup><col class="c-name"/><col class="c-bestand"/><col class="c-reserviert"/><col class="c-verfuegbar"/><col class="c-status"/><col class="c-ts"/></colgroup>
           <thead><tr>
             <th>Typ / Farbe / Maße</th>
             <th>Bestand <small style="font-weight:400;text-transform:none">(klick = direkt)</small></th>
+            <th>Reserviert</th>
+            <th>Verfügbar</th>
             <th>Status</th>
             <th>Geändert</th>
           </tr></thead>
@@ -478,6 +495,20 @@ function updateValues() {
 
       const tsEl = document.getElementById(`t-${kat.id}-${z.id}`);
       if (tsEl) tsEl.textContent = d.updatedAt || '–';
+
+      const resEl   = document.getElementById(`res-${kat.id}-${z.id}`);
+      const availEl = document.getElementById(`avail-${kat.id}-${z.id}`);
+      if (resEl) {
+        const res = (_reserviert[kat.id] || {})[z.id] || 0;
+        if (res > 0) { resEl.textContent = res + ' reserv.'; resEl.className = 'res-badge'; }
+        else { resEl.textContent = '–'; resEl.className = 'res-badge none'; }
+      }
+      if (availEl) {
+        const res   = (_reserviert[kat.id] || {})[z.id] || 0;
+        const avail = v - res;
+        availEl.textContent = avail;
+        availEl.className   = 'avail-val ' + (avail < 0 ? 'avail-neg' : avail <= 5 ? 'avail-warn' : 'avail-pos');
+      }
     });
 
     const totEl = document.getElementById(`kat-tot-${kat.id}`);
@@ -534,6 +565,31 @@ function change(katId, zeilId, delta) {
 function scheduleSave() {
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(save, 800);
+}
+
+/* ── Session-Listener für Reservierungsanzeige ── */
+function listenToSessions() {
+  if (!_db) return;
+  _db.ref('sessions').on('value', snap => {
+    const all = snap.val();
+    const newRes = {};
+    if (all) {
+      Object.values(all).forEach(session => {
+        if (!session || !session.personen) return;
+        session.personen.forEach(p => {
+          if (!p || !['Offen','Reservierung','Abholung'].includes(p.status)) return;
+          if (!Array.isArray(p.moebel)) return;
+          p.moebel.forEach(m => {
+            if (!m || !m.kat || !m.sub || !(m.qty > 0)) return;
+            if (!newRes[m.kat]) newRes[m.kat] = {};
+            newRes[m.kat][m.sub] = (newRes[m.kat][m.sub] || 0) + m.qty;
+          });
+        });
+      });
+    }
+    _reserviert = newRes;
+    updateValues();
+  });
 }
 
 function save() {
