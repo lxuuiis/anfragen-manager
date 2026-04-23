@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Möbel Bestand</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  main { max-width: 1300px; margin: 0 auto; padding: 24px 20px 80px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── Summary Strip ── */
+  .summary-strip { display: flex; gap: 10px; flex-wrap: wrap; }
+  .sum-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; min-width: 140px; flex: 1; box-shadow: var(--shadow-sm); }
+  .sum-card.ok   { border-left: 3px solid var(--success); }
+  .sum-card.warn { border-left: 3px solid var(--danger); }
+  .s-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-2); margin-bottom: 5px; }
+  .s-num { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+  .s-sub { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+
+  /* ── Kategorie-Karte ── */
+  .kat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+  .kat-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .kat-emoji { font-size: 16px; flex-shrink: 0; }
+  .kat-title { font-size: 14px; font-weight: 700; flex: 1; color: var(--text); }
+  .kat-gesamtbadge { font-size: 11px; font-weight: 700; color: var(--text-2); background: var(--surface3); border-radius: 20px; padding: 2px 9px; white-space: nowrap; }
+
+  /* ── Tabelle ── */
+  .tbl-wrap { overflow-x: auto; }
+  .mtbl { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 500px; }
+  .mtbl col.c-name    { width: auto; }
+  .mtbl col.c-bestand { width: 140px; }
+  .mtbl col.c-status  { width: 120px; }
+  .mtbl col.c-ts      { width: 130px; }
+  .mtbl thead th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-3); padding: 8px 14px; text-align: left; border-bottom: 1px solid var(--border); background: var(--surface2); white-space: nowrap; }
+  .mtbl tbody tr:hover td { background: var(--surface2); }
+  .mtbl td { padding: 8px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; overflow: hidden; }
+  .mtbl tbody tr:last-child td { border-bottom: none; }
+
+  /* ── Farb-Chip ── */
+  .fchip { display: flex; align-items: center; gap: 7px; font-weight: 500; color: var(--text); }
+
+  /* ── Stepper ── */
+  .stepper { display: flex; align-items: center; gap: 6px; }
+  .s-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; color: var(--text-2); transition: 0.12s; flex-shrink: 0; }
+  .s-btn:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .s-val { font-size: 15px; font-weight: 700; width: 36px; text-align: center; color: var(--text); cursor: pointer; border-radius: 6px; padding: 2px 0; transition: 0.12s; }
+  .s-val:hover { background: var(--accent-light); color: var(--accent); }
+  .s-val.zero { color: var(--text-3); }
+
+  /* ── Status-Badge ── */
+  .sbadge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .sbadge.ok     { background: var(--success-light); color: var(--success); }
+  .sbadge.leer   { background: var(--danger-light);  color: var(--danger); }
+  .sbadge.mittel { background: var(--warning-light); color: var(--warning); }
+  .sbadge.viel   { background: var(--success-light); color: var(--success); }
+
+  /* ── Timestamp ── */
+  .ts { font-size: 11px; color: var(--text-3); white-space: nowrap; }
+
+  /* ── Edit-Overlay ── */
+  .edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 3000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .edit-overlay.open { display: flex; }
+  .edit-box { background: var(--surface); border-radius: var(--radius-lg); padding: 26px 28px; max-width: 340px; width: 90%; box-shadow: var(--shadow-modal); border: 1px solid var(--border); }
+  .edit-box h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+  .edit-box p  { font-size: 13px; color: var(--text-2); margin-bottom: 16px; }
+  .edit-box input { width: 100%; font-size: 22px; font-weight: 700; text-align: center; font-family: var(--font); padding: 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); outline: none; background: var(--surface2); color: var(--text); margin-bottom: 16px; box-sizing: border-box; }
+  .edit-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .edit-box-actions { display: flex; gap: 8px; }
+  .edit-box-actions .btn { flex: 1; justify-content: center; }
+
+  /* ── Loading ── */
+  .loading-hint { font-size: 14px; color: var(--text-3); text-align: center; padding: 40px 20px; }
+</style>
+</head>
+<body>
+
+<!-- ── Passwort-Schutz ── -->
+<div id="pwOverlay" style="position:fixed;inset:0;background:var(--bg,#f5f5f7);z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:var(--surface,#fff);border:1px solid var(--border,#e0e0e0);border-radius:14px;padding:36px 30px;max-width:340px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.14);text-align:center;">
+    <div style="font-size:32px;margin-bottom:14px;">🔒</div>
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:6px;color:var(--text,#1c1c1e);">Möbel Bestand</h2>
+    <p style="font-size:13px;color:var(--text-2,#6e6e73);margin-bottom:22px;">Bitte Passwort eingeben, um fortzufahren</p>
+    <input type="password" id="pwInput" placeholder="Passwort…" autocomplete="current-password"
+      style="width:100%;font-size:15px;padding:11px 14px;border:1.5px solid var(--border,#e0e0e0);border-radius:8px;outline:none;margin-bottom:10px;font-family:inherit;box-sizing:border-box;" />
+    <div id="pwError" style="font-size:12px;color:#d93025;margin-bottom:10px;min-height:16px;"></div>
+    <button onclick="checkPw()" style="width:100%;background:#0071e3;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Weiter →</button>
+  </div>
+</div>
+<script>
+(function(){
+  const PW = 'Lager2026';
+  if(sessionStorage.getItem('externPwOk')==='1'){
+    document.getElementById('pwOverlay').style.display='none';
+  } else {
+    setTimeout(()=>document.getElementById('pwInput').focus(),80);
+    document.getElementById('pwInput').addEventListener('keydown',function(e){ if(e.key==='Enter') checkPw(); });
+  }
+  window.checkPw = function(){
+    if(document.getElementById('pwInput').value===PW){
+      sessionStorage.setItem('externPwOk','1');
+      document.getElementById('pwOverlay').style.display='none';
+    } else {
+      document.getElementById('pwError').textContent='Falsches Passwort – bitte erneut versuchen';
+      document.getElementById('pwInput').value='';
+      document.getElementById('pwInput').focus();
+    }
+  };
+})();
+</script>
+
+<nav>
+  <div class="nav-brand">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+    </svg>
+    Möbel Bestand
+    <span class="owner-tag" style="background:#6c757d;color:#fff;">Extern</span>
+  </div>
+  <div class="nav-actions">
+    <div class="sync-indicator" id="syncIndicator"><div class="dot"></div><span id="syncText">Verbinde…</span></div>
+    <button class="dm-toggle" id="dmToggle" title="Dark Mode">
+      <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun"  width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</nav>
+
+<main>
+  <div>
+    <div class="sec-label" style="margin-bottom:10px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      Gesamt-Übersicht
+    </div>
+    <div class="summary-strip" id="summaryStrip"></div>
+  </div>
+  <div id="katContainer">
+    <div class="loading-hint">Bestände werden geladen…</div>
+  </div>
+</main>
+
+<!-- Edit-Overlay -->
+<div class="edit-overlay" id="editOverlay">
+  <div class="edit-box">
+    <h3 id="editTitle">Bestand eingeben</h3>
+    <p id="editSub">Aktueller Wert:</p>
+    <input type="number" id="editInput" min="0" />
+    <div class="edit-box-actions">
+      <button class="btn btn-ghost" onclick="closeEdit()">Abbrechen</button>
+      <button class="btn btn-primary" onclick="confirmEdit()">Übernehmen</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+
+/* ── IP-Erkennung ── */
+let _clientIp = 'unbekannt';
+fetch('https://api.ipify.org?format=json')
+  .then(r => r.json())
+  .then(d => { _clientIp = d.ip || 'unbekannt'; })
+  .catch(() => {});
+
+/* ── Firebase Config ── */
+const FB_CFG = {
+  apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
+  authDomain:        "manager-3cf2b.firebaseapp.com",
+  databaseURL:       "https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "manager-3cf2b",
+  storageBucket:     "manager-3cf2b.firebasestorage.app",
+  messagingSenderId: "55315892331",
+  appId:             "1:55315892331:web:9889b92c74e535a85a892e"
+};
+
+/* ── Fallback-Katalog (identisch zu moebel.html) ── */
+const KATEGORIEN_DEFAULT = [
+  { id:'schreibtisch_160', titel:'Schreibtisch 160×80 höhenverstellbar', emoji:'🖥️', zeilen:[
+    { id:'weiss',            label:'Weiß' },
+    { id:'grau',             label:'Grau' },
+    { id:'grau_manuel_rad',  label:'Grau manuell mit Rädchen' },
+    { id:'grau_manuel_schr', label:'Grau manuell mit Schrauben' },
+    { id:'grau_auseinander', label:'Grau manuell auseinandergebaut' },
+    { id:'holz_rollen',      label:'Holz manuell auf Rollen' },
+  ]},
+  { id:'schreibtisch_120', titel:'Schreibtisch 120×80 höhenverstellbar', emoji:'🖥️', zeilen:[
+    { id:'holz_rollen', label:'Holz manuell auf Rollen' },
+  ]},
+  { id:'schreibtisch_240', titel:'Schreibtisch 240×80 (Winkeltisch)', emoji:'🖥️', zeilen:[
+    { id:'weiss', label:'Weiß Winkeltisch' },
+  ]},
+  { id:'buerostuehle', titel:'Bürostühle', emoji:'🪑', zeilen:[
+    { id:'jeansblau',  label:'Jeansblau' },
+    { id:'grau',       label:'Grau' },
+    { id:'dunkelblau', label:'Dunkelblau (geteilte RL)' },
+  ]},
+  { id:'besprechungsstuehle', titel:'Besprechungsstühle', emoji:'🪑', zeilen:[
+    { id:'dunkelblau',    label:'Dunkelblau' },
+    { id:'jeansblau',     label:'Jeansblau' },
+    { id:'grau',          label:'Grau' },
+    { id:'grau_ohne_arm', label:'Grau ohne Armlehne' },
+  ]},
+  { id:'beistelltisch', titel:'Beistelltisch', emoji:'📐', zeilen:[
+    { id:'weiss_120x60',  label:'Weiß 120×60' },
+    { id:'weiss_160x80',  label:'Weiß 160×80' },
+    { id:'weiss_180x60',  label:'Weiß 180×60' },
+    { id:'weiss_180x80',  label:'Weiß 180×80' },
+    { id:'weiss_190x90',  label:'Weiß 190×90' },
+    { id:'grau_120x60',   label:'Grau 120×60' },
+    { id:'grau_160x60',   label:'Grau 160×60' },
+    { id:'grau_160x80',   label:'Grau 160×80' },
+    { id:'grau_180x80',   label:'Grau 180×80' },
+    { id:'grau_200x100',  label:'Grau 200×100' },
+    { id:'holz_160x80',   label:'Holz 160×80' },
+  ]},
+  { id:'rc', titel:'Rollcontainer (RC)', emoji:'📦', zeilen:[
+    { id:'grau_h51', label:'Grau H51' },
+    { id:'grau_h57', label:'Grau H57' },
+    { id:'weiss',    label:'Weiß' },
+  ]},
+  { id:'sideboard', titel:'Sideboard', emoji:'🗄️', zeilen:[
+    { id:'holz_jalousie',   label:'Holz Jalousie 120×80' },
+    { id:'holz_schiebe78',  label:'Holz Schiebetür 120×78' },
+    { id:'holz_schiebe152', label:'Holz Schiebetür 120×152' },
+    { id:'weiss_80',        label:'Weiß 80×80' },
+    { id:'weiss_100',       label:'Weiß 100×80' },
+    { id:'weiss_120',       label:'Weiß 120×80' },
+    { id:'weiss_160',       label:'Weiß 160×80' },
+    { id:'weiss_100_117',   label:'Weiß 100×117' },
+    { id:'weiss_120_117',   label:'Weiß 120×117' },
+    { id:'grau_jalousie',   label:'Grau Jalousie Hängeregister 160×117' },
+  ]},
+  { id:'schrank', titel:'Schrank', emoji:'🚪', zeilen:[
+    { id:'grau_schiebe',    label:'Grau Schiebetür 100×115' },
+    { id:'grau_doppel',     label:'Grau Doppelflügel 100×190' },
+    { id:'grau_jalousie80', label:'Grau Jalousie 100×117' },
+    { id:'grau_jalousie190',label:'Grau Jalousie 80×190' },
+  ]},
+  { id:'besprechungstisch', titel:'Besprechungstisch', emoji:'🪑', zeilen:[
+    { id:'holz_140',       label:'Holz 140×80' },
+    { id:'holz_200',       label:'Holz 200×80 mit IT' },
+    { id:'holz_210',       label:'Holz 210×120 mit IT' },
+    { id:'grau_oval160',   label:'Grau 160×90 oval' },
+    { id:'grau_160',       label:'Grau 160×90' },
+    { id:'grau_r140',      label:'Grau rund Ø140' },
+    { id:'grau_r120',      label:'Grau rund Ø120' },
+    { id:'weiss_r120',     label:'Weiß rund Ø120' },
+    { id:'weiss_160x160',  label:'Weiß 160×160 mit IT' },
+    { id:'weiss_160x160b', label:'Weiß 160×160' },
+  ]},
+  { id:'apothekerschrank', titel:'Apothekerschrank', emoji:'🗂️', zeilen:[
+    { id:'weiss_li',       label:'Weiß links' },
+    { id:'weiss_esche_li', label:'Weiß/Esche links' },
+    { id:'weiss_esche_re', label:'Weiß/Esche rechts' },
+  ]},
+  { id:'whiteboard', titel:'Whiteboard', emoji:'📋', zeilen:[
+    { id:'100x150_neu', label:'100×150 neu/OVP' },
+    { id:'100x200_neu', label:'100×200 neu/OVP' },
+    { id:'120x150_neu', label:'120×150 neu/OVP' },
+    { id:'100x200_gb',  label:'100×200 gebraucht' },
+    { id:'120x200_gb',  label:'120×200 gebraucht' },
+  ]},
+  { id:'garderobe', titel:'Garderobe', emoji:'🧥', zeilen:[
+    { id:'weiss',  label:'Weiß' },
+    { id:'divers', label:'Divers' },
+    { id:'rollen', label:'Auf Rollen' },
+  ]},
+  { id:'pulttisch', titel:'Pulttisch mit Sitz', emoji:'🪑', zeilen:[
+    { id:'standard', label:'Standard' },
+  ]},
+  { id:'luefter', titel:'Lüfter', emoji:'💨', zeilen:[
+    { id:'ansio',      label:'Ansio' },
+    { id:'tecvance',   label:'TecVance' },
+    { id:'honey_chr',  label:'Honeywell Chrom' },
+    { id:'honey_schw', label:'Honeywell Schwarz' },
+  ]},
+  { id:'ventilator', titel:'Ventilator', emoji:'🌀', zeilen:[
+    { id:'honeywell', label:'Honeywell' },
+    { id:'aeg',       label:'AEG' },
+    { id:'profi',     label:'Profi & Care' },
+  ]},
+  { id:'kleiderschrank', titel:'Kleiderschrank', emoji:'👔', zeilen:[
+    { id:'weiss', label:'Weiß 60×198' },
+    { id:'grau',  label:'Grau 60×186' },
+  ]},
+];
+
+/* ── State ── */
+let KATEGORIEN    = [];
+let _data         = {};
+let _db           = null;
+let _saveTimer    = null;
+let _domBuilt     = false;
+// Tracks net change per item for batch logging on save
+let _pendingLogs  = {}; // key: 'katId/zeilId' → { katLabel, zLabel, oldVal }
+
+/* ── Helpers ── */
+function nowStr() {
+  const d = new Date();
+  return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}) + ' '
+       + d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+}
+function setSync(t, txt) {
+  const el = document.getElementById('syncIndicator');
+  const te = document.getElementById('syncText');
+  if(el) el.className = 'sync-indicator ' + t;
+  if(te) te.textContent = txt;
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg, dur=2400) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), dur);
+}
+
+/* ── Log-Schreiber ── */
+function writeLog(aktion, details) {
+  if (!_db) return;
+  const ts = Date.now();
+  const entry = {
+    ts,
+    datum:   new Date().toLocaleDateString('de-DE'),
+    uhrzeit: new Date().toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' }),
+    user:    'Extern',
+    aktion,
+    details: details || '',
+    extern:  true,
+    ip:      _clientIp
+  };
+  _db.ref('logs/' + ts + '_' + Math.random().toString(36).slice(2,5)).set(entry);
+}
+
+/* ── Firebase Init ── */
+(function initFb(){
+  try {
+    const app = firebase.initializeApp(FB_CFG);
+    _db = firebase.database(app);
+
+    // Katalog laden (moebelKatalog von moebel.html befüllt)
+    _db.ref('moebelKatalog').once('value', snapKat => {
+      const fbKat = snapKat.val();
+      if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
+        KATEGORIEN = fbKat.map(k => ({
+          id:     k.id,
+          titel:  k.titel || k.label || k.id,
+          emoji:  k.emoji || '📦',
+          zeilen: Array.isArray(k.zeilen) ? k.zeilen.map(z => ({ id: z.id, label: z.label })) : []
+        }));
+      } else {
+        // Fallback: hardcodierter Katalog
+        KATEGORIEN = KATEGORIEN_DEFAULT.map(k => ({
+          id: k.id, titel: k.titel, emoji: k.emoji,
+          zeilen: k.zeilen.map(z => ({ id: z.id, label: z.label }))
+        }));
+      }
+      initData();
+      startMoebelListener();
+    }, () => {
+      // Katalog nicht erreichbar → Fallback
+      KATEGORIEN = KATEGORIEN_DEFAULT.map(k => ({
+        id: k.id, titel: k.titel, emoji: k.emoji,
+        zeilen: k.zeilen.map(z => ({ id: z.id, label: z.label }))
+      }));
+      initData();
+      startMoebelListener();
+    });
+  } catch(e) { setSync('error','Init-Fehler'); console.error(e); }
+})();
+
+function initData() {
+  KATEGORIEN.forEach(kat => {
+    if (!_data[kat.id]) _data[kat.id] = {};
+    kat.zeilen.forEach(z => {
+      if (!_data[kat.id][z.id]) _data[kat.id][z.id] = { anzahl: 0, updatedAt: '' };
+    });
+  });
+}
+
+function startMoebelListener() {
+  _db.ref('moebel').on('value', snap => {
+    const fbData = snap.val();
+    if (fbData) {
+      KATEGORIEN.forEach(kat => {
+        if (fbData[kat.id]) {
+          kat.zeilen.forEach(z => {
+            if (fbData[kat.id][z.id] !== undefined) {
+              const fb = fbData[kat.id][z.id];
+              if (!_data[kat.id])       _data[kat.id] = {};
+              if (!_data[kat.id][z.id]) _data[kat.id][z.id] = { anzahl: 0, updatedAt: '' };
+              if (fb.anzahl    != null) _data[kat.id][z.id].anzahl    = fb.anzahl;
+              if (fb.updatedAt != null) _data[kat.id][z.id].updatedAt = fb.updatedAt;
+            }
+          });
+        }
+      });
+    }
+    _domBuilt = false;
+    renderAll();
+    setSync('synced', 'Live ✓');
+  }, () => { setSync('error','Firebase Fehler'); renderAll(); });
+}
+
+/* ── Render ── */
+function renderAll() {
+  if (!_domBuilt) buildDOM();
+  updateValues();
+  renderSummary();
+}
+
+function buildDOM() {
+  const container = document.getElementById('katContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  KATEGORIEN.forEach(kat => {
+    const rows = kat.zeilen.map(z => `
+      <tr id="row-ext-${kat.id}-${z.id}">
+        <td><span class="fchip">${esc(z.label)}</span></td>
+        <td>
+          <div class="stepper">
+            <button class="s-btn" onclick="change('${kat.id}','${z.id}',-1)">−</button>
+            <span class="s-val zero" id="v-${kat.id}-${z.id}" onclick="openEdit('${kat.id}','${z.id}','${esc(z.label)}')" title="Klicken zum direkten Eingeben">0</span>
+            <button class="s-btn" onclick="change('${kat.id}','${z.id}',1)">+</button>
+          </div>
+        </td>
+        <td><span class="sbadge leer" id="b-${kat.id}-${z.id}">Leer</span></td>
+        <td><span class="ts" id="t-${kat.id}-${z.id}">–</span></td>
+      </tr>`).join('');
+
+    const card = document.createElement('div');
+    card.className = 'kat-card';
+    card.innerHTML = `
+      <div class="kat-head">
+        <span class="kat-emoji">${kat.emoji}</span>
+        <span class="kat-title">${esc(kat.titel)}</span>
+        <span class="kat-gesamtbadge" id="kat-tot-${kat.id}">–</span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="mtbl">
+          <colgroup><col class="c-name"/><col class="c-bestand"/><col class="c-status"/><col class="c-ts"/></colgroup>
+          <thead><tr>
+            <th>Typ / Farbe / Maße</th>
+            <th>Bestand <small style="font-weight:400;text-transform:none">(klick = direkt)</small></th>
+            <th>Status</th>
+            <th>Geändert</th>
+          </tr></thead>
+          <tbody id="tbody-ext-${kat.id}">${rows}</tbody>
+        </table>
+      </div>`;
+    container.appendChild(card);
+  });
+  _domBuilt = true;
+}
+
+function updateValues() {
+  KATEGORIEN.forEach(kat => {
+    let total = 0;
+    kat.zeilen.forEach(z => {
+      const d = (_data[kat.id]||{})[z.id] || { anzahl:0, updatedAt:'' };
+      const v = Math.max(0, Number(d.anzahl) || 0);
+      total += v;
+
+      const valEl = document.getElementById(`v-${kat.id}-${z.id}`);
+      if (valEl) { valEl.textContent = v; valEl.className = 's-val ' + (v > 10 ? 'pos' : v > 0 ? '' : 'zero'); }
+
+      const badgeEl = document.getElementById(`b-${kat.id}-${z.id}`);
+      if (badgeEl) {
+        if (v === 0)       { badgeEl.className = 'sbadge leer';   badgeEl.textContent = 'Leer'; }
+        else if (v <= 5)   { badgeEl.className = 'sbadge mittel'; badgeEl.textContent = 'Wenig (' + v + ')'; }
+        else               { badgeEl.className = 'sbadge viel';   badgeEl.textContent = 'OK (' + v + ')'; }
+      }
+
+      const tsEl = document.getElementById(`t-${kat.id}-${z.id}`);
+      if (tsEl) tsEl.textContent = d.updatedAt || '–';
+    });
+
+    const totEl = document.getElementById(`kat-tot-${kat.id}`);
+    if (totEl) totEl.textContent = total + ' gesamt';
+  });
+}
+
+function renderSummary() {
+  let gesamt = 0, leer = 0, wenig = 0;
+  KATEGORIEN.forEach(kat => {
+    let tot = 0;
+    kat.zeilen.forEach(z => { tot += Math.max(0, Number(((_data[kat.id]||{})[z.id]||{}).anzahl) || 0); });
+    gesamt += tot;
+    if (tot === 0) leer++;
+    else if (tot <= 10) wenig++;
+  });
+  const strip = document.getElementById('summaryStrip');
+  if (!strip) return;
+  strip.innerHTML = `
+    <div class="sum-card ok"><div class="s-lbl">Gesamt Artikel</div><div class="s-num">${gesamt}</div><div class="s-sub">verfügbar</div></div>
+    <div class="sum-card"><div class="s-lbl">Kategorien</div><div class="s-num">${KATEGORIEN.length}</div><div class="s-sub">Möbeltypen</div></div>
+    <div class="sum-card ${wenig>0?'warn':''}"><div class="s-lbl">Wenig Bestand</div><div class="s-num">${wenig}</div><div class="s-sub">Kategorien ≤ 10 Stk.</div></div>
+    <div class="sum-card ${leer>0?'warn':''}"><div class="s-lbl">Leer</div><div class="s-num">${leer}</div><div class="s-sub">Kategorien = 0</div></div>
+  `;
+}
+
+/* ── Bestand ändern ── */
+function change(katId, zeilId, delta) {
+  if (!_data[katId])        _data[katId] = {};
+  if (!_data[katId][zeilId]) _data[katId][zeilId] = { anzahl:0, updatedAt:'' };
+
+  const oldVal = Number(_data[katId][zeilId].anzahl) || 0;
+  const newVal = Math.max(0, oldVal + delta);
+  _data[katId][zeilId].anzahl    = newVal;
+  _data[katId][zeilId].updatedAt = nowStr();
+
+  // Track net change for batch log on save (only capture oldVal once per item)
+  const key = katId + '/' + zeilId;
+  if (!_pendingLogs[key]) {
+    const kat = KATEGORIEN.find(k => k.id === katId);
+    const z   = kat ? kat.zeilen.find(z => z.id === zeilId) : null;
+    _pendingLogs[key] = {
+      katLabel: kat ? kat.titel : katId,
+      zLabel:   z   ? z.label   : zeilId,
+      oldVal
+    };
+  }
+
+  updateValues();
+  renderSummary();
+  scheduleSave();
+}
+
+function scheduleSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(save, 800);
+}
+
+function save() {
+  if (!_db) return;
+  setSync('syncing', 'Speichern…');
+
+  const updates = {};
+  Object.keys(_pendingLogs).forEach(key => {
+    const [katId, zeilId] = key.split('/');
+    const d = (_data[katId]||{})[zeilId];
+    if (d) updates['moebel/' + katId + '/' + zeilId] = d;
+  });
+
+  const logsToWrite = Object.assign({}, _pendingLogs);
+  _pendingLogs = {};
+
+  _db.ref('/').update(updates)
+    .then(() => {
+      setSync('synced', 'Gespeichert ✓');
+      // Log every net change
+      Object.keys(logsToWrite).forEach(key => {
+        const [katId, zeilId] = key.split('/');
+        const { katLabel, zLabel, oldVal } = logsToWrite[key];
+        const newVal = ((_data[katId]||{})[zeilId]||{}).anzahl ?? oldVal;
+        const diff   = newVal - oldVal;
+        if (diff !== 0) {
+          const sign = diff > 0 ? '+' : '';
+          writeLog('Bestand geändert', `${katLabel} – ${zLabel}: ${oldVal} → ${newVal} (${sign}${diff})`);
+        }
+      });
+      toast('Gespeichert ✓');
+    })
+    .catch(e => { setSync('error','Fehler'); console.error(e); });
+}
+
+/* ── Direkteingabe Modal ── */
+let _editKat = null, _editZeil = null, _editOldVal = null;
+function openEdit(katId, zeilId, label) {
+  _editKat = katId; _editZeil = zeilId;
+  _editOldVal = ((_data[katId]||{})[zeilId]||{}).anzahl || 0;
+  document.getElementById('editTitle').textContent = label + ' — Bestand';
+  document.getElementById('editSub').textContent   = 'Aktuell: ' + _editOldVal;
+  const inp = document.getElementById('editInput');
+  inp.value = _editOldVal;
+  document.getElementById('editOverlay').classList.add('open');
+  setTimeout(() => { inp.focus(); inp.select(); }, 80);
+}
+function closeEdit() {
+  document.getElementById('editOverlay').classList.remove('open');
+  _editKat = null; _editZeil = null; _editOldVal = null;
+}
+function confirmEdit() {
+  if (!_editKat || !_editZeil) return;
+  const newVal = Math.max(0, parseInt(document.getElementById('editInput').value) || 0);
+  if (!_data[_editKat])        _data[_editKat] = {};
+  if (!_data[_editKat][_editZeil]) _data[_editKat][_editZeil] = { anzahl:0, updatedAt:'' };
+
+  const oldVal = Number(_data[_editKat][_editZeil].anzahl) || 0;
+  _data[_editKat][_editZeil].anzahl    = newVal;
+  _data[_editKat][_editZeil].updatedAt = nowStr();
+
+  const key = _editKat + '/' + _editZeil;
+  if (!_pendingLogs[key]) {
+    const kat = KATEGORIEN.find(k => k.id === _editKat);
+    const z   = kat ? kat.zeilen.find(z => z.id === _editZeil) : null;
+    _pendingLogs[key] = {
+      katLabel: kat ? kat.titel : _editKat,
+      zLabel:   z   ? z.label   : _editZeil,
+      oldVal
+    };
+  }
+
+  updateValues();
+  renderSummary();
+  scheduleSave();
+  closeEdit();
+}
+
+document.getElementById('editInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter')  confirmEdit();
+  if (e.key === 'Escape') closeEdit();
+});
+document.getElementById('editOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('editOverlay')) closeEdit();
+});
+</script>
+</body>
+</html>
