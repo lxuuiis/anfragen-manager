@@ -55,6 +55,8 @@
   .vai-card-top { display:flex; align-items:center; gap:10px; padding:10px 14px; flex-wrap:wrap; }
   .vai-name { font-size:13px; font-weight:700; color:var(--text); flex:1; }
   .vai-abt { font-size:11px; color:var(--text-3); }
+  .vai-mail { font-size:11px; font-weight:500; color:var(--text-2); background:var(--surface2); border:1px solid var(--border); padding:2px 8px; border-radius:11px; text-decoration:none; transition:0.12s; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .vai-mail:hover { color:var(--accent); border-color:var(--accent); background:var(--accent-light); }
   .vai-termin { background:var(--assil-c); color:#fff; border-radius:6px; padding:2px 8px; font-size:11px; font-weight:700; }
   .vai-time-ago { font-size:10px; color:var(--text-3); }
   .vai-tag { font-size:10px; font-weight:700; background:#fff7ed; color:#f97316; border:1px solid #fed7aa; border-radius:20px; padding:1px 7px; text-transform:uppercase; letter-spacing:0.4px; }
@@ -480,6 +482,7 @@ function renderVai() {
       '<div class="vai-card-top">' +
         '<span class="vai-name">'+esc(buyer.name||'–')+'</span>' +
         (buyer.abteilung ? '<span class="vai-abt">'+esc(buyer.abteilung)+'</span>' : '') +
+        (buyer.email ? '<a class="vai-mail" href="mailto:'+esc(buyer.email)+'" title="E-Mail schreiben" onclick="event.stopPropagation();">'+esc(buyer.email)+'</a>' : '') +
         (terminTxt ? '<span class="vai-termin">'+esc(terminTxt)+'</span>' : '') +
         '<span class="vai-time-ago">'+vaiTimeAgo(e.createdAt)+'</span>' +
         '<span class="vai-tag '+(isPending?'':'mine')+'">'+(isPending?'Neu':'Du bearbeitest')+'</span>' +

@@ -42,6 +42,7 @@
   .mtbl col.c-name   { width: auto; }
   .mtbl col.c-bestand{ width: 130px; }
   .mtbl col.c-verkauf{ width: 90px; }
+  .mtbl col.c-preis  { width: 110px; }
   .mtbl col.c-bilder { width: 110px; }
   .mtbl col.c-status { width: 120px; }
   .mtbl col.c-notiz  { width: 200px; }
@@ -56,6 +57,14 @@
   .vtoggle input:checked + .slider { background: var(--success); border-color: var(--success); }
   .vtoggle input:checked + .slider::before { transform: translateX(16px); }
   .vtoggle:hover .slider { filter: brightness(1.05); }
+
+  /* ── Preis-Spalte ── */
+  .preis-cell { display: inline-flex; align-items: center; gap: 4px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 0 8px 0 4px; transition: 0.12s; }
+  .preis-cell:focus-within { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px var(--accent-light); }
+  .preis-inp { width: 64px; border: none; outline: none; background: transparent; padding: 6px 4px; font-size: 13px; font-weight: 600; color: var(--text); font-family: inherit; text-align: right; -moz-appearance: textfield; }
+  .preis-inp::-webkit-outer-spin-button, .preis-inp::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .preis-inp::placeholder { color: var(--text-3); font-weight: 400; }
+  .preis-eur { font-size: 12px; font-weight: 600; color: var(--text-2); }
 
   /* ── Bilder-Spalte ── */
   .bilder-cell { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
@@ -405,7 +414,7 @@ let _resVerkauf  = {}; // Reservierungen aus offenen verkaufAnfragen (pending/cl
 // Initialisiere mit Startwerten
 KATEGORIEN.forEach(kat => {
   _data[kat.id] = {};
-  kat.zeilen.forEach(z => { _data[kat.id][z.id] = { anzahl: z.start, notiz: '', updatedAt: '', verkauf: false, bilder: [] }; });
+  kat.zeilen.forEach(z => { _data[kat.id][z.id] = { anzahl: z.start, notiz: '', updatedAt: '', verkauf: false, preis: 0, bilder: [] }; });
 });
 
 /* ── Helpers ── */
@@ -446,7 +455,7 @@ function saveKatalog() {
       KATEGORIEN.forEach(kat => {
         if (!_data[kat.id]) _data[kat.id] = {};
         kat.zeilen.forEach(z => {
-          if (!_data[kat.id][z.id]) _data[kat.id][z.id] = { anzahl: z.start || 0, notiz: '', updatedAt: '', verkauf: false, bilder: [] };
+          if (!_data[kat.id][z.id]) _data[kat.id][z.id] = { anzahl: z.start || 0, notiz: '', updatedAt: '', verkauf: false, preis: 0, bilder: [] };
         });
       });
 
@@ -464,7 +473,7 @@ function saveKatalog() {
                 if (fbData[kat.id][z.id] !== undefined) {
                   const fb = fbData[kat.id][z.id];
                   if (!_data[kat.id]) _data[kat.id] = {};
-                  if (!_data[kat.id][z.id]) _data[kat.id][z.id] = { anzahl: 0, notiz:'', updatedAt:'', verkauf:false, bilder:[] };
+                  if (!_data[kat.id][z.id]) _data[kat.id][z.id] = { anzahl: 0, notiz:'', updatedAt:'', verkauf:false, preis:0, bilder:[] };
                   _data[kat.id][z.id].anzahl    = fb.anzahl    != null ? fb.anzahl    : _data[kat.id][z.id].anzahl;
                   _data[kat.id][z.id].notiz     = fb.notiz     != null ? fb.notiz     : '';
                   _data[kat.id][z.id].updatedAt = fb.updatedAt != null ? fb.updatedAt : '';
@@ -589,6 +598,12 @@ function buildDOM() {
             <span class="slider"></span>
           </label>
         </td>
+        <td>
+          <div class="preis-cell">
+            <input type="number" min="0" step="1" id="pr-${kat.id}-${z.id}" class="preis-inp" placeholder="—" oninput="priceChange('${kat.id}','${z.id}',this.value)" />
+            <span class="preis-eur">€</span>
+          </div>
+        </td>
         <td><div class="bilder-cell" id="bi-${kat.id}-${z.id}"></div></td>
         <td><span class="sbadge leer" id="b-${kat.id}-${z.id}">Leer</span></td>
         <td><input class="notiz" id="n-${kat.id}-${z.id}" placeholder="Notiz…" oninput="noteChange('${kat.id}','${z.id}',this.value)" /></td>
@@ -613,13 +628,14 @@ function buildDOM() {
       </div>
       <div class="tbl-wrap">
         <table class="mtbl">
-          <colgroup><col class="c-name"/><col class="c-bestand"/><col class="c-reserviert"/><col class="c-verfuegbar"/><col class="c-verkauf"/><col class="c-bilder"/><col class="c-status"/><col class="c-notiz"/><col class="c-ts"/><col class="c-rm"/></colgroup>
+          <colgroup><col class="c-name"/><col class="c-bestand"/><col class="c-reserviert"/><col class="c-verfuegbar"/><col class="c-verkauf"/><col class="c-preis"/><col class="c-bilder"/><col class="c-status"/><col class="c-notiz"/><col class="c-ts"/><col class="c-rm"/></colgroup>
           <thead><tr>
             <th>Typ / Farbe / Maße</th>
             <th>Bestand <small style="font-weight:400;text-transform:none">(klick = direkt)</small></th>
             <th>Reserviert</th>
             <th>Verfügbar</th>
             <th>Im Verkauf</th>
+            <th>Preis</th>
             <th>Bilder</th>
             <th>Status</th>
             <th>Notiz</th>
@@ -646,7 +662,7 @@ function updateValues() {
   KATEGORIEN.forEach(kat => {
     let total = 0;
     kat.zeilen.forEach(z => {
-      const d = (_data[kat.id]||{})[z.id] || { anzahl:0, notiz:'', updatedAt:'', verkauf:false, bilder:[] };
+      const d = (_data[kat.id]||{})[z.id] || { anzahl:0, notiz:'', updatedAt:'', verkauf:false, preis:0, bilder:[] };
       const v = Math.max(0, Number(d.anzahl) || 0);
       total += v;
 
@@ -682,6 +698,12 @@ function updateValues() {
 
       const vkEl = document.getElementById(`vk-${kat.id}-${z.id}`);
       if (vkEl) vkEl.checked = !!d.verkauf;
+
+      const prEl = document.getElementById(`pr-${kat.id}-${z.id}`);
+      if (prEl && document.activeElement !== prEl) {
+        const p = Number(d.preis) || 0;
+        prEl.value = p > 0 ? p : '';
+      }
 
       const biEl = document.getElementById(`bi-${kat.id}-${z.id}`);
       if (biEl) renderBilderCell(biEl, kat.id, z.id, d.bilder || []);
@@ -983,7 +1005,7 @@ function toast(msg) {
 /* ── Verkauf-Toggle ── */
 function toggleVerkauf(katId, zeilId, checked) {
   if (!_data[katId]) _data[katId] = {};
-  if (!_data[katId][zeilId]) _data[katId][zeilId] = { anzahl:0, notiz:'', updatedAt:'', verkauf:false, bilder:[] };
+  if (!_data[katId][zeilId]) _data[katId][zeilId] = { anzahl:0, notiz:'', updatedAt:'', verkauf:false, preis:0, bilder:[] };
   _data[katId][zeilId].verkauf   = !!checked;
   _data[katId][zeilId].updatedAt = nowStr();
   if (_db) {
@@ -991,6 +1013,24 @@ function toggleVerkauf(katId, zeilId, checked) {
     _db.ref(`moebel/${katId}/${zeilId}/updatedAt`).set(_data[katId][zeilId].updatedAt);
   }
   toast(checked ? 'Im Verkauf ✓' : 'Aus Verkauf entfernt');
+}
+
+/* ── Preis (€) ── */
+const _priceTimers = {};
+function priceChange(katId, zeilId, val) {
+  if (!_data[katId]) _data[katId] = {};
+  if (!_data[katId][zeilId]) _data[katId][zeilId] = { anzahl:0, notiz:'', updatedAt:'', verkauf:false, preis:0, bilder:[] };
+  const num = Math.max(0, Number(val) || 0);
+  _data[katId][zeilId].preis     = num;
+  _data[katId][zeilId].updatedAt = nowStr();
+  const k = katId + '/' + zeilId;
+  clearTimeout(_priceTimers[k]);
+  _priceTimers[k] = setTimeout(() => {
+    if (_db) {
+      _db.ref(`moebel/${katId}/${zeilId}/preis`).set(num);
+      _db.ref(`moebel/${katId}/${zeilId}/updatedAt`).set(_data[katId][zeilId].updatedAt);
+    }
+  }, 600);
 }
 
 /* ── Bilder: Render ── */

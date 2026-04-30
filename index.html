@@ -176,6 +176,8 @@
   .va-card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .va-card-name { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -.005em; }
   .va-card-abt  { font-size: 12px; color: var(--text-3); }
+  .va-card-mail { font-size: 11.5px; font-weight: 500; color: var(--text-2); background: var(--surface2); border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; text-decoration: none; transition: 0.12s; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .va-card-mail:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
   .va-card-time { font-size: 11px; color: var(--text-3); margin-left: auto; display: inline-flex; align-items: center; gap: 4px; }
   .va-termin-badge {
     background: linear-gradient(135deg, #5B2FE5, #7C3AED);
@@ -741,6 +743,7 @@ function renderVerkaufAnfragen() {
         '<div class="va-card-head">' +
           '<span class="va-card-name">'+esc(buyer.name||'–')+'</span>' +
           (buyer.abteilung ? '<span class="va-card-abt">· '+esc(buyer.abteilung)+'</span>' : '') +
+          (buyer.email ? '<a class="va-card-mail" href="mailto:'+esc(buyer.email)+'" title="E-Mail kopieren / schreiben" onclick="event.stopPropagation();">'+esc(buyer.email)+'</a>' : '') +
           (terminTxt ? '<span class="va-termin-badge">'+calIcon+esc(terminTxt)+'</span>' : '') +
           '<span class="va-card-time">'+clkIcon+vaTimeAgo(e.createdAt)+'</span>' +
         '</div>' +
