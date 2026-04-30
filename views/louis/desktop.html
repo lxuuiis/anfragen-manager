@@ -36,6 +36,40 @@
   .claim-qty { font-weight:700; color:var(--text); }
   .claim-stock-banner { background:#f0fdf4; border:1px solid #86efac; border-radius:var(--radius); padding:10px 14px; margin:14px 0 0; font-size:13px; color:#15803d; font-weight:600; display:flex; align-items:center; gap:6px; }
   .claim-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+  /* ── Verkaufsanfragen-Inbox ── */
+  .vai-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .vai-section.closed .vai-list { display:none; }
+  .vai-section.closed .vai-chevron { transform: rotate(-90deg); }
+  .vai-hdr { display:flex; align-items:center; gap:8px; padding:11px 18px; background:var(--surface2); border-bottom:1px solid var(--border); cursor:pointer; user-select:none; }
+  .vai-hdr h2 { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2); display:flex; align-items:center; gap:6px; margin:0; flex:1; }
+  .vai-count-badge { font-size:10px; font-weight:700; background:var(--surface3); color:var(--text-2); border-radius:20px; padding:1px 8px; }
+  .vai-count-badge.has-pending { background: var(--danger); color:#fff; }
+  .vai-chevron { color:var(--text-3); transition: transform var(--transition); }
+  .vai-list { padding:8px 12px; display:flex; flex-direction:column; gap:8px; }
+  .vai-empty { font-size:13px; color:var(--text-3); padding:14px 6px; }
+  .vai-card { border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; background:var(--surface); position:relative; }
+  .vai-card.pending { border-left:3px solid var(--danger); }
+  .vai-card.claimed { border-left:3px solid var(--accent); background:var(--surface2); }
+  .vai-card.flash   { animation: vaiFlash 1.4s ease 0s 3; }
+  @keyframes vaiFlash { 0%,100% { box-shadow:0 0 0 0 rgba(0,113,227,0); } 50% { box-shadow:0 0 0 4px rgba(0,113,227,0.35); } }
+  .vai-card-top { display:flex; align-items:center; gap:10px; padding:10px 14px; flex-wrap:wrap; }
+  .vai-name { font-size:13px; font-weight:700; color:var(--text); flex:1; }
+  .vai-abt { font-size:11px; color:var(--text-3); }
+  .vai-termin { background:var(--assil-c); color:#fff; border-radius:6px; padding:2px 8px; font-size:11px; font-weight:700; }
+  .vai-time-ago { font-size:10px; color:var(--text-3); }
+  .vai-tag { font-size:10px; font-weight:700; background:#fff7ed; color:#f97316; border:1px solid #fed7aa; border-radius:20px; padding:1px 7px; text-transform:uppercase; letter-spacing:0.4px; }
+  .vai-tag.mine { background:var(--accent-light); color:var(--accent); border-color: transparent; }
+  .vai-moebel-row { padding:0 14px 8px; display:flex; flex-wrap:wrap; gap:5px; }
+  .vai-m-chip { font-size:11px; background:var(--surface2); color:var(--text-2); border-radius:4px; padding:2px 7px; border:1px solid var(--border); }
+  .vai-card.claimed .vai-m-chip { background: var(--surface); }
+  .vai-bem { padding:0 14px 8px; font-size:12px; color:var(--text-3); font-style:italic; }
+  .vai-footer { display:flex; justify-content:flex-end; gap:6px; padding:8px 14px; border-top:1px solid var(--border); background:var(--surface2); flex-wrap:wrap; }
+  .vai-pulse { position:absolute; top:10px; right:10px; width:7px; height:7px; border-radius:50%; background:var(--danger); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100% { transform:scale(1); opacity:1 } 50% { transform:scale(1.5); opacity:.6 } }
+  .vai-btn-reject { background:transparent; border:1px solid var(--border); color:var(--text-3); }
+  .vai-btn-reject:hover { color:var(--danger); border-color:var(--danger); }
+  .vai-termin-modal-row { display:flex; gap:8px; margin:12px 0; }
+  .vai-termin-modal-row input { flex:1; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font); font-size:13px; background:var(--surface); color:var(--text); }
 </style>
 </head>
 <body>
@@ -92,6 +126,19 @@
         Tabelle erstellen
       </button>
     </div>
+  </div>
+
+  <!-- Eingehende Verkaufsanfragen (Inbox) -->
+  <div class="vai-section" id="vaiSection" style="display:none">
+    <div class="vai-hdr" onclick="document.getElementById('vaiSection').classList.toggle('closed')">
+      <h2>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        Eingehende Verkaufsanfragen
+        <span class="vai-count-badge" id="vaiCountBadge">0</span>
+      </h2>
+      <svg class="vai-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="vai-list" id="vaiList"></div>
   </div>
 
   <!-- Externe Verkäufe (von Assil erfasst) -->
@@ -340,6 +387,250 @@ function confirmClaimExtern() {
   renderAll();
 }
 
+// ── Verkaufsanfragen-Inbox (verkaufAnfragen) ─────────────────────
+let vaiAnfragen = [];
+let _vaiClaimIdFromUrl = null;
+
+function startVaiListener() {
+  if (!db) return;
+  db.ref('verkaufAnfragen').on('value', snap => {
+    const raw = snap.val();
+    vaiAnfragen = raw ? Object.values(raw) : [];
+    renderVai();
+    if (_vaiClaimIdFromUrl) {
+      // Nach Render: Karte highlighten
+      setTimeout(() => vaiHighlight(_vaiClaimIdFromUrl), 80);
+    }
+  });
+}
+
+function vaiTimeAgo(ts) {
+  if (!ts) return '';
+  const min = Math.floor((Date.now() - ts) / 60000);
+  if (min < 1)   return 'gerade eben';
+  if (min < 60)  return 'vor ' + min + ' Min';
+  const h = Math.floor(min / 60);
+  if (h < 24)    return 'vor ' + h + ' h';
+  const d = Math.floor(h / 24);
+  return 'vor ' + d + ' Tag' + (d!==1?'en':'');
+}
+
+function renderVai() {
+  const section = document.getElementById('vaiSection');
+  const list    = document.getElementById('vaiList');
+  const badge   = document.getElementById('vaiCountBadge');
+  if (!section || !list || !badge) return;
+
+  const items = vaiAnfragen
+    .filter(x => x && (x.status === 'pending' || (x.status === 'claimed' && x.claimedBy === OWNER)))
+    .sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+
+  const pendingCount = items.filter(x => x.status === 'pending').length;
+  badge.textContent = items.length;
+  badge.className = 'vai-count-badge' + (pendingCount > 0 ? ' has-pending' : '');
+
+  if (!items.length) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+  // Default offen wenn ≥1 pending oder claimedByMe (und User noch nicht manuell zu hat)
+  if (!section.dataset.userToggled) section.classList.remove('closed');
+
+  list.innerHTML = items.map(e => {
+    const isPending = e.status === 'pending';
+    const buyer = e.buyer || {};
+    const wt    = e.wunschTermin || {};
+    const moebelChips = (e.moebel || []).map(m =>
+      '<span class="vai-m-chip">' + (m.qty||1) + '× ' + esc(m.katLabel||m.kat||'') +
+      (m.subLabel ? ' ' + esc(m.subLabel) : '') + '</span>'
+    ).join('');
+    const terminTxt = (wt.datum||'') + (wt.uhrzeit ? ' · ' + wt.uhrzeit : '');
+    const idEsc = esc(e.id);
+
+    const footer = isPending
+      ? '<button class="btn vai-btn-reject" onclick="vaiReject(\''+idEsc+'\')">Ablehnen</button>' +
+        '<button class="btn btn-primary" onclick="vaiClaim(\''+idEsc+'\')">&#220;bernehmen</button>'
+      : '<button class="btn vai-btn-reject" onclick="vaiRelease(\''+idEsc+'\')">Freigeben</button>' +
+        '<button class="btn btn-ghost" onclick="vaiOpenTerminModal(\''+idEsc+'\')">Termin &#228;ndern</button>' +
+        '<button class="btn btn-primary" onclick="vaiInsertIntoTable(\''+idEsc+'\')">In Tabelle einf&#252;gen</button>';
+
+    return '<div class="vai-card '+(isPending?'pending':'claimed')+'" data-vid="'+idEsc+'">' +
+      (isPending ? '<div class="vai-pulse"></div>' : '') +
+      '<div class="vai-card-top">' +
+        '<span class="vai-name">'+esc(buyer.name||'–')+'</span>' +
+        (buyer.abteilung ? '<span class="vai-abt">'+esc(buyer.abteilung)+'</span>' : '') +
+        (terminTxt ? '<span class="vai-termin">'+esc(terminTxt)+'</span>' : '') +
+        '<span class="vai-time-ago">'+vaiTimeAgo(e.createdAt)+'</span>' +
+        '<span class="vai-tag '+(isPending?'':'mine')+'">'+(isPending?'Neu':'Du bearbeitest')+'</span>' +
+      '</div>' +
+      (moebelChips ? '<div class="vai-moebel-row">'+moebelChips+'</div>' : '') +
+      (e.notiz ? '<div class="vai-bem">„'+esc(e.notiz)+'"</div>' : '') +
+      '<div class="vai-footer">'+footer+'</div>' +
+    '</div>';
+  }).join('');
+}
+
+function vaiClaim(id) {
+  if (!db) return;
+  db.ref('verkaufAnfragen/' + id).update({ status: 'claimed', claimedBy: OWNER })
+    .then(() => toast('&#220;bernommen ✓'))
+    .catch(err => toast('Fehler: ' + err.message));
+}
+function vaiReject(id) {
+  if (!db) return;
+  if (!confirm('Anfrage wirklich ablehnen?')) return;
+  db.ref('verkaufAnfragen/' + id).update({ status: 'rejected' })
+    .then(() => toast('Anfrage abgelehnt'))
+    .catch(err => toast('Fehler: ' + err.message));
+}
+function vaiRelease(id) {
+  if (!db) return;
+  db.ref('verkaufAnfragen/' + id).update({ status: 'pending', claimedBy: null })
+    .then(() => toast('Freigegeben'))
+    .catch(err => toast('Fehler: ' + err.message));
+}
+
+function vaiInsertIntoTable(id) {
+  const e = vaiAnfragen.find(x => String(x.id) === String(id));
+  if (!e || !db) { toast('Anfrage nicht gefunden'); return; }
+  const buyer = e.buyer || {};
+  const wt    = e.wunschTermin || {};
+  const personenName = (buyer.name||'').trim() + (buyer.abteilung ? ' (' + buyer.abteilung + ')' : '');
+  const moebelArr = (e.moebel||[]).map(m => ({
+    kat: m.kat||'', sub: m.sub||'', qty: parseInt(m.qty)||1
+  }));
+  const newPerson = {
+    name:      personenName,
+    status:    'Reservierung',
+    fe:        'Nein',
+    fw:        'Nein',
+    moebel:    moebelArr,
+    bem:       e.notiz || '',
+    abh_datum: '',
+    abh_zeit:  '',
+    quelle:    'verkauf'
+  };
+
+  // Suche bestehende Session mit gleichem Datum/Uhrzeit
+  const existing = sessions.find(s =>
+    s.owner === OWNER &&
+    (s.datum||'') === (wt.datum||'') &&
+    (s.uhrzeit||'') === (wt.uhrzeit||'')
+  );
+
+  let targetSid;
+  const updates = {};
+  if (existing) {
+    existing.personen = existing.personen || [];
+    existing.personen.push(newPerson);
+    targetSid = existing.id;
+    _dirtyIds.add(String(targetSid));
+    updates['sessions/' + targetSid] = { ...existing, owner: OWNER };
+  } else {
+    const newId = Date.now();
+    const newSession = {
+      id: newId,
+      datum:    wt.datum || '',
+      uhrzeit:  wt.uhrzeit || '',
+      collapsed: false,
+      owner:    OWNER,
+      personen: [newPerson]
+    };
+    sessions.push(newSession);
+    targetSid = newId;
+    _dirtyIds.add(String(targetSid));
+    updates['sessions/' + targetSid] = { ...newSession };
+  }
+  updates['verkaufAnfragen/' + e.id + '/status']        = 'integrated';
+  updates['verkaufAnfragen/' + e.id + '/integratedAt']  = Date.now();
+  updates['verkaufAnfragen/' + e.id + '/claimedBy']     = OWNER;
+
+  firebase.database().ref().update(updates)
+    .then(() => {
+      toast('In Tabelle eingef&#252;gt ✓');
+      _dirtyIds.delete(String(targetSid));
+      renderAll();
+      // Scrollen zur Person-Zeile
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('td input[type=text]');
+        for (let i = 0; i < inputs.length; i++) {
+          if ((inputs[i].value||'').trim().toLowerCase() === personenName.toLowerCase()) {
+            const tr = inputs[i].closest('tr');
+            if (tr) {
+              tr.scrollIntoView({ behavior:'smooth', block:'center' });
+              tr.style.transition = 'background 0.3s';
+              tr.style.background = 'rgba(0,113,227,0.18)';
+              setTimeout(() => { tr.style.background = ''; }, 4000);
+            }
+            return;
+          }
+        }
+      }, 350);
+    })
+    .catch(err => toast('Fehler: ' + err.message));
+}
+
+function vaiOpenTerminModal(id) {
+  const e = vaiAnfragen.find(x => String(x.id) === String(id));
+  if (!e) return;
+  const wt = e.wunschTermin || {};
+  const old = document.getElementById('vaiTerminModal');
+  if (old) old.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay open';
+  overlay.id = 'vaiTerminModal';
+  overlay.innerHTML =
+    '<div class="modal-box">' +
+      '<h3>📅 Termin &#228;ndern</h3>' +
+      '<p style="font-size:13px;color:var(--text-2);">K&#228;ufer: <strong>'+esc((e.buyer&&e.buyer.name)||'–')+'</strong></p>' +
+      '<div class="vai-termin-modal-row">' +
+        '<input type="text" id="vaiNewDatum"   placeholder="TT.MM.JJJJ" value="'+esc(wt.datum||'')+'" />' +
+        '<input type="text" id="vaiNewUhrzeit" placeholder="HH:MM"      value="'+esc(wt.uhrzeit||'')+'" />' +
+      '</div>' +
+      '<div class="modal-actions">' +
+        '<button class="btn btn-ghost"   onclick="document.getElementById(\'vaiTerminModal\').remove()">Abbrechen</button>' +
+        '<button class="btn btn-primary" onclick="vaiSaveTermin(\''+esc(e.id)+'\')">Speichern</button>' +
+      '</div>' +
+    '</div>';
+  overlay.addEventListener('click', ev => { if (ev.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function vaiSaveTermin(id) {
+  const e = vaiAnfragen.find(x => String(x.id) === String(id));
+  if (!e || !db) return;
+  const datum   = (document.getElementById('vaiNewDatum')  ?.value||'').trim();
+  const uhrzeit = (document.getElementById('vaiNewUhrzeit')?.value||'').trim();
+  if (!datum || !uhrzeit) { toast('Bitte Datum und Uhrzeit eingeben.'); return; }
+  const name = (e.buyer && e.buyer.name) || 'der K&#228;ufer';
+  const ok = confirm('Achtung: Du musst ' + name + ' pers&#246;nlich kontaktieren und die neue Zeit (' + datum + ' ' + uhrzeit + ') mitteilen, bevor sie g&#252;ltig wird. Fortfahren?');
+  if (!ok) return;
+  db.ref('verkaufAnfragen/' + id).update({
+    'wunschTermin/datum':   datum,
+    'wunschTermin/uhrzeit': uhrzeit
+  })
+    .then(() => {
+      toast('Termin aktualisiert ✓');
+      const m = document.getElementById('vaiTerminModal');
+      if (m) m.remove();
+    })
+    .catch(err => toast('Fehler: ' + err.message));
+}
+
+function vaiHighlight(id) {
+  const card = document.querySelector('.vai-card[data-vid="'+CSS.escape(String(id))+'"]');
+  if (!card) return;
+  const section = document.getElementById('vaiSection');
+  if (section) section.classList.remove('closed');
+  card.scrollIntoView({ behavior:'smooth', block:'center' });
+  card.classList.add('flash');
+  setTimeout(() => card.classList.remove('flash'), 4500);
+  _vaiClaimIdFromUrl = null; // einmalig
+  // URL-Parameter entfernen
+  try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
+}
+
 // ── Firebase initialisieren ──────────────────────────────────────
 function initFirebase() {
   if (FIREBASE_CONFIG.apiKey === 'DEIN_API_KEY') {
@@ -365,10 +656,12 @@ function initFirebase() {
       // Danach Session-Daten live hören
       startSessionListener();
       startExternListener();
+      startVaiListener();
     }, () => {
       // Katalog nicht lesbar → trotzdem Sessions laden
       startSessionListener();
       startExternListener();
+      startVaiListener();
     });
 
     // Live-Update wenn Katalog in moebel.html geändert wird
@@ -1211,6 +1504,21 @@ window.addEventListener('scroll', e => {
 
 document.getElementById('newUhrzeit').addEventListener('keydown', e => { if (e.key==='Enter') addSession(); });
 document.getElementById('newDatum').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('newUhrzeit').focus(); });
+
+// ── URL-Parameter ?claimVerkauf=<id> (von index.html „Integrieren") ──
+(function readVaiClaimParam() {
+  try {
+    const u = new URL(window.location.href);
+    const cid = u.searchParams.get('claimVerkauf');
+    if (cid) _vaiClaimIdFromUrl = cid;
+  } catch(_) {}
+})();
+
+// Manuelles Toggle merken, damit Default-Open nicht überschrieben wird
+document.addEventListener('click', ev => {
+  const hdr = ev.target.closest('#vaiSection .vai-hdr');
+  if (hdr) { document.getElementById('vaiSection').dataset.userToggled = '1'; }
+}, true);
 
 initFirebase();
 

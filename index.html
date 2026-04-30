@@ -135,6 +135,88 @@
   /* ── Stat Pills (Person Cards) ── */
   .stat-pill { display: flex; align-items: center; gap: 5px; background: var(--surface2); border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--text-2); }
   .stat-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Verkaufsanfragen ── */
+  .va-count { font-size: 11px; font-weight: 700; background: var(--surface3); color: var(--text-2); border-radius: 20px; padding: 1px 8px; }
+  .va-count.has-pending { background: linear-gradient(135deg, #5B2FE5, #7C3AED); color: #fff; box-shadow: 0 2px 8px rgba(91,47,229,.35); }
+  .va-empty { font-size: 13px; color: var(--text-3); padding: 28px 0; text-align: center; }
+
+  .va-card {
+    display: flex; align-items: stretch; gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .va-card:last-child { margin-bottom: 0; }
+  .va-card:hover { transform: translateY(-1px); box-shadow: 0 8px 24px -12px rgba(91,47,229,.25); border-color: rgba(91,47,229,.35); }
+  .va-card::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: linear-gradient(180deg, #5B2FE5, #7C3AED);
+  }
+  .va-card.pending::before { background: linear-gradient(180deg, #5B2FE5, #7C3AED); }
+  .va-card.claimed::before { background: var(--accent); }
+  .va-card.claimed { background: var(--surface2); }
+
+  .va-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, #5B2FE5, #7C3AED);
+    color: #fff; font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; letter-spacing: .02em;
+    box-shadow: 0 4px 12px -4px rgba(91,47,229,.5);
+  }
+  .va-card.claimed .va-avatar { background: var(--accent); box-shadow: none; opacity: .85; }
+
+  .va-card-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .va-card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .va-card-name { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -.005em; }
+  .va-card-abt  { font-size: 12px; color: var(--text-3); }
+  .va-card-time { font-size: 11px; color: var(--text-3); margin-left: auto; display: inline-flex; align-items: center; gap: 4px; }
+  .va-termin-badge {
+    background: linear-gradient(135deg, #5B2FE5, #7C3AED);
+    color: #fff; border-radius: 8px;
+    padding: 3px 10px; font-size: 11px; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 5px;
+    box-shadow: 0 2px 6px -2px rgba(91,47,229,.5);
+  }
+  .va-termin-badge svg { opacity: .9; }
+  .va-moebel { display: flex; flex-wrap: wrap; gap: 5px; }
+  .va-m-chip {
+    font-size: 11px; background: var(--surface2); color: var(--text-2);
+    border-radius: 6px; padding: 3px 9px; border: 1px solid var(--border);
+    font-weight: 500;
+  }
+  .va-m-chip b { color: var(--text); font-weight: 700; margin-right: 2px; }
+  .va-card.claimed .va-m-chip { background: var(--surface); }
+  .va-notiz { font-size: 12px; color: var(--text-2); font-style: italic; padding: 6px 10px; background: var(--surface2); border-radius: 6px; border-left: 2px solid var(--border); }
+  .va-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; flex-shrink: 0; min-width: 130px; }
+  .va-btn {
+    padding: 7px 12px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface); font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: var(--font); white-space: nowrap;
+    transition: 0.15s; color: var(--text);
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .va-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+  .va-btn.louis  { background: var(--louis-c); border-color: var(--louis-c); color: #fff; }
+  .va-btn.rohat  { background: var(--rohat-c); border-color: var(--rohat-c); color: #fff; }
+  .va-btn.louis:hover, .va-btn.rohat:hover { opacity: 0.9; color: #fff; box-shadow: 0 4px 12px -4px currentColor; }
+  .va-btn.primary { background: linear-gradient(135deg, #5B2FE5, #7C3AED); border-color: transparent; color: #fff; box-shadow: 0 4px 12px -4px rgba(91,47,229,.5); }
+  .va-btn.primary:hover { opacity: 0.92; color: #fff; transform: translateY(-1px); }
+  .va-btn.ghost { color: var(--text-3); background: transparent; border-color: transparent; font-size: 11px; padding: 4px 8px; }
+  .va-btn.ghost:hover { color: var(--danger); background: var(--surface2); }
+  .va-pulse { position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: #5B2FE5; box-shadow: 0 0 0 0 rgba(91,47,229,.6); animation: pulse 1.6s infinite; }
+  .va-card.claimed .va-pulse { display: none; }
+  @media (max-width: 720px) {
+    .va-card { flex-wrap: wrap; }
+    .va-actions { width: 100%; flex-direction: row; flex-wrap: wrap; }
+    .va-actions .va-btn { flex: 1; }
+  }
 </style>
 </head>
 <body>
@@ -146,6 +228,10 @@
   </a>
   <div style="display:flex;align-items:center;gap:8px;">
     <div class="sync-badge" id="syncBadge"><div class="dot"></div><span id="syncTxt">Verbinde&#x2026;</span></div>
+    <a href="verkauf.html" target="_blank" class="btn btn-ghost" title="IAV Möbelmarkt (Mitarbeiter-Seite)" style="display:flex;align-items:center;gap:5px;text-decoration:none;color:#E2001A;font-weight:600;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span style="font-size:12px;">IAV-Markt</span>
+    </a>
     <a href="trash.html" class="btn btn-ghost" title="Papierkorb" style="display:flex;align-items:center;gap:5px;text-decoration:none;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
       <span id="trashCount" style="display:none;background:var(--danger);color:#fff;border-radius:20px;padding:1px 6px;font-size:10px;font-weight:700;"></span>
@@ -218,6 +304,25 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- VERKAUFSANFRAGEN -->
+  <div>
+    <div class="sec-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      Möbel-Verkaufsanfragen
+    </div>
+    <div class="panel" id="vaPanel">
+      <div class="panel-head" onclick="this.parentElement.classList.toggle('closed')">
+        <span class="panel-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          Eingehende Anfragen
+          <span class="va-count" id="vaCount">0</span>
+        </span>
+        <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="panel-body"><div id="vaList"><p class="va-empty">L&#228;dt&#8230;</p></div></div>
     </div>
   </div>
 
@@ -308,6 +413,7 @@ const VIEW_URLS = {
 };
 
 let _sessions = [], _archiv = [], _filter = 'all';
+let _verkaufAnfragen = [], _dbRoot = null;
 
 function esc(v) { return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
 
@@ -345,6 +451,7 @@ function setSyncStatus(type, txt) {
   try {
     const app = firebase.initializeApp(FB_CFG);
     const db  = firebase.database(app);
+    _dbRoot = db;
     setSyncStatus('', 'Verbinde…');
     db.ref('sessions').on('value', snap => {
       _sessions = snap.val() ? Object.values(snap.val()) : [];
@@ -354,6 +461,10 @@ function setSyncStatus(type, txt) {
     db.ref('archiv').on('value', snap => {
       _archiv = snap.val() ? Object.values(snap.val()) : [];
       renderArchiv();
+    });
+    db.ref('verkaufAnfragen').on('value', snap => {
+      _verkaufAnfragen = snap.val() ? Object.values(snap.val()) : [];
+      renderVerkaufAnfragen();
     });
     // Papierkorb-Zähler in Nav
     db.ref('trash').on('value', snap => {
@@ -543,6 +654,107 @@ function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent=msg; el.classList.add('show');
   clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),2400);
+}
+
+// ── Verkaufsanfragen ─────────────────────────────────────────────
+function vaTimeAgo(ts) {
+  if (!ts) return '';
+  const min = Math.floor((Date.now() - ts) / 60000);
+  if (min < 1)   return 'gerade eben';
+  if (min < 60)  return 'vor ' + min + ' Min';
+  const h = Math.floor(min / 60);
+  if (h < 24)    return 'vor ' + h + ' h';
+  const d = Math.floor(h / 24);
+  return 'vor ' + d + ' Tag' + (d!==1?'en':'');
+}
+
+function renderVerkaufAnfragen() {
+  const list  = document.getElementById('vaList');
+  const count = document.getElementById('vaCount');
+  const panel = document.getElementById('vaPanel');
+  if (!list || !count || !panel) return;
+
+  const items = _verkaufAnfragen
+    .filter(x => x && (x.status === 'pending' || x.status === 'claimed'))
+    .sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+
+  const pendingCount = items.filter(x => x.status === 'pending').length;
+  count.textContent = items.length;
+  count.className = 'va-count' + (pendingCount > 0 ? ' has-pending' : '');
+
+  if (!items.length) {
+    list.innerHTML = '<p class="va-empty">Keine offenen Verkaufsanfragen.</p>';
+    return;
+  }
+
+  list.innerHTML = items.map(e => {
+    const isPending = e.status === 'pending';
+    const claimedBy = e.claimedBy || '';
+    const buyer = e.buyer || {};
+    const wt    = e.wunschTermin || {};
+    const moebelChips = (e.moebel || []).map(m =>
+      '<span class="va-m-chip"><b>' + (m.qty||1) + '×</b> ' + esc(m.katLabel||m.kat||'') +
+      (m.subLabel ? ' ' + esc(m.subLabel) : '') + '</span>'
+    ).join('');
+    const initials = (buyer.name||'?').trim().split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase() || '?';
+
+    let actions = '';
+    if (isPending) {
+      actions =
+        '<button class="va-btn louis" onclick="vaClaim(\''+esc(e.id)+'\',\'louis\')">Louis &#252;bernimmt</button>' +
+        '<button class="va-btn rohat" onclick="vaClaim(\''+esc(e.id)+'\',\'rohat\')">Rohat &#252;bernimmt</button>' +
+        '<button class="va-btn ghost" onclick="vaReject(\''+esc(e.id)+'\')">Ablehnen</button>';
+    } else {
+      actions =
+        '<span class="owner-chip '+esc(claimedBy)+'" style="margin-bottom:2px">'+ownerLabel(claimedBy)+'</span>' +
+        '<button class="va-btn primary" onclick="vaIntegrate(\''+esc(e.id)+'\',\''+esc(claimedBy)+'\')">Integrieren &#8594;</button>' +
+        '<button class="va-btn ghost" onclick="vaRelease(\''+esc(e.id)+'\')">Freigeben</button>';
+    }
+
+    const terminTxt = (wt.datum||'') + (wt.uhrzeit ? ' · ' + wt.uhrzeit : '');
+    const calIcon = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+    const clkIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+
+    return '<div class="va-card '+(isPending?'pending':'claimed')+'">' +
+      (isPending ? '<div class="va-pulse"></div>' : '') +
+      '<div class="va-avatar">'+esc(initials)+'</div>' +
+      '<div class="va-card-body">' +
+        '<div class="va-card-head">' +
+          '<span class="va-card-name">'+esc(buyer.name||'–')+'</span>' +
+          (buyer.abteilung ? '<span class="va-card-abt">· '+esc(buyer.abteilung)+'</span>' : '') +
+          (terminTxt ? '<span class="va-termin-badge">'+calIcon+esc(terminTxt)+'</span>' : '') +
+          '<span class="va-card-time">'+clkIcon+vaTimeAgo(e.createdAt)+'</span>' +
+        '</div>' +
+        (moebelChips ? '<div class="va-moebel">'+moebelChips+'</div>' : '') +
+        (e.notiz ? '<div class="va-notiz">„'+esc(e.notiz)+'"</div>' : '') +
+      '</div>' +
+      '<div class="va-actions">'+actions+'</div>' +
+    '</div>';
+  }).join('');
+}
+
+function vaClaim(id, owner) {
+  if (!_dbRoot) return;
+  _dbRoot.ref('verkaufAnfragen/' + id).update({ status: 'claimed', claimedBy: owner })
+    .then(() => toast(ownerLabel(owner) + ' &#252;bernimmt ✓'))
+    .catch(err => toast('Fehler: ' + err.message));
+}
+function vaReject(id) {
+  if (!_dbRoot) return;
+  if (!confirm('Anfrage wirklich ablehnen?')) return;
+  _dbRoot.ref('verkaufAnfragen/' + id).update({ status: 'rejected' })
+    .then(() => toast('Anfrage abgelehnt'))
+    .catch(err => toast('Fehler: ' + err.message));
+}
+function vaRelease(id) {
+  if (!_dbRoot) return;
+  _dbRoot.ref('verkaufAnfragen/' + id).update({ status: 'pending', claimedBy: null })
+    .then(() => toast('Freigegeben'))
+    .catch(err => toast('Fehler: ' + err.message));
+}
+function vaIntegrate(id, owner) {
+  if (!owner || !VIEW_URLS[owner]) { toast('Fehler: Owner unbekannt'); return; }
+  window.location.href = VIEW_URLS[owner] + '?claimVerkauf=' + encodeURIComponent(id);
 }
 </script>
 </body>
