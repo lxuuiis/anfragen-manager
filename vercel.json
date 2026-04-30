@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/checkDelayed",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}

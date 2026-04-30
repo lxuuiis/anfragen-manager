@@ -1258,6 +1258,13 @@ function submitRequest() {
 
   ref.set(payload).then(() => {
     addMyId(id);
+    // fire-and-forget confirmation mail (don't block UI on errors)
+    fetch('/api/sendConfirmation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ anfrageId: id })
+    }).catch(err => console.warn('Confirmation mail failed:', err));
+
     document.getElementById('successSummary').innerHTML = `
       <strong>${esc(name)}${payload.buyer.abteilung?' · '+esc(payload.buyer.abteilung):''}</strong>
       <div style="margin-top:8px;">Termin: ${esc(datumStr)} um ${esc(time)} Uhr</div>
