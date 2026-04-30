@@ -480,6 +480,45 @@
   .success-wrap p { font-size: 15px; color: var(--ink-2); line-height: 1.5; max-width: 380px; margin: 0 auto 28px; }
   .success-summary { background: var(--bg-2); border-radius: 12px; padding: 18px; text-align: left; font-size: 13px; color: var(--ink-2); margin-bottom: 22px; }
   .success-summary strong { color: var(--ink); display: block; margin-bottom: 6px; }
+  .success-status-cta {
+    margin: 0 auto 26px; max-width: 440px;
+    background: linear-gradient(135deg, rgba(91,47,229,0.08) 0%, rgba(56,189,248,0.08) 100%);
+    border: 1.5px solid var(--iav-violet);
+    border-radius: 14px;
+    padding: 20px 22px;
+    text-align: left;
+    box-shadow: 0 8px 28px -10px rgba(91,47,229,.35);
+    animation: pulseGlow 2.4s ease-in-out 1;
+  }
+  @keyframes pulseGlow {
+    0%   { box-shadow: 0 0 0 0 rgba(91,47,229,.45); }
+    60%  { box-shadow: 0 0 0 14px rgba(91,47,229,0); }
+    100% { box-shadow: 0 8px 28px -10px rgba(91,47,229,.35); }
+  }
+  .success-status-cta-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 700; color: var(--iav-violet);
+    text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+  .success-status-cta p {
+    font-size: 13.5px; color: var(--ink-2); line-height: 1.55;
+    max-width: none; margin: 0 0 14px;
+    text-align: left;
+  }
+  .success-status-cta p b { color: var(--ink); }
+  .success-status-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 20px; border-radius: 10px;
+    background: linear-gradient(135deg,#5B2FE5 0%,#7C3AED 60%,#38BDF8 130%);
+    color: #fff; font-weight: 700; font-size: 13.5px;
+    border: none; cursor: pointer;
+    transition: transform .15s, box-shadow .2s;
+  }
+  .success-status-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px -8px rgba(91,47,229,.55);
+  }
 
   /* My requests */
   .myreq-card {
@@ -816,6 +855,23 @@
       <h2>Anfrage gesendet</h2>
       <p>Louis oder Rohat schauen sich deine Anfrage an und melden sich bei dir, um den Termin zu bestätigen.</p>
       <div class="success-summary" id="successSummary"></div>
+
+      <div class="success-status-cta">
+        <div class="success-status-cta-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Wichtig — bitte regelmäßig prüfen
+        </div>
+        <p>
+          Falls Louis oder Rohat den <b>Termin verschieben müssen</b>, siehst du das nur,
+          wenn du oben rechts auf den Button <b>„Status"</b> klickst.<br/>
+          Dort kannst du den neuen Vorschlag direkt mit <b>Ja</b> oder <b>Nein</b> beantworten.
+        </p>
+        <button type="button" class="success-status-btn" onclick="closeCart();setTimeout(openMyReqs,250);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Status jetzt öffnen
+        </button>
+      </div>
+
       <button class="btn-secondary" onclick="closeCart();" style="margin-right:8px;">Schließen</button>
       <button class="btn-primary" style="display:inline-flex;width:auto;" onclick="resetShop()">Weitere Anfrage</button>
     </div>
@@ -1396,9 +1452,6 @@ function submitRequest() {
       <strong>${esc(name)}${payload.buyer.abteilung?' · '+esc(payload.buyer.abteilung):''}</strong>
       <div style="margin-top:8px;">Termin: ${esc(datumStr)} um ${esc(time)} Uhr</div>
       <div style="margin-top:8px;">${_cart.length} Position${_cart.length!==1?'en':''}, ${_cart.reduce((n,c)=>n+c.qty,0)} Stk. gesamt</div>
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;line-height:1.55;">
-        Den aktuellen Status deiner Anfrage findest du jederzeit oben rechts unter <strong>Status</strong> – einfach mit dieser E-Mail anzeigen lassen.
-      </div>
     `;
     _cart = [];
     updateCartBadge();
