@@ -26,6 +26,14 @@
         <input type="password" id="iavAuthInput" placeholder="Passwort…" autocomplete="current-password" style="width:100%;font-size:15px;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;outline:none;margin-bottom:10px;font-family:inherit;box-sizing:border-box;" />
         <div id="iavAuthError" style="font-size:12px;color:#d93025;margin-bottom:10px;min-height:16px;"></div>
         <button id="iavAuthBtn" type="button" style="width:100%;background:#0071e3;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Weiter →</button>
+        <div style="margin-top:22px;padding-top:18px;border-top:1px solid #ececec;font-size:12px;color:#6e6e73;line-height:1.5;">
+          Falls du dich verirrt hast und <b style="color:#1c1c1e;">Möbel buchen</b> wolltest:
+          <br/>
+          <a id="iavAuthShopLink" href="#" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;color:#5B2FE5;text-decoration:none;font-weight:600;font-size:13px;">
+            Zur Möbel-Buchungsseite
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
       </div>`;
     document.body.appendChild(div);
 
@@ -47,6 +55,16 @@
     }
     btn.addEventListener('click', check);
     input.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+
+    // Link zur Verkaufs-Seite — Pfad-Tiefe bestimmen (views/<user>/… → ../../)
+    try {
+      const link = document.getElementById('iavAuthShopLink');
+      const segs = location.pathname.split('/').filter(Boolean);
+      // letzter Segment ist die Datei, alle davor sind Ordner unter dem Site-Root
+      const depth = Math.max(0, segs.length - 1);
+      link.href = (depth ? '../'.repeat(depth) : './') + 'verkauf.html';
+    } catch(_) {}
+
     setTimeout(() => input.focus(), 60);
   }
 
