@@ -73,6 +73,21 @@
     border: 1px solid rgba(255,255,255,0.18);
   }
   .nav-icon-btn:hover { background: rgba(255,255,255,0.20); }
+  .nav-status-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 18px; height: 46px;
+    border-radius: 999px;
+    color: #fff; font-size: 14px; font-weight: 600;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.22);
+    transition: background .2s, transform .15s;
+  }
+  .nav-status-btn:hover { background: rgba(255,255,255,0.22); transform: translateY(-1px); }
+  .nav-status-btn svg { opacity: .9; }
+  @media (max-width: 540px) {
+    .nav-status-btn { padding: 0 14px; height: 42px; font-size: 13px; }
+    .nav-status-btn .lbl { display: inline; }
+  }
   .cart-badge {
     position: absolute; top: -4px; right: -4px;
     background: #fff; color: var(--iav-violet);
@@ -637,8 +652,9 @@
       <span class="brand-wordmark">IAV&nbsp;Möbel&nbsp;Verkauf</span>
     </div>
     <div class="nav-right">
-      <button class="nav-icon-btn" id="statusBtn" title="Anfrage-Status" onclick="openMyReqs()">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+      <button class="nav-status-btn" id="statusBtn" title="Anfrage-Status" onclick="openMyReqs()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span class="lbl">Status</span>
       </button>
       <button class="nav-icon-btn cart-main" id="cartBtn" title="Warenkorb" onclick="openCart()">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>

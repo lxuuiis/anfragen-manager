@@ -73,6 +73,10 @@ export function buildConfirmationMail(anfrage) {
       <div style="font-size:12px;color:#888;margin-top:8px;">Du siehst dort den aktuellen Stand &amp; kannst Terminänderungen direkt bestätigen.</div>
     </div>
 
+    <div style="background:#FFF8E6;border:1px solid #FFE9A8;border-radius:10px;padding:14px 18px;margin:0 0 22px;font-size:13px;color:#0B0B14;line-height:1.55;">
+      <b style="color:#B97A00;">Wichtig:</b> Falls es zu <b>Terminverschiebungen</b> kommt, bitte oben auf der Seite über den Button <b>„Status"</b> deinen Anfrage-Status prüfen. Dort kannst du den neuen Vorschlag direkt mit <b>Ja</b> oder <b>Nein</b> beantworten.
+    </div>
+
     <p style="margin:0 0 8px;font-size:14px;color:#444;">Falls etwas dringend ist oder sich was ändert, kannst du auf diese Mail einfach antworten.</p>
     <p style="margin:0;font-size:14px;color:#444;">Beste Grüße<br><b>IAV Möbelmarkt</b></p>
   `;
