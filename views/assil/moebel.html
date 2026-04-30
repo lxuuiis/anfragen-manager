@@ -154,41 +154,9 @@
   .modal-actions { display: flex; gap: 8px; margin-top: 18px; }
   .modal-actions .btn { flex: 1; justify-content: center; }
 </style>
+<script src="../../auth.js"></script>
 </head>
 <body>
-
-<!-- ── Passwort-Schutz ── -->
-<div id="pwOverlay" style="position:fixed;inset:0;background:var(--bg,#f5f5f7);z-index:9999;display:flex;align-items:center;justify-content:center;">
-  <div style="background:var(--surface,#fff);border:1px solid var(--border,#e0e0e0);border-radius:14px;padding:36px 30px;max-width:340px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.14);text-align:center;">
-    <div style="font-size:32px;margin-bottom:14px;">🔒</div>
-    <h2 style="font-size:18px;font-weight:700;margin-bottom:6px;color:var(--text,#1c1c1e);">Möbel Übersicht</h2>
-    <p style="font-size:13px;color:var(--text-2,#6e6e73);margin-bottom:22px;">Bitte Passwort eingeben, um fortzufahren</p>
-    <input type="password" id="pwInput" placeholder="Passwort…" autocomplete="current-password" style="width:100%;font-size:15px;padding:11px 14px;border:1.5px solid var(--border,#e0e0e0);border-radius:8px;outline:none;margin-bottom:10px;font-family:inherit;box-sizing:border-box;" />
-    <div id="pwError" style="font-size:12px;color:#d93025;margin-bottom:10px;min-height:16px;"></div>
-    <button onclick="checkPw()" style="width:100%;background:#0071e3;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Weiter →</button>
-  </div>
-</div>
-<script>
-(function(){
-  const PW = 'Moebel2026';
-  if(sessionStorage.getItem('moebelPwOk')==='1'){
-    document.getElementById('pwOverlay').style.display='none';
-  } else {
-    setTimeout(()=>document.getElementById('pwInput').focus(),80);
-    document.getElementById('pwInput').addEventListener('keydown',function(e){ if(e.key==='Enter') checkPw(); });
-  }
-  window.checkPw = function(){
-    if(document.getElementById('pwInput').value===PW){
-      sessionStorage.setItem('moebelPwOk','1');
-      document.getElementById('pwOverlay').style.display='none';
-    } else {
-      document.getElementById('pwError').textContent='Falsches Passwort – bitte erneut versuchen';
-      document.getElementById('pwInput').value='';
-      document.getElementById('pwInput').focus();
-    }
-  };
-})();
-</script>
 
 <nav>
   <div class="nav-brand">
