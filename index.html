@@ -194,6 +194,10 @@
   .va-m-chip b { color: var(--text); font-weight: 700; margin-right: 2px; }
   .va-card.claimed .va-m-chip { background: var(--surface); }
   .va-notiz { font-size: 12px; color: var(--text-2); font-style: italic; padding: 6px 10px; background: var(--surface2); border-radius: 6px; border-left: 2px solid var(--border); }
+  .va-proposal-line { margin-top:8px; padding:7px 11px; border-radius:8px; font-size:11px; font-weight:600; line-height:1.4; }
+  .va-proposal-line.pending  { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+  .va-proposal-line.accepted { background:#dcfce7; color:#166534; border:1px solid #86efac; }
+  .va-proposal-line.rejected { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
   .va-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; flex-shrink: 0; min-width: 130px; }
   .va-btn {
     padding: 7px 12px; border-radius: 7px; border: 1px solid var(--border);
@@ -715,6 +719,20 @@ function renderVerkaufAnfragen() {
     const calIcon = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
     const clkIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
 
+    const pt = e.proposedTermin;
+    const cr = e.customerResponse;
+    let proposalLine = '';
+    if (pt && pt.datum) {
+      const ptStr = esc(pt.datum + (pt.uhrzeit ? ' · ' + pt.uhrzeit : ''));
+      if (cr === 'accepted') {
+        proposalLine = '<div class="va-proposal-line accepted">✓ Käufer hat neuen Termin (' + ptStr + ') <b>bestätigt</b></div>';
+      } else if (cr === 'rejected') {
+        proposalLine = '<div class="va-proposal-line rejected">✗ Käufer hat Vorschlag (' + ptStr + ') <b>abgelehnt</b> · Teams kontaktieren</div>';
+      } else {
+        proposalLine = '<div class="va-proposal-line pending">⏳ Vorschlag (' + ptStr + ') wartet auf Käufer-Antwort</div>';
+      }
+    }
+
     return '<div class="va-card '+(isPending?'pending':'claimed')+'">' +
       (isPending ? '<div class="va-pulse"></div>' : '') +
       '<div class="va-avatar">'+esc(initials)+'</div>' +
@@ -727,6 +745,7 @@ function renderVerkaufAnfragen() {
         '</div>' +
         (moebelChips ? '<div class="va-moebel">'+moebelChips+'</div>' : '') +
         (e.notiz ? '<div class="va-notiz">„'+esc(e.notiz)+'"</div>' : '') +
+        proposalLine +
       '</div>' +
       '<div class="va-actions">'+actions+'</div>' +
     '</div>';

@@ -467,13 +467,69 @@
   .success-summary strong { color: var(--ink); display: block; margin-bottom: 6px; }
 
   /* My requests */
-  .myreq-card { padding: 14px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 10px; }
-  .myreq-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-  .myreq-status { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
-  .myreq-status.pending { background: #fef3c7; color: #92400e; }
-  .myreq-status.claimed { background: #dbeafe; color: #1e40af; }
+  .myreq-card {
+    padding: 16px; border: 1px solid var(--line); border-radius: 14px; margin-bottom: 12px;
+    background: #fff; transition: border-color .2s, box-shadow .2s;
+  }
+  .myreq-card.has-proposal { border-color: var(--iav-violet); box-shadow: 0 6px 20px -6px rgba(91,47,229,.25); }
+  .myreq-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 10px; }
+  .myreq-head strong { font-size: 14px; font-weight: 600; }
+  .myreq-status { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
+  .myreq-status.pending    { background: #fef3c7; color: #92400e; }
+  .myreq-status.claimed    { background: #dbeafe; color: #1e40af; }
   .myreq-status.integrated { background: #dcfce7; color: #166534; }
-  .myreq-meta { font-size: 12px; color: var(--ink-3); }
+  .myreq-status.rejected   { background: #fee2e2; color: #991b1b; }
+  .myreq-status.done       { background: #e5e7eb; color: #374151; }
+  .myreq-meta { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+  .myreq-meta b { color: var(--ink-2); font-weight: 500; }
+  .myreq-proposal {
+    margin-top: 12px; padding: 14px; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(91,47,229,0.06) 0%, rgba(56,189,248,0.06) 100%);
+    border: 1px solid rgba(91,47,229,0.18);
+  }
+  .myreq-proposal-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--iav-violet); font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .myreq-proposal-cmp { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .myreq-proposal-old { font-size: 13px; color: var(--ink-3); text-decoration: line-through; }
+  .myreq-proposal-arrow { color: var(--ink-3); font-size: 14px; }
+  .myreq-proposal-new { font-size: 14px; font-weight: 700; color: var(--iav-violet); }
+  .myreq-actions { display: flex; gap: 8px; }
+  .myreq-btn {
+    flex: 1; padding: 10px 14px; border-radius: 10px; font-weight: 600; font-size: 13px;
+    cursor: pointer; transition: transform .15s, box-shadow .2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .myreq-btn.yes  { background: linear-gradient(135deg,#5B2FE5 0%,#7C3AED 60%,#38BDF8 130%); color: #fff; border: none; }
+  .myreq-btn.yes:hover  { transform: translateY(-1px); box-shadow: 0 8px 18px -6px rgba(91,47,229,.5); }
+  .myreq-btn.no   { background: #fff; color: #B0302C; border: 1px solid #FCA5A1; }
+  .myreq-btn.no:hover   { background: #FFF5F4; }
+  .myreq-response-note {
+    margin-top: 10px; padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.5;
+    background: #FFF5F4; color: #7A1F1B; border: 1px solid #FCA5A1;
+  }
+  .myreq-response-note.accepted { background: #dcfce7; color: #166534; border-color: #86efac; }
+
+  /* Status email lookup */
+  .status-lookup { padding: 8px 4px 4px; }
+  .status-lookup label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); font-weight: 600; margin-bottom: 8px; }
+  .status-lookup-row { display: flex; gap: 8px; }
+  .status-lookup input {
+    flex: 1; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .status-lookup input:focus { outline: none; border-color: var(--iav-violet); box-shadow: 0 0 0 3px rgba(91,47,229,.12); }
+  .status-lookup button {
+    padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 14px;
+    background: linear-gradient(135deg,#5B2FE5 0%,#7C3AED 60%,#38BDF8 130%); color: #fff; border: none;
+  }
+  .status-empty { color: var(--ink-3); text-align: center; padding: 30px 0; font-size: 14px; }
+
+  /* FAQ accordion */
+  .faq-block { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .faq-item { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+  .faq-q { width: 100%; padding: 12px 14px; text-align: left; font-size: 13px; font-weight: 600; background: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .faq-q .chev { transition: transform .2s; flex-shrink: 0; color: var(--ink-3); }
+  .faq-item.open .faq-q .chev { transform: rotate(180deg); }
+  .faq-a { padding: 0 14px; max-height: 0; overflow: hidden; transition: max-height .25s ease, padding .25s ease; font-size: 13px; line-height: 1.55; color: var(--ink-2); }
+  .faq-item.open .faq-a { padding: 4px 14px 14px; max-height: 320px; }
 
   /* Lightbox arrow color tweak */
   @media (max-width: 540px) {
@@ -581,6 +637,9 @@
       <span class="brand-wordmark">IAV&nbsp;Möbel&nbsp;Verkauf</span>
     </div>
     <div class="nav-right">
+      <button class="nav-icon-btn" id="statusBtn" title="Anfrage-Status" onclick="openMyReqs()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+      </button>
       <button class="nav-icon-btn cart-main" id="cartBtn" title="Warenkorb" onclick="openCart()">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         <span class="cart-badge hidden" id="cartBadge">0</span>
@@ -747,16 +806,53 @@
   </div>
 </aside>
 
-<!-- ── My Requests Modal ── -->
+<!-- ── Status / My Requests Modal ── -->
 <div class="myreq-overlay" id="myReqOverlay" onclick="if(event.target===this)closeMyReqs()">
   <div class="myreq-modal">
     <div class="drawer-head">
-      <span class="drawer-title">Meine Anfragen</span>
+      <span class="drawer-title">Anfrage-Status</span>
       <button class="drawer-close" onclick="closeMyReqs()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="drawer-body" id="myReqBody"><p style="color:var(--ink-3);text-align:center;padding:30px 0;">Noch keine Anfragen abgesendet.</p></div>
+    <div class="drawer-body" id="myReqBody">
+      <div class="status-lookup">
+        <label>Deine E-Mail</label>
+        <div class="status-lookup-row">
+          <input type="email" id="statusMailInput" placeholder="name@iav.de" autocomplete="email" onkeydown="if(event.key==='Enter')loadStatusByMail()" />
+          <button onclick="loadStatusByMail()">Anzeigen</button>
+        </div>
+        <p style="font-size:12px;color:var(--ink-3);margin-top:8px;line-height:1.5;">Gib die E-Mail ein, mit der du die Anfrage abgeschickt hast.</p>
+      </div>
+      <div id="statusResults" style="margin-top:18px;"></div>
+      <div class="faq-block">
+        <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-3);font-weight:600;margin-bottom:10px;">Häufige Fragen</div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Muss ich hier etwas bezahlen?
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">Nein. Du <b>bezahlst hier nichts</b>. Du erstellst nur eine Anfrage, die intern an das <b>IAV Möbelverkaufs-Team</b> (Louis Musolff &amp; Rohat Turgut) weitergeleitet wird. Die beiden melden sich dann bei dir.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Was bedeuten die Status?
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a"><b style="color:#92400e;">Wartet</b> – noch nicht angesehen.<br/><b style="color:#1e40af;">Wird bearbeitet</b> – Louis oder Rohat haben die Anfrage übernommen.<br/><b style="color:#166534;">Bestätigt</b> – Termin steht, Möbel sind reserviert.<br/><b style="color:#991b1b;">Abgelehnt</b> – leider keine Zusage. Begründung steht in deiner Mail.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Mein Termin wurde verschoben – was tun?
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">Sobald Louis oder Rohat einen neuen Termin vorschlagen, siehst du ihn hier oben in deiner Anfrage. Klick einfach auf <b>Ja, passt</b> oder <b>Nein</b>. Bei „Nein" kontaktierst du Louis oder Rohat über <b>Microsoft Teams</b> für eine persönliche Abstimmung.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Wie lange dauert die Antwort?
+            <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-a">In der Regel innerhalb von <b>2 Werktagen</b>. Falls länger, bekommst du automatisch eine Erinnerungs-Mail.</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -806,6 +902,16 @@ function toast(msg) {
 function getMyIds() { try { return JSON.parse(sessionStorage.getItem(MY_IDS_KEY)||'[]'); } catch(e){return [];} }
 function addMyId(id) { const a = getMyIds(); a.push(id); sessionStorage.setItem(MY_IDS_KEY, JSON.stringify(a)); }
 
+/* Auto-open Status-Modal bei ?status=mail oder ?mail=... */
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    const url = new URLSearchParams(location.search);
+    if (url.has('status') || url.has('mail')) {
+      setTimeout(openMyReqs, 250);
+    }
+  } catch(_){}
+});
+
 /* ── Firebase ── */
 try {
   const app = firebase.initializeApp(FB_CFG);
@@ -849,7 +955,11 @@ try {
       });
     });
     renderCatalog();
-    renderMyReqs();
+    // Auto-Refresh des Status-Modals, wenn offen
+    if (_statusMail) {
+      _statusList = Object.values(_allVA).filter(a => (a?.buyer?.email||'').toLowerCase() === _statusMail).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+      if (document.getElementById('myReqOverlay').classList.contains('open')) renderStatusList();
+    }
   });
 } catch(e) { console.error(e); }
 
@@ -1258,6 +1368,7 @@ function submitRequest() {
 
   ref.set(payload).then(() => {
     addMyId(id);
+    try { localStorage.setItem('verkauf_my_mail', mail.toLowerCase()); } catch(_){}
     // fire-and-forget confirmation mail (don't block UI on errors)
     fetch('/api/sendConfirmation', {
       method: 'POST',
@@ -1269,6 +1380,9 @@ function submitRequest() {
       <strong>${esc(name)}${payload.buyer.abteilung?' · '+esc(payload.buyer.abteilung):''}</strong>
       <div style="margin-top:8px;">Termin: ${esc(datumStr)} um ${esc(time)} Uhr</div>
       <div style="margin-top:8px;">${_cart.length} Position${_cart.length!==1?'en':''}, ${_cart.reduce((n,c)=>n+c.qty,0)} Stk. gesamt</div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;line-height:1.55;">
+        Den aktuellen Status deiner Anfrage findest du jederzeit oben rechts unter <strong>Status</strong> – einfach mit dieser E-Mail anzeigen lassen.
+      </div>
     `;
     _cart = [];
     updateCartBadge();
@@ -1289,38 +1403,149 @@ function resetShop() {
   setStage('stageCart');
 }
 
-/* ── My Requests ── */
+/* ── Status / Meine Anfragen ── */
+let _statusMail = '';   // gemerkte Mail
+let _statusList = [];   // Anfragen für diese Mail
+
 function openMyReqs() {
   document.getElementById('myReqOverlay').classList.add('open');
   document.body.style.overflow='hidden';
-  renderMyReqs();
+  // Mail aus localStorage / URL / Form vorbefüllen
+  const inp = document.getElementById('statusMailInput');
+  if (inp) {
+    const url = new URLSearchParams(location.search);
+    const fromUrl = url.get('status') || url.get('mail') || '';
+    const stored = localStorage.getItem('verkauf_my_mail') || '';
+    const fromForm = (document.getElementById('fMail')?.value || '').trim();
+    inp.value = inp.value || fromUrl || fromForm || stored || '';
+    if (inp.value) loadStatusByMail();
+    else inp.focus();
+  }
 }
 function closeMyReqs() {
   document.getElementById('myReqOverlay').classList.remove('open');
   document.body.style.overflow='';
 }
-function renderMyReqs() {
-  const body = document.getElementById('myReqBody');
-  if (!body) return;
-  const ids = getMyIds();
-  const mine = ids.map(id => _allVA[id]).filter(Boolean).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-  if (!mine.length) {
-    body.innerHTML = '<p style="color:var(--ink-3);text-align:center;padding:30px 0;">Noch keine Anfragen abgesendet.</p>';
+function toggleFaq(btn) {
+  btn.parentElement.classList.toggle('open');
+}
+function loadStatusByMail() {
+  const mail = (document.getElementById('statusMailInput').value || '').trim().toLowerCase();
+  if (!mail || !mail.includes('@')) { toast('Bitte gültige E-Mail eingeben'); return; }
+  _statusMail = mail;
+  localStorage.setItem('verkauf_my_mail', mail);
+  const box = document.getElementById('statusResults');
+  box.innerHTML = '<p class="status-empty">Lade Anfragen…</p>';
+  if (!_db) { box.innerHTML = '<p class="status-empty">Verbindung wird aufgebaut…</p>'; return; }
+  _db.ref('verkaufAnfragen').once('value').then(snap => {
+    const all = snap.val() || {};
+    _statusList = Object.values(all).filter(a => (a?.buyer?.email||'').toLowerCase() === mail).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    renderStatusList();
+    // Live-Updates
+    if (!_statusListenerAttached) {
+      _db.ref('verkaufAnfragen').on('value', s => {
+        const all2 = s.val() || {};
+        _statusList = Object.values(all2).filter(a => (a?.buyer?.email||'').toLowerCase() === _statusMail).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+        renderStatusList();
+      });
+      _statusListenerAttached = true;
+    }
+  }).catch(e => { console.error(e); box.innerHTML = '<p class="status-empty">Fehler beim Laden.</p>'; });
+}
+let _statusListenerAttached = false;
+
+function renderStatusList() {
+  const box = document.getElementById('statusResults');
+  if (!box) return;
+  if (!_statusList.length) {
+    box.innerHTML = '<p class="status-empty">Keine Anfragen für diese E-Mail gefunden.</p>';
     return;
   }
-  body.innerHTML = mine.map(a => {
+  box.innerHTML = _statusList.map(a => {
     const statusLabel = {pending:'Wartet',claimed:`Wird bearbeitet${a.claimedBy?' · '+a.claimedBy:''}`,integrated:'Bestätigt',rejected:'Abgelehnt',done:'Erledigt'}[a.status]||a.status;
-    const cls = ['pending','claimed','integrated'].includes(a.status) ? a.status : 'pending';
+    const cls = ['pending','claimed','integrated','rejected','done'].includes(a.status) ? a.status : 'pending';
+    const wt = a.wunschTermin || {};
+    const moebelStr = (a.moebel||[]).map(m => `${m.qty}× ${esc(m.subLabel||m.sub)}`).join(', ') || '–';
+
+    let proposalHtml = '';
+    let cardClass = 'myreq-card';
+    if (a.proposedTermin && a.proposedTermin.datum) {
+      const pt = a.proposedTermin;
+      const oldStr = `${esc(wt.datum||'?')} · ${esc(wt.uhrzeit||'?')} Uhr`;
+      const newStr = `${esc(pt.datum)} · ${esc(pt.uhrzeit||'')} Uhr`;
+      const resp = a.customerResponse;
+      cardClass += ' has-proposal';
+      let respBlock = '';
+      if (resp === 'accepted') {
+        respBlock = `<div class="myreq-response-note accepted">✓ Du hast den neuen Termin bestätigt. Louis oder Rohat wurde informiert.</div>`;
+      } else if (resp === 'rejected') {
+        respBlock = `<div class="myreq-response-note">Du hast den Vorschlag abgelehnt.<br/><strong>Bitte kontaktiere Louis Musolff oder Rohat Turgut über Microsoft Teams</strong> für eine persönliche Abstimmung.</div>`;
+      } else {
+        respBlock = `
+          <div class="myreq-actions">
+            <button class="myreq-btn yes" onclick="respondTermin('${esc(a.id)}','accepted')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Ja, passt
+            </button>
+            <button class="myreq-btn no" onclick="respondTermin('${esc(a.id)}','rejected')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Nein
+            </button>
+          </div>`;
+      }
+      proposalHtml = `
+        <div class="myreq-proposal">
+          <div class="myreq-proposal-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Neuer Terminvorschlag
+          </div>
+          <div class="myreq-proposal-cmp">
+            <span class="myreq-proposal-old">${oldStr}</span>
+            <span class="myreq-proposal-arrow">→</span>
+            <span class="myreq-proposal-new">${newStr}</span>
+          </div>
+          ${respBlock}
+        </div>`;
+    }
+
     return `
-      <div class="myreq-card">
+      <div class="${cardClass}">
         <div class="myreq-head">
-          <strong>${esc(a.wunschTermin?.datum||'?')} · ${esc(a.wunschTermin?.uhrzeit||'?')} Uhr</strong>
+          <strong>${esc(wt.datum||'?')} · ${esc(wt.uhrzeit||'?')} Uhr</strong>
           <span class="myreq-status ${cls}">${esc(statusLabel)}</span>
         </div>
-        <div class="myreq-meta">${(a.moebel||[]).map(m => `${m.qty}× ${esc(m.subLabel||m.sub)}`).join(', ')}</div>
+        <div class="myreq-meta"><b>Möbel:</b> ${moebelStr}</div>
+        ${a.notiz?`<div class="myreq-meta" style="margin-top:4px;"><b>Anmerkung:</b> ${esc(a.notiz)}</div>`:''}
+        ${a.rejectReason?`<div class="myreq-response-note" style="margin-top:10px;"><b>Begründung der Ablehnung:</b><br/>${esc(a.rejectReason)}</div>`:''}
+        ${proposalHtml}
       </div>
     `;
   }).join('');
+}
+
+function respondTermin(id, response) {
+  const a = _statusList.find(x => x.id === id);
+  if (!a || !_db) return;
+  if (response === 'rejected') {
+    if (!confirm('Termin ablehnen? Du musst Louis oder Rohat anschließend über Microsoft Teams kontaktieren.')) return;
+  }
+  const update = {
+    customerResponse: response,
+    customerResponseAt: Date.now()
+  };
+  if (response === 'accepted') {
+    // Übernehme proposedTermin als wunschTermin
+    update['wunschTermin/datum']   = a.proposedTermin.datum;
+    update['wunschTermin/uhrzeit'] = a.proposedTermin.uhrzeit;
+  }
+  _db.ref('verkaufAnfragen/' + id).update(update).then(() => {
+    toast(response === 'accepted' ? '✓ Termin bestätigt' : 'Vorschlag abgelehnt');
+    fetch('/api/sendNotification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ anfrageId: id, type: 'customerResponse', response })
+    }).catch(err => console.warn('Notify failed:', err));
+  }).catch(e => { console.error(e); toast('Fehler beim Speichern'); });
 }
 </script>
 </body>
