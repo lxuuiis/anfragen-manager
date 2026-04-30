@@ -741,9 +741,17 @@ function vaClaim(id, owner) {
 }
 function vaReject(id) {
   if (!_dbRoot) return;
-  if (!confirm('Anfrage wirklich ablehnen?')) return;
-  _dbRoot.ref('verkaufAnfragen/' + id).update({ status: 'rejected' })
-    .then(() => toast('Anfrage abgelehnt'))
+  const reason = prompt('Warum wird die Anfrage abgelehnt?\n(Kurzer Grund — wird dem Käufer per Mail mitgeteilt)\n\nLeer lassen, um ohne Begründung abzulehnen.', '');
+  if (reason === null) return; // Abbruch
+  _dbRoot.ref('verkaufAnfragen/' + id).update({ status: 'rejected', rejectReason: reason || '' })
+    .then(() => {
+      toast('Anfrage abgelehnt');
+      fetch('/api/sendNotification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ anfrageId: id, type: 'rejected', reason: reason || '' })
+      }).catch(err => console.warn('Reject mail failed:', err));
+    })
     .catch(err => toast('Fehler: ' + err.message));
 }
 function vaRelease(id) {

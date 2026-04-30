@@ -489,7 +489,16 @@ function vaiClaim(id) {
 function vaiReject(id) {
   if (!db) return;
   if (!confirm('Anfrage wirklich ablehnen?')) return;
-  db.ref('verkaufAnfragen/' + id).update({ status: 'rejected' })
+  const reason = prompt('Warum wird die Anfrage abgelehnt?\n(Kurzer Grund — wird dem Käufer per Mail mitgeteilt)\n\nLeer lassen, um ohne Begründung abzulehnen.', '') || '';
+  db.ref('verkaufAnfragen/' + id).update({ status: 'rejected', rejectReason: reason })
+    .then(() => {
+      toast('Anfrage abgelehnt');
+      fetch('/api/sendNotification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ anfrageId: id, type: 'rejected', reason })
+      }).catch(err => console.warn('Reject mail failed:', err));
+    })
     .then(() => toast('Anfrage abgelehnt'))
     .catch(err => toast('Fehler: ' + err.message));
 }
@@ -611,14 +620,21 @@ function vaiSaveTermin(id) {
   const uhrzeit = (document.getElementById('vaiNewUhrzeit')?.value||'').trim();
   if (!datum || !uhrzeit) { toast('Bitte Datum und Uhrzeit eingeben.'); return; }
   const name = (e.buyer && e.buyer.name) || 'der K&#228;ufer';
-  const ok = confirm('Achtung: Du musst ' + name + ' pers&#246;nlich kontaktieren und die neue Zeit (' + datum + ' ' + uhrzeit + ') mitteilen, bevor sie g&#252;ltig wird. Fortfahren?');
+  const oldT = ((e.wunschTermin && e.wunschTermin.datum) || '') + ((e.wunschTermin && e.wunschTermin.uhrzeit) ? ' · ' + e.wunschTermin.uhrzeit + ' Uhr' : '');
+  const newT = datum + ' · ' + uhrzeit + ' Uhr';
+  const ok = confirm('Es wird automatisch eine Mail an ' + name + ' geschickt mit dem neuen Vorschlag (' + newT + ') und der Bitte um Bestätigung. Fortfahren?');
   if (!ok) return;
   db.ref('verkaufAnfragen/' + id).update({
     'wunschTermin/datum':   datum,
     'wunschTermin/uhrzeit': uhrzeit
   })
     .then(() => {
-      toast('Termin aktualisiert ✓');
+      toast('Termin aktualisiert ✓ – Mail geht raus');
+      fetch('/api/sendNotification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ anfrageId: id, type: 'termin', oldTermin: oldT, newTermin: newT })
+      }).catch(err => console.warn('Termin mail failed:', err));
       const m = document.getElementById('vaiTerminModal');
       if (m) m.remove();
     })

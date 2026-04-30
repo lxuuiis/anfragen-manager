@@ -100,3 +100,70 @@ export function buildDelayedMail(anfrage) {
   `;
   return shellHtml(inner, 'Update zu deiner Anfrage');
 }
+
+export function buildRejectionMail(anfrage, reason) {
+  const buyer  = anfrage.buyer || {};
+  const moebel = moebelRows(anfrage.moebel || []);
+
+  const inner = `
+    <p style="margin:0 0 18px;">Hallo ${esc(buyer.name || '')},</p>
+    <p style="margin:0 0 18px;">vielen Dank für deine Anfrage im IAV Möbelmarkt. Leider können wir sie <b>nicht wie gewünscht umsetzen</b>.</p>
+    ${reason ? `<div style="background:#FFF1F0;border:1px solid #FFD4D1;border-radius:10px;padding:16px 18px;margin:0 0 22px;">
+      <div style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#B0302C;font-weight:700;margin-bottom:6px;">Begründung</div>
+      <div style="font-size:14px;color:#0B0B14;line-height:1.55;">${esc(reason)}</div>
+    </div>` : ''}
+
+    <div style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#666;font-weight:700;margin:0 0 8px;">Deine ursprüngliche Auswahl</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eee;border-radius:10px;overflow:hidden;margin-bottom:22px;">
+      ${moebel || '<tr><td style="padding:14px;font-size:13px;color:#888;">Keine Möbel</td></tr>'}
+    </table>
+
+    <p style="margin:0 0 8px;font-size:14px;color:#444;">Falls du Fragen hast oder eine Alternative besprechen möchtest, antworte gern auf diese Mail oder schreib Louis bzw. Rohat über Teams.</p>
+    <p style="margin:0;font-size:14px;color:#444;">Beste Grüße<br><b>IAV Möbelmarkt</b></p>
+  `;
+  return shellHtml(inner, 'Anfrage leider abgelehnt');
+}
+
+export function buildTerminChangeMail(anfrage, oldTermin, newTermin) {
+  const buyer  = anfrage.buyer || {};
+  const moebel = moebelRows(anfrage.moebel || []);
+
+  const inner = `
+    <p style="margin:0 0 18px;">Hallo ${esc(buyer.name || '')},</p>
+    <p style="margin:0 0 18px;">wir möchten deine Möbel-Übergabe <b>auf einen anderen Termin verschieben</b>. Bitte gib uns kurz Bescheid, ob der neue Vorschlag für dich passt.</p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;">
+      <tr>
+        <td width="50%" style="padding:0 8px 0 0;vertical-align:top;">
+          <div style="background:#F4F4F8;border:1px solid #E5E5EC;border-radius:10px;padding:14px 16px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#888;font-weight:700;margin-bottom:6px;">Bisher</div>
+            <div style="font-size:15px;color:#666;text-decoration:line-through;">${esc(oldTermin || '—')}</div>
+          </div>
+        </td>
+        <td width="50%" style="padding:0 0 0 8px;vertical-align:top;">
+          <div style="background:linear-gradient(135deg,#5B2FE5 0%,#7C3AED 100%);border-radius:10px;padding:14px 16px;color:#fff;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;opacity:.85;font-weight:700;margin-bottom:6px;">Neuer Vorschlag</div>
+            <div style="font-size:18px;font-weight:700;">${esc(newTermin || '—')}</div>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <div style="background:#F7F5FF;border:1px solid #E9E2FF;border-radius:10px;padding:18px 20px;margin:0 0 22px;">
+      <div style="font-size:13px;font-weight:700;color:#0B0B14;margin-bottom:10px;">Bitte um kurze Rückmeldung:</div>
+      <ul style="margin:0;padding:0 0 0 18px;font-size:14px;line-height:1.7;color:#0B0B14;">
+        <li>Auf diese Mail antworten mit <b>„Ja, passt"</b></li>
+        <li>oder mit <b>„Nein, stimmt nicht"</b> + Wunsch-Zeitraum</li>
+        <li>oder uns direkt über <b>Microsoft Teams</b> kontaktieren</li>
+      </ul>
+    </div>
+
+    <div style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#666;font-weight:700;margin:0 0 8px;">Deine Auswahl</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eee;border-radius:10px;overflow:hidden;margin-bottom:22px;">
+      ${moebel || '<tr><td style="padding:14px;font-size:13px;color:#888;">Keine Möbel</td></tr>'}
+    </table>
+
+    <p style="margin:0;font-size:14px;color:#444;">Danke dir!<br><b>IAV Möbelmarkt</b></p>
+  `;
+  return shellHtml(inner, 'Terminvorschlag — bitte kurz bestätigen');
+}
