@@ -4,6 +4,10 @@
     {
       "path": "/api/checkDelayed",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/stollberg/checkDelayed",
+      "schedule": "0 9 * * *"
     }
   ]
 }

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Statistiken · IAV Anfragen-Manager</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="shared.css" />
+<style>
+  main { max-width: 1200px; margin: 0 auto; padding: 32px 20px 100px; display: flex; flex-direction: column; gap: 28px; }
+
+  /* ── Hero Banner ── */
+  .hero-banner {
+    border-radius: 20px; padding: 32px 36px; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #0049a0 0%, #0071e3 40%, #1a7a36 80%, #2d9a4a 100%);
+    color: #fff; display: flex; flex-direction: column; gap: 8px;
+  }
+  .hero-banner::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(255,255,255,.12) 0%, transparent 70%);
+  }
+  .hero-banner::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 20% 80%, rgba(91,47,229,.25) 0%, transparent 60%);
+  }
+  .hero-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; opacity: .7; position: relative; z-index: 1; }
+  .hero-headline { font-size: 28px; font-weight: 800; letter-spacing: -.02em; position: relative; z-index: 1; line-height: 1.15; }
+  .hero-headline span { opacity: .65; }
+  .hero-kpi-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; position: relative; z-index: 1; }
+  .hero-kpi {
+    background: rgba(255,255,255,.15); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 14px; padding: 16px 22px; flex: 1; min-width: 130px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .hero-kpi-val { font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -.03em; }
+  .hero-kpi-lbl { font-size: 11px; font-weight: 600; opacity: .7; text-transform: uppercase; letter-spacing: .5px; }
+  .hero-kpi-sub { font-size: 11px; opacity: .55; margin-top: 2px; }
+  @media (max-width: 600px) {
+    .hero-banner { padding: 24px 20px; border-radius: 14px; }
+    .hero-headline { font-size: 22px; }
+    .hero-kpi-val { font-size: 26px; }
+    .hero-kpi-row { gap: 8px; }
+    .hero-kpi { padding: 12px 16px; }
+  }
+
+  /* ── Section Head ── */
+  .s-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .s-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .s-count { font-size: 11px; font-weight: 700; background: var(--surface3); color: var(--text-3); border-radius: 20px; padding: 2px 8px; }
+
+  /* ── Owner Cards ── */
+  .owner-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .owner-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px 22px; position: relative; overflow: hidden;
+    box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s;
+  }
+  .owner-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px -8px rgba(0,0,0,.12); }
+  .owner-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .owner-card.louis::before  { background: var(--louis-c); }
+  .owner-card.rohat::before  { background: var(--rohat-c); }
+  .owner-card.stollberg::before { background: linear-gradient(90deg, #5B2FE5, #7C3AED); }
+  .owner-card-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .owner-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    font-size: 15px; font-weight: 800; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .owner-card.louis  .owner-avatar { background: var(--louis-c); }
+  .owner-card.rohat  .owner-avatar { background: var(--rohat-c); }
+  .owner-card.stollberg .owner-avatar { background: linear-gradient(135deg, #5B2FE5, #7C3AED); }
+  .owner-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: .4px; }
+  .owner-card.louis  .owner-badge { background: var(--accent-light); color: var(--louis-c); }
+  .owner-card.rohat  .owner-badge { background: var(--success-light); color: var(--rohat-c); }
+  .owner-card.stollberg .owner-badge { background: rgba(91,47,229,.1); color: #5B2FE5; }
+  .owner-count { font-size: 40px; font-weight: 800; letter-spacing: -.03em; line-height: 1; color: var(--text); }
+  .owner-count-lbl { font-size: 12px; color: var(--text-3); font-weight: 500; margin-top: 2px; }
+  .owner-stats { display: flex; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .owner-stat { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .owner-stat-val { font-size: 16px; font-weight: 700; color: var(--text); }
+  .owner-stat-lbl { font-size: 10px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
+  .owner-bar { height: 4px; border-radius: 2px; background: var(--surface3); margin-top: 14px; overflow: hidden; }
+  .owner-bar-fill { height: 100%; border-radius: 2px; transition: width .6s cubic-bezier(.25,.1,.25,1); }
+  .owner-card.louis  .owner-bar-fill { background: var(--louis-c); }
+  .owner-card.rohat  .owner-bar-fill { background: var(--rohat-c); }
+  .owner-card.stollberg .owner-bar-fill { background: linear-gradient(90deg, #5B2FE5, #7C3AED); }
+  .owner-sub-list { display: flex; flex-direction: column; gap: 5px; margin-top: 12px; }
+  .owner-sub-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; padding: 5px 8px; border-radius: 7px; background: var(--surface2); }
+  .owner-sub-name { font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .owner-sub-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .owner-sub-cnt { font-weight: 700; color: var(--text-2); }
+
+  /* ── Charts row ── */
+  .charts-row { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; align-items: start; }
+  @media (max-width: 760px) { .charts-row { grid-template-columns: 1fr; } }
+
+  .chart-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow);
+  }
+  .chart-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .chart-sub { font-size: 11px; color: var(--text-3); margin-bottom: 20px; }
+
+  /* Donut */
+  .donut-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto 16px; }
+  .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+  .donut-center-val { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -.02em; }
+  .donut-center-lbl { font-size: 10px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+  .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .legend-left { display: flex; align-items: center; gap: 7px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .legend-name { color: var(--text); font-weight: 500; }
+  .legend-pct { color: var(--text-3); font-size: 11px; margin-left: 4px; }
+  .legend-val { font-weight: 700; color: var(--text); }
+
+  /* Monthly bar chart */
+  .monthly-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding-top: 8px; }
+  .month-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
+  .month-bars { flex: 1; display: flex; flex-direction: column-reverse; width: 100%; gap: 0; border-radius: 5px 5px 0 0; overflow: hidden; position: relative; min-height: 4px; }
+  .month-bar-seg { width: 100%; transition: height .6s cubic-bezier(.25,.1,.25,1); }
+  .month-bar-seg.louis     { background: var(--louis-c); }
+  .month-bar-seg.rohat     { background: var(--rohat-c); }
+  .month-bar-seg.stollberg { background: #7C3AED; }
+  .month-label { font-size: 10px; color: var(--text-3); font-weight: 600; text-align: center; white-space: nowrap; }
+  .month-total { font-size: 10px; font-weight: 700; color: var(--text-2); text-align: center; }
+  .monthly-legend { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .monthly-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-2); font-weight: 500; }
+  .monthly-legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+
+  /* ── Top Möbel ── */
+  .moebel-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px 24px; box-shadow: var(--shadow);
+  }
+  .moebel-list { display: flex; flex-direction: column; gap: 10px; }
+  .moebel-item { display: flex; flex-direction: column; gap: 4px; }
+  .moebel-item-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+  .moebel-item-name { font-weight: 600; color: var(--text); }
+  .moebel-item-cnt { font-weight: 700; color: var(--text-2); font-size: 12px; }
+  .moebel-bar-track { height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+  .moebel-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #5B2FE5, #0071e3); transition: width .8s cubic-bezier(.25,.1,.25,1); }
+  .moebel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 500px) { .moebel-grid { grid-template-columns: 1fr; } }
+
+  /* ── Recent Table ── */
+  .recent-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; box-shadow: var(--shadow);
+  }
+  .recent-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+  .recent-title { font-size: 13px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .recent-search { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); font-size: 12px; color: var(--text); font-family: var(--font); outline: none; transition: .15s; width: 180px; }
+  .recent-search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .recent-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .recent-table th { padding: 10px 16px; text-align: left; font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .recent-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .recent-table tr:last-child td { border-bottom: none; }
+  .recent-table tr:hover td { background: var(--surface2); }
+  .owner-chip-sm { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .owner-chip-sm.louis     { background: var(--accent-light); color: var(--louis-c); }
+  .owner-chip-sm.rohat     { background: var(--success-light); color: var(--rohat-c); }
+  .owner-chip-sm.stollberg { background: rgba(91,47,229,.1); color: #5B2FE5; }
+  .owner-chip-sm.other     { background: var(--surface3); color: var(--text-2); }
+  .moebel-chips-sm { display: flex; flex-wrap: wrap; gap: 4px; }
+  .mc { font-size: 10px; background: var(--surface2); color: var(--text-2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+  .date-cell { font-size: 11px; color: var(--text-3); white-space: nowrap; }
+  .recent-empty { padding: 40px; text-align: center; color: var(--text-3); font-size: 13px; }
+  .show-more-row { text-align: center; padding: 12px; border-top: 1px solid var(--border); }
+  .show-more-btn { background: none; border: 1px solid var(--border); border-radius: 20px; padding: 6px 18px; font-size: 12px; font-weight: 600; color: var(--text-2); cursor: pointer; font-family: var(--font); transition: .15s; }
+  .show-more-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Loading ── */
+  .loading-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; gap: 16px; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-txt { font-size: 13px; color: var(--text-3); }
+
+  /* ── Count Animation ── */
+  @keyframes countIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .count-animated { animation: countIn .4s ease both; }
+
+  /* ── Empty state ── */
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-3); font-size: 13px; }
+  .empty-state svg { opacity: .3; margin-bottom: 12px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    main { padding: 20px 12px 80px; }
+    .recent-table th:nth-child(4), .recent-table td:nth-child(4) { display: none; }
+    .recent-search { width: 120px; }
+  }
+</style>
+<script src="auth.js"></script>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
+    Anfragen Manager
+  </a>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="/" class="btn btn-ghost" style="font-size:12px;text-decoration:none;">← Zurück</a>
+    <button class="dm-toggle" id="dmToggle" title="Dark Mode">
+      <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="icon-sun"  width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</nav>
+
+<main>
+  <div id="loadingState" class="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-txt">Daten werden geladen…</div>
+  </div>
+
+  <div id="statsContent" style="display:none;display:none;flex-direction:column;gap:28px;">
+
+    <!-- Hero -->
+    <div class="hero-banner">
+      <div class="hero-title">IAV Möbelmarkt · Gesamtübersicht</div>
+      <div class="hero-headline">Abgeschlossene Aufträge <span>· alle Standorte</span></div>
+      <div class="hero-kpi-row">
+        <div class="hero-kpi">
+          <div class="hero-kpi-val" id="kpiTotal">–</div>
+          <div class="hero-kpi-lbl">Gesamt</div>
+          <div class="hero-kpi-sub" id="kpiTotalSub">Alle Standorte</div>
+        </div>
+        <div class="hero-kpi">
+          <div class="hero-kpi-val" id="kpiMonth">–</div>
+          <div class="hero-kpi-lbl">Diesen Monat</div>
+          <div class="hero-kpi-sub" id="kpiMonthSub">–</div>
+        </div>
+        <div class="hero-kpi">
+          <div class="hero-kpi-val" id="kpiYear">–</div>
+          <div class="hero-kpi-lbl">Dieses Jahr</div>
+          <div class="hero-kpi-sub" id="kpiYearSub">–</div>
+        </div>
+        <div class="hero-kpi">
+          <div class="hero-kpi-val" id="kpiMoebel">–</div>
+          <div class="hero-kpi-lbl">Möbelstücke</div>
+          <div class="hero-kpi-sub">Gesammt übergeben</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Owner Cards -->
+    <div>
+      <div class="s-head">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="s-title">Mitarbeiter</span>
+      </div>
+      <div class="owner-cards" id="ownerCards">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+      <!-- Donut -->
+      <div class="chart-box">
+        <div class="chart-title">Verteilung</div>
+        <div class="chart-sub">Anteil je Standort / Mitarbeiter</div>
+        <div class="donut-wrap">
+          <svg id="donutSvg" width="160" height="160" viewBox="0 0 160 160" style="transform:rotate(-90deg)">
+            <!-- filled by JS -->
+          </svg>
+          <div class="donut-center">
+            <div class="donut-center-val" id="donutTotal">–</div>
+            <div class="donut-center-lbl">Gesamt</div>
+          </div>
+        </div>
+        <div class="donut-legend" id="donutLegend"></div>
+      </div>
+
+      <!-- Monthly Bar -->
+      <div class="chart-box">
+        <div class="chart-title">Monats-Trend</div>
+        <div class="chart-sub" id="monthlySubtitle">Letzte 6 Monate</div>
+        <div class="monthly-chart" id="monthlyChart"></div>
+        <div class="monthly-legend" id="monthlyLegend"></div>
+      </div>
+    </div>
+
+    <!-- Top Möbel -->
+    <div class="moebel-box">
+      <div class="s-head" style="margin-bottom:12px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+        <span class="s-title">Meistverkaufte Möbeltypen</span>
+        <span class="s-count" id="moebelUniqueCount">0</span>
+      </div>
+      <div class="moebel-grid" id="moebelList">
+        <div class="empty-state">Lädt…</div>
+      </div>
+    </div>
+
+    <!-- Recent Table -->
+    <div class="recent-box">
+      <div class="recent-head">
+        <div class="recent-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/></svg>
+          Abgeschlossene Aufträge
+          <span class="s-count" id="recentCount">0</span>
+        </div>
+        <input class="recent-search" id="recentSearch" type="text" placeholder="Namen suchen…" oninput="filterRecent(this.value)" />
+      </div>
+      <div id="recentTableWrap">
+        <table class="recent-table">
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>Name</th>
+              <th>Mitarbeiter</th>
+              <th>Möbel</th>
+              <th>Archivert am</th>
+            </tr>
+          </thead>
+          <tbody id="recentBody"></tbody>
+        </table>
+        <div class="show-more-row" id="showMoreRow" style="display:none;">
+          <button class="show-more-btn" onclick="showMore()">Mehr anzeigen</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+/* ─────────────────── CONFIG ─────────────────── */
+const FB_CFG = {
+  apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
+  authDomain:        "manager-3cf2b.firebaseapp.com",
+  databaseURL:       "https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "manager-3cf2b",
+  storageBucket:     "manager-3cf2b.firebasestorage.app",
+  messagingSenderId: "55315892331",
+  appId:             "1:55315892331:web:9889b92c74e535a85a892e"
+};
+
+/* Owner meta (main system) */
+const MAIN_OWNERS = {
+  louis:  { name: 'Louis',  color: '#0066cc', class: 'louis'  },
+  rohat:  { name: 'Rohat',  color: '#1a7a36', class: 'rohat'  },
+};
+
+/* ─────────────────── STATE ─────────────────── */
+let _mainArchiv  = [];    // archiv/ entries (louis, rohat, …)
+let _stollArchiv = [];    // stollbergArchiv/ entries
+let _stollEmps   = {};    // stollbergMitarbeiter
+
+let _loadedMain  = false;
+let _loadedStoll = false;
+let _loadedEmps  = false;
+
+/* Search / pagination */
+let _allRows     = [];    // sorted, all entries for table
+let _filteredRows = [];
+let _shownCount  = 25;
+const PAGE_SIZE  = 25;
+let _searchQuery = '';
+
+/* ─────────────────── HELPERS ─────────────────── */
+function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// "TT.MM.JJJJ" → Date object
+function parseDE(s) {
+  if (!s) return null;
+  const p = String(s).split('.');
+  if (p.length < 3) return null;
+  return new Date(+p[2], +p[1]-1, +p[0]);
+}
+
+// "TT.MM.JJJJ" → sortable number
+function dateSort(s) {
+  const d = parseDE(s);
+  return d ? d.getTime() : 0;
+}
+
+// "TT.MM.JJJJ" → "YYYY-MM"
+function monthKey(s) {
+  if (!s) return '0000-00';
+  const p = String(s).split('.');
+  if (p.length < 3) return '0000-00';
+  return p[2] + '-' + p[1].padStart(2,'0');
+}
+
+// "YYYY-MM" → "Mär 25"
+const DE_MONTHS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+function fmtMonth(key) {
+  const [y, m] = key.split('-');
+  return DE_MONTHS[(+m)-1] + " '" + String(y).slice(2);
+}
+
+// Last N months as "YYYY-MM"
+function lastNMonths(n) {
+  const result = [];
+  const now = new Date();
+  for (let i = n-1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    result.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
+  }
+  return result;
+}
+
+function isThisMonth(s) {
+  const d = parseDE(s);
+  if (!d) return false;
+  const n = new Date();
+  return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth();
+}
+
+function isThisYear(s) {
+  const d = parseDE(s);
+  if (!d) return false;
+  return d.getFullYear() === new Date().getFullYear();
+}
+
+function countUpTo(el, target, duration) {
+  const start = Date.now();
+  const from  = 0;
+  function step() {
+    const progress = Math.min(1, (Date.now() - start) / duration);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(from + (target - from) * ease);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ─────────────────── MAIN RENDER ─────────────────── */
+function tryRender() {
+  if (!_loadedMain || !_loadedStoll || !_loadedEmps) return;
+
+  document.getElementById('loadingState').style.display = 'none';
+  const content = document.getElementById('statsContent');
+  content.style.display = 'flex';
+  content.style.flexDirection = 'column';
+
+  renderHero();
+  renderOwnerCards();
+  renderCharts();
+  renderMoebelTop();
+  renderRecentTable();
+}
+
+/* ── Hero KPIs ── */
+function renderHero() {
+  const all = [..._mainArchiv, ..._stollArchiv];
+  const total   = all.length;
+  const thisMonth = all.filter(e => isThisMonth(e.archiviertAm)).length;
+  const thisYear  = all.filter(e => isThisYear(e.archiviertAm)).length;
+  const moebelTotal = all.reduce((sum, e) => {
+    return sum + (Array.isArray(e.moebel) ? e.moebel.reduce((s,m) => s + (m.qty||1), 0) : 0);
+  }, 0);
+
+  countUpTo(document.getElementById('kpiTotal'), total, 800);
+  countUpTo(document.getElementById('kpiMonth'), thisMonth, 600);
+  countUpTo(document.getElementById('kpiYear'),  thisYear, 700);
+  countUpTo(document.getElementById('kpiMoebel'), moebelTotal, 900);
+
+  // Subtitles
+  document.getElementById('kpiTotalSub').textContent = 'Louis, Rohat & Stollberg';
+  document.getElementById('kpiMonthSub').textContent = DE_MONTHS[new Date().getMonth()] + ' ' + new Date().getFullYear();
+  document.getElementById('kpiYearSub').textContent = 'Seit Jan. ' + new Date().getFullYear();
+}
+
+/* ── Owner Cards ── */
+function getOwnerGroups() {
+  // Main owners
+  const groups = {};
+  _mainArchiv.forEach(e => {
+    const key = (e.owner || 'unbekannt').toLowerCase();
+    if (!groups[key]) groups[key] = { entries: [], key };
+    groups[key].entries.push(e);
+  });
+
+  // Stollberg group
+  groups['stollberg'] = { entries: _stollArchiv, key: 'stollberg', isStollberg: true };
+
+  return groups;
+}
+
+function renderOwnerCards() {
+  const groups = getOwnerGroups();
+  const allTotal = [..._mainArchiv, ..._stollArchiv].length;
+  const container = document.getElementById('ownerCards');
+
+  // Build owner order: known main owners first, then stollberg, then others
+  const order = ['louis', 'rohat'];
+  Object.keys(groups).forEach(k => { if (!order.includes(k)) order.push(k); });
+
+  container.innerHTML = order
+    .filter(k => groups[k] && groups[k].entries.length > 0)
+    .map(key => {
+      const g = groups[key];
+      const isStoll = g.isStollberg;
+      const meta = isStoll
+        ? { name: 'Stollberg', color: '#5B2FE5', cls: 'stollberg', initials: 'ST' }
+        : (MAIN_OWNERS[key] || { name: key, color: '#6e6e73', cls: 'other', initials: key.slice(0,2).toUpperCase() });
+      meta.initials = isStoll ? 'ST' : (meta.name||key).slice(0,2).toUpperCase();
+
+      const cnt = g.entries.length;
+      const thisM = g.entries.filter(e => isThisMonth(e.archiviertAm)).length;
+      const pct   = allTotal > 0 ? Math.round(cnt / allTotal * 100) : 0;
+      const moebelCnt = g.entries.reduce((s, e) => s + (Array.isArray(e.moebel) ? e.moebel.reduce((ss,m) => ss+(m.qty||1),0) : 0), 0);
+
+      let subList = '';
+      if (isStoll) {
+        // Per-employee breakdown for Stollberg
+        const empGroups = {};
+        g.entries.forEach(e => {
+          const eid = e.owner || 'unbekannt';
+          if (!empGroups[eid]) empGroups[eid] = 0;
+          empGroups[eid]++;
+        });
+        const topEmps = Object.entries(empGroups)
+          .sort((a,b) => b[1]-a[1])
+          .slice(0, 4);
+        if (topEmps.length > 0) {
+          subList = '<div class="owner-sub-list">' + topEmps.map(([eid, n]) => {
+            const emp = _stollEmps[eid];
+            const empName = emp ? emp.name : eid;
+            const empColor = emp ? emp.color : '#888';
+            return `<div class="owner-sub-item">
+              <span class="owner-sub-name">
+                <span class="owner-sub-dot" style="background:${esc(empColor)}"></span>
+                ${esc(empName)}
+              </span>
+              <span class="owner-sub-cnt">${n}</span>
+            </div>`;
+          }).join('') + '</div>';
+        }
+      }
+
+      return `<div class="owner-card ${esc(meta.cls||'other')}">
+        <div class="owner-card-hdr">
+          <div class="owner-avatar">${esc(meta.initials)}</div>
+          <span class="owner-badge">${esc(meta.name)}</span>
+        </div>
+        <div class="owner-count count-animated" id="cnt-${esc(key)}">${cnt}</div>
+        <div class="owner-count-lbl">Abgeschlossene Aufträge</div>
+        <div class="owner-stats">
+          <div class="owner-stat">
+            <span class="owner-stat-val">${thisM}</span>
+            <span class="owner-stat-lbl">Diesen Monat</span>
+          </div>
+          <div class="owner-stat">
+            <span class="owner-stat-val">${moebelCnt}</span>
+            <span class="owner-stat-lbl">Möbelstücke</span>
+          </div>
+          <div class="owner-stat">
+            <span class="owner-stat-val">${pct}%</span>
+            <span class="owner-stat-lbl">Anteil</span>
+          </div>
+        </div>
+        <div class="owner-bar"><div class="owner-bar-fill" style="width:${pct}%"></div></div>
+        ${subList}
+      </div>`;
+    }).join('');
+
+  // Animate counts
+  order.filter(k => groups[k] && groups[k].entries.length > 0).forEach(key => {
+    const el = document.getElementById('cnt-' + key);
+    if (el) countUpTo(el, groups[key].entries.length, 700);
+  });
+}
+
+/* ── Charts ── */
+function renderCharts() {
+  renderDonut();
+  renderMonthly();
+}
+
+function getOwnerColor(owner) {
+  if (owner === 'louis') return '#0066cc';
+  if (owner === 'rohat') return '#1a7a36';
+  if (owner === 'stollberg') return '#5B2FE5';
+  const emp = _stollEmps[owner];
+  return emp ? emp.color : '#888';
+}
+
+function getOwnerDisplayName(owner) {
+  if (owner === 'louis') return 'Louis';
+  if (owner === 'rohat') return 'Rohat';
+  if (owner === 'stollberg') return 'Stollberg';
+  const emp = _stollEmps[owner];
+  return emp ? emp.name : owner;
+}
+
+function renderDonut() {
+  const groups = getOwnerGroups();
+  const entries = [..._mainArchiv, ..._stollArchiv];
+  const total = entries.length;
+
+  document.getElementById('donutTotal').textContent = total;
+
+  const displayGroups = Object.entries(groups)
+    .filter(([,g]) => g.entries.length > 0)
+    .map(([key, g]) => ({
+      key,
+      name: key === 'stollberg' ? 'Stollberg' : (MAIN_OWNERS[key]?.name || key),
+      count: g.entries.length,
+      color: getOwnerColor(key),
+      cls: key === 'stollberg' ? 'stollberg' : (MAIN_OWNERS[key]?.class || 'other')
+    }))
+    .sort((a,b) => b.count - a.count);
+
+  // SVG donut
+  const R = 60, cx = 80, cy = 80, stroke = 22;
+  const circumference = 2 * Math.PI * R;
+  let offset = 0;
+  const svgEl = document.getElementById('donutSvg');
+
+  // background circle
+  svgEl.innerHTML = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--surface3)" stroke-width="${stroke}" />`;
+
+  displayGroups.forEach(g => {
+    if (total === 0) return;
+    const pct = g.count / total;
+    const dash = pct * circumference;
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx', cx);
+    circle.setAttribute('cy', cy);
+    circle.setAttribute('r', R);
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('stroke', g.color);
+    circle.setAttribute('stroke-width', stroke);
+    circle.setAttribute('stroke-dasharray', `${dash} ${circumference - dash}`);
+    circle.setAttribute('stroke-dashoffset', -offset * circumference);
+    circle.setAttribute('stroke-linecap', 'round');
+    circle.style.transition = 'stroke-dasharray .8s cubic-bezier(.25,.1,.25,1)';
+    svgEl.appendChild(circle);
+    offset += pct;
+  });
+
+  // Legend
+  const legend = document.getElementById('donutLegend');
+  legend.innerHTML = displayGroups.map(g => {
+    const pct = total > 0 ? Math.round(g.count / total * 100) : 0;
+    return `<div class="legend-item">
+      <div class="legend-left">
+        <span class="legend-dot" style="background:${esc(g.color)}"></span>
+        <span class="legend-name">${esc(g.name)}</span>
+        <span class="legend-pct">${pct}%</span>
+      </div>
+      <span class="legend-val">${g.count}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderMonthly() {
+  const months = lastNMonths(6);
+  const groups = getOwnerGroups();
+
+  // For bar chart: show main owners + stollberg as a group
+  const displayKeys = Object.keys(groups).filter(k => groups[k].entries.length > 0);
+
+  // Count per month per owner
+  const byMonthOwner = {}; // month → { owner: count }
+  months.forEach(m => { byMonthOwner[m] = {}; });
+
+  _mainArchiv.forEach(e => {
+    const m = monthKey(e.archiviertAm);
+    const owner = (e.owner || 'unbekannt').toLowerCase();
+    if (byMonthOwner[m]) {
+      byMonthOwner[m][owner] = (byMonthOwner[m][owner] || 0) + 1;
+    }
+  });
+  _stollArchiv.forEach(e => {
+    const m = monthKey(e.archiviertAm);
+    if (byMonthOwner[m]) {
+      byMonthOwner[m]['stollberg'] = (byMonthOwner[m]['stollberg'] || 0) + 1;
+    }
+  });
+
+  // Find max for scaling
+  const monthTotals = months.map(m => Object.values(byMonthOwner[m]).reduce((s,v) => s+v, 0));
+  const maxTotal = Math.max(...monthTotals, 1);
+
+  const chartEl = document.getElementById('monthlyChart');
+  const orderedKeys = ['louis', 'rohat', 'stollberg', ...displayKeys.filter(k => !['louis','rohat','stollberg'].includes(k))];
+  const activeKeys = orderedKeys.filter(k => displayKeys.includes(k));
+
+  chartEl.innerHTML = months.map((m, i) => {
+    const total = monthTotals[i];
+    const heightPct = total / maxTotal * 100;
+    const bars = activeKeys.map(key => {
+      const cnt = byMonthOwner[m][key] || 0;
+      if (cnt === 0) return '';
+      const segPct = total > 0 ? cnt / total * 100 : 0;
+      const color = getOwnerColor(key);
+      const cls = key === 'stollberg' ? 'stollberg' : (MAIN_OWNERS[key]?.class || 'other');
+      return `<div class="month-bar-seg ${cls}" style="height:${segPct}%;background:${esc(color)};min-height:${cnt>0?'3px':'0'}" title="${getOwnerDisplayName(key)}: ${cnt}"></div>`;
+    }).join('');
+
+    return `<div class="month-col">
+      <div class="month-total">${total > 0 ? total : ''}</div>
+      <div class="month-bars" style="max-height:${heightPct}%" title="${total} Abschlüsse">${bars}</div>
+      <div class="month-label">${fmtMonth(m)}</div>
+    </div>`;
+  }).join('');
+
+  // Legend
+  const legendEl = document.getElementById('monthlyLegend');
+  legendEl.innerHTML = activeKeys.map(key => {
+    const color = getOwnerColor(key);
+    return `<div class="monthly-legend-item">
+      <div class="monthly-legend-dot" style="background:${esc(color)}"></div>
+      ${esc(getOwnerDisplayName(key))}
+    </div>`;
+  }).join('');
+}
+
+/* ── Top Möbel ── */
+function renderMoebelTop() {
+  const all = [..._mainArchiv, ..._stollArchiv];
+  const moebelMap = {}; // label → count
+
+  all.forEach(e => {
+    if (!Array.isArray(e.moebel)) return;
+    e.moebel.forEach(m => {
+      // Build display label
+      let label = m.katLabel || m.subLabel || '';
+      if (!label && m.sub) label = m.sub;
+      if (!label && m.kat) label = m.kat;
+      if (!label) label = 'Möbel';
+      // Normalize: trim, lowercase for grouping
+      const key = label.trim();
+      if (!key) return;
+      moebelMap[key] = (moebelMap[key] || 0) + (m.qty || 1);
+    });
+  });
+
+  const sorted = Object.entries(moebelMap)
+    .sort((a,b) => b[1]-a[1])
+    .slice(0, 12);
+
+  const unique = Object.keys(moebelMap).length;
+  document.getElementById('moebelUniqueCount').textContent = unique + ' Typen';
+
+  const maxCnt = sorted[0]?.[1] || 1;
+  const listEl = document.getElementById('moebelList');
+
+  if (!sorted.length) {
+    listEl.innerHTML = '<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><br>Noch keine Möbeldaten.</div>';
+    return;
+  }
+
+  listEl.innerHTML = sorted.map(([label, cnt]) => {
+    const pct = Math.round(cnt / maxCnt * 100);
+    return `<div class="moebel-item">
+      <div class="moebel-item-head">
+        <span class="moebel-item-name">${esc(label)}</span>
+        <span class="moebel-item-cnt">${cnt}×</span>
+      </div>
+      <div class="moebel-bar-track">
+        <div class="moebel-bar-fill" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Recent Table ── */
+function buildAllRows() {
+  const all = [
+    ..._mainArchiv.map(e => ({...e, _system: 'main'})),
+    ..._stollArchiv.map(e => ({...e, _system: 'stollberg'}))
+  ];
+  all.sort((a,b) => dateSort(b.archiviertAm) - dateSort(a.archiviertAm));
+  _allRows = all;
+  document.getElementById('recentCount').textContent = all.length;
+}
+
+function filterRecent(q) {
+  _searchQuery = q.toLowerCase().trim();
+  _shownCount = PAGE_SIZE;
+  renderRecentRows();
+}
+
+function showMore() {
+  _shownCount += PAGE_SIZE;
+  renderRecentRows();
+}
+
+function renderRecentTable() {
+  buildAllRows();
+  _filteredRows = _allRows;
+  renderRecentRows();
+}
+
+function renderRecentRows() {
+  const q = _searchQuery;
+  _filteredRows = q
+    ? _allRows.filter(e =>
+        (e.name || '').toLowerCase().includes(q) ||
+        (e.owner || '').toLowerCase().includes(q) ||
+        (e.bem  || '').toLowerCase().includes(q)
+      )
+    : _allRows;
+
+  const tbody = document.getElementById('recentBody');
+  const showMoreRow = document.getElementById('showMoreRow');
+  const visible = _filteredRows.slice(0, _shownCount);
+
+  if (!visible.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="recent-empty">Keine Einträge gefunden.</div></td></tr>`;
+    showMoreRow.style.display = 'none';
+    return;
+  }
+
+  tbody.innerHTML = visible.map(e => {
+    const ownerKey  = e._system === 'stollberg' ? 'stollberg' : (e.owner || 'unbekannt').toLowerCase();
+    const ownerName = ownerKey === 'stollberg'
+      ? 'Stollberg' + (e.owner && _stollEmps[e.owner] ? ' · ' + _stollEmps[e.owner].name : '')
+      : (MAIN_OWNERS[ownerKey]?.name || e.owner || '–');
+    const chipClass = ownerKey === 'stollberg' ? 'stollberg' : (MAIN_OWNERS[ownerKey]?.class || 'other');
+    const moebel = Array.isArray(e.moebel) && e.moebel.length
+      ? e.moebel.map(m => {
+          const lbl = m.katLabel || m.subLabel || m.sub || m.kat || '?';
+          return `<span class="mc">${m.qty||1}× ${esc(lbl)}</span>`;
+        }).join('')
+      : '–';
+    const termin = [e.terminDatum, e.terminUhrzeit].filter(Boolean).join(' ');
+    return `<tr>
+      <td class="date-cell">${esc(termin || '–')}</td>
+      <td style="font-weight:500;">${esc(e.name || '–')}</td>
+      <td><span class="owner-chip-sm ${chipClass}">${esc(ownerName)}</span></td>
+      <td><div class="moebel-chips-sm">${moebel}</div></td>
+      <td class="date-cell">${esc(e.archiviertAm || '–')}</td>
+    </tr>`;
+  }).join('');
+
+  showMoreRow.style.display = _filteredRows.length > _shownCount ? '' : 'none';
+}
+
+/* ─────────────────── FIREBASE ─────────────────── */
+(function() {
+  try {
+    const app = firebase.initializeApp(FB_CFG);
+    const db  = firebase.database(app);
+
+    // Main archiv (Louis + Rohat)
+    db.ref('archiv').on('value', snap => {
+      const raw = snap.val();
+      _mainArchiv = raw ? Object.values(raw) : [];
+      _loadedMain = true;
+      tryRender();
+    }, () => { _loadedMain = true; tryRender(); });
+
+    // Stollberg archiv
+    db.ref('stollbergArchiv').on('value', snap => {
+      const raw = snap.val();
+      _stollArchiv = raw ? Object.values(raw) : [];
+      _loadedStoll = true;
+      tryRender();
+    }, () => { _loadedStoll = true; tryRender(); });
+
+    // Stollberg employees (for names/colors)
+    db.ref('stollbergMitarbeiter').on('value', snap => {
+      _stollEmps = snap.val() || {};
+      _loadedEmps = true;
+      tryRender();
+    }, () => { _loadedEmps = true; tryRender(); });
+
+  } catch(e) {
+    console.error('Firebase error:', e);
+    // Show content even if Firebase fails
+    _loadedMain = _loadedStoll = _loadedEmps = true;
+    tryRender();
+  }
+})();
+
+/* Toast */
+let _toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+</script>
+</body>
+</html>

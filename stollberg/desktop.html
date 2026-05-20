@@ -3,495 +3,89 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Anfragen Manager · Rohat</title>
-<script src="../../theme.js"></script>
-<link rel="stylesheet" href="../../shared.css" />
+<title>Anfragen · Stollberg</title>
+<script src="../theme.js"></script>
+<link rel="stylesheet" href="../shared.css" />
 <style>
-  /* ──────────────────────────────────────────────────────────────
-     Rohat · Apple/ChatGPT-inspired Redesign
-     – generous whitespace, soft shadows, 16px radii, smooth motion
-     – built on shared.css tokens, dark-mode native
-     ────────────────────────────────────────────────────────────── */
-  :root {
-    --owner-color: var(--rohat-c);
-    --r-accent: #1a7a36;
-    --r-accent-soft: #eaf6ee;
-    --r-accent-grad: linear-gradient(135deg, #1a7a36 0%, #2ea14a 100%);
-    --r-radius: 16px;
-    --r-radius-sm: 12px;
-    --r-shadow-soft: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.04);
-    --r-shadow-hover: 0 2px 6px rgba(0,0,0,.08), 0 16px 40px rgba(0,0,0,.06);
-    --r-ease: cubic-bezier(.4,0,.2,1);
-    --r-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", sans-serif;
-  }
-  [data-theme="dark"] {
-    --r-accent: #3ddc68;
-    --r-accent-soft: rgba(61,220,104,.12);
-    --r-accent-grad: linear-gradient(135deg, #2ea14a 0%, #3ddc68 100%);
-    --r-shadow-soft: 0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
-    --r-shadow-hover: 0 2px 6px rgba(0,0,0,.5), 0 16px 40px rgba(0,0,0,.4);
-  }
-
-  body { font-family: var(--r-font); letter-spacing: -0.01em; }
-
-  /* ── Nav: glassy sticky header ── */
-  nav {
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    background: var(--nav-bg);
-    border-bottom: 1px solid var(--nav-border);
-  }
-  .nav-brand .owner-tag {
-    background: var(--r-accent-grad);
-    color: #fff;
-    border-radius: 999px;
-    padding: 3px 10px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    box-shadow: 0 1px 2px rgba(26,122,54,.25);
-  }
-
-  /* ── Main layout: more breathing room ── */
-  main {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 28px 24px 80px;
-  }
-
-  /* ── Cards: shared treatment ── */
-  .extern-section,
-  .vai-section,
-  .new-session-card,
-  .sessions-list > .session,
-  .day-overview {
-    border-radius: var(--r-radius);
-    border: 1px solid var(--border);
-    background: var(--surface);
-    box-shadow: var(--r-shadow-soft);
-    transition: box-shadow .25s var(--r-ease), transform .25s var(--r-ease);
-  }
-
-  /* ── New session card ── */
-  .new-session-card {
-    padding: 22px 24px;
-    background: linear-gradient(180deg, var(--surface) 0%, var(--surface2) 100%);
-  }
-  .new-session-card h2 {
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    margin-bottom: 16px;
-    color: var(--text);
-  }
-  .new-session-row { gap: 12px; }
-  .new-session-row .input-group input {
-    border-radius: var(--r-radius-sm);
-    border: 1px solid var(--border);
-    background: var(--surface);
-    padding: 10px 14px;
-    font-size: 14px;
-    transition: border-color .2s var(--r-ease), box-shadow .2s var(--r-ease);
-  }
-  .new-session-row .input-group input:focus {
-    outline: none;
-    border-color: var(--r-accent);
-    box-shadow: 0 0 0 4px var(--r-accent-soft);
-  }
-
-  /* ── Buttons: pill-shape + lift ── */
-  .btn {
-    border-radius: 999px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    transition: transform .15s var(--r-ease), box-shadow .2s var(--r-ease),
-                background .2s var(--r-ease), color .2s var(--r-ease),
-                border-color .2s var(--r-ease);
-  }
-  .btn-primary {
-    background: var(--r-accent-grad);
-    color: #fff;
-    border: none;
-    box-shadow: 0 1px 2px rgba(26,122,54,.25), 0 4px 12px rgba(26,122,54,.18);
-  }
-  .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(26,122,54,.3), 0 8px 20px rgba(26,122,54,.24);
-  }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-ghost {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-  .btn-ghost:hover {
-    background: var(--surface3);
-    border-color: var(--border-strong);
-  }
-
-  /* ── Section headers: refined ── */
-  .extern-section-hdr,
-  .vai-hdr {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 22px;
-    background: transparent;
-    border-bottom: 1px solid var(--border);
-  }
-  .vai-hdr { cursor: pointer; user-select: none; }
-  .vai-hdr:hover { background: var(--surface2); }
-  .extern-section-hdr h2,
-  .vai-hdr h2 {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-2);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    flex: 1;
-  }
-
-  /* Badges */
-  .extern-count-badge {
-    font-size: 11px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
-    color: #fff;
-    border-radius: 999px;
-    padding: 2px 10px;
-    box-shadow: 0 1px 2px rgba(249,115,22,.3);
-  }
-  .vai-count-badge {
-    font-size: 11px;
-    font-weight: 700;
-    background: var(--surface3);
-    color: var(--text-2);
-    border-radius: 999px;
-    padding: 2px 10px;
-  }
-  .vai-count-badge.has-pending {
-    background: linear-gradient(135deg, var(--danger) 0%, #ff7a73 100%);
-    color: #fff;
-    box-shadow: 0 1px 2px rgba(217,48,37,.3);
-  }
-  .vai-chevron {
-    color: var(--text-3);
-    transition: transform .25s var(--r-ease);
-  }
-  .vai-section.closed .vai-list { display: none; }
+  :root { --owner-color: #0071e3; }
+  main { display: flex; flex-direction: column; gap: 20px; }
+  /* ── Externe Verkäufe ── */
+  .extern-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .extern-section-hdr { display:flex; align-items:center; gap:8px; padding:11px 18px; background:var(--surface2); border-bottom:1px solid var(--border); }
+  .extern-section-hdr h2 { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2); display:flex; align-items:center; gap:6px; margin:0; }
+  .extern-count-badge { font-size:10px; font-weight:700; background:#f97316; color:#fff; border-radius:20px; padding:1px 8px; }
+  .extern-list { padding:8px 12px; display:flex; flex-direction:column; gap:8px; }
+  .extern-card { border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; border-left:3px solid #f97316; background:var(--surface); }
+  .extern-card-top { display:flex; align-items:center; gap:10px; padding:10px 14px; flex-wrap:wrap; }
+  .extern-card-name { font-size:13px; font-weight:700; color:var(--text); flex:1; }
+  .extern-card-meta { font-size:12px; color:var(--text-2); }
+  .extern-tag { font-size:10px; font-weight:700; background:#fff7ed; color:#f97316; border:1px solid #fed7aa; border-radius:20px; padding:1px 7px; text-transform:uppercase; letter-spacing:0.4px; }
+  .extern-moebel-row { padding:0 14px 8px; display:flex; flex-wrap:wrap; gap:5px; }
+  .extern-m-chip { font-size:11px; background:var(--surface2); color:var(--text-2); border-radius:4px; padding:2px 7px; border:1px solid var(--border); }
+  .extern-bem-row { padding:0 14px 8px; font-size:12px; color:var(--text-3); font-style:italic; }
+  .extern-card-footer { display:flex; justify-content:flex-end; padding:8px 14px; border-top:1px solid var(--border); background:var(--surface2); }
+  /* Claim Modal */
+  .claim-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; display:flex; align-items:center; justify-content:center; }
+  .claim-box { background:var(--surface); border-radius:var(--radius); box-shadow:0 20px 60px rgba(0,0,0,0.2); max-width:440px; width:92%; padding:24px; }
+  .claim-box h3 { font-size:15px; font-weight:700; margin-bottom:16px; }
+  .claim-detail { font-size:13px; color:var(--text); margin-bottom:4px; }
+  .claim-detail strong { color:var(--text-2); font-weight:600; }
+  .claim-moebel { margin:10px 0; display:flex; flex-direction:column; gap:5px; }
+  .claim-moebel-item { display:flex; gap:8px; align-items:center; font-size:13px; background:var(--surface2); border-radius:6px; padding:6px 10px; }
+  .claim-qty { font-weight:700; color:var(--text); }
+  .claim-stock-banner { background:#f0fdf4; border:1px solid #86efac; border-radius:var(--radius); padding:10px 14px; margin:14px 0 0; font-size:13px; color:#15803d; font-weight:600; display:flex; align-items:center; gap:6px; }
+  .claim-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+  /* ── Verkaufsanfragen-Inbox ── */
+  .vai-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .vai-section.closed .vai-list { display:none; }
   .vai-section.closed .vai-chevron { transform: rotate(-90deg); }
-
-  /* ── Lists ── */
-  .extern-list,
-  .vai-list {
-    padding: 14px 16px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  /* ── Cards inside sections ── */
-  .extern-card,
-  .vai-card {
-    border: 1px solid var(--border);
-    border-radius: var(--r-radius-sm);
-    overflow: hidden;
-    background: var(--surface);
-    position: relative;
-    transition: transform .2s var(--r-ease), box-shadow .2s var(--r-ease), border-color .2s var(--r-ease);
-  }
-  .extern-card:hover,
-  .vai-card:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--r-shadow-soft);
-    border-color: var(--border-strong);
-  }
-  .extern-card { border-left: 3px solid #f97316; }
-  .vai-card.pending { border-left: 3px solid var(--danger); }
-  .vai-card.claimed { border-left: 3px solid var(--r-accent); background: linear-gradient(180deg, var(--surface) 0%, var(--r-accent-soft) 220%); }
-  .vai-card.flash { animation: vaiFlash 1.4s ease 0s 3; }
-  @keyframes vaiFlash {
-    0%,100% { box-shadow: 0 0 0 0 rgba(26,122,54,0); }
-    50%     { box-shadow: 0 0 0 5px rgba(26,122,54,.32); }
-  }
-
-  .extern-card-top,
-  .vai-card-top {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
-    flex-wrap: wrap;
-  }
-  .extern-card-name,
-  .vai-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    flex: 1;
-    letter-spacing: -0.01em;
-  }
-  .extern-card-meta { font-size: 12.5px; color: var(--text-2); }
-  .vai-abt { font-size: 11.5px; color: var(--text-3); }
-
-  .vai-mail {
-    font-size: 11.5px;
-    font-weight: 500;
-    color: var(--text-2);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 3px 10px;
-    border-radius: 999px;
-    text-decoration: none;
-    transition: all .2s var(--r-ease);
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .vai-mail:hover {
-    color: var(--r-accent);
-    border-color: var(--r-accent);
-    background: var(--r-accent-soft);
-  }
-
-  .vai-termin {
-    background: linear-gradient(135deg, var(--assil-c) 0%, #8a4ce8 100%);
-    color: #fff;
-    border-radius: 999px;
-    padding: 3px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-  }
-  .vai-time-ago { font-size: 11px; color: var(--text-3); }
-
-  .extern-tag,
-  .vai-tag {
-    font-size: 10px;
-    font-weight: 700;
-    background: #fff7ed;
-    color: #f97316;
-    border: 1px solid #fed7aa;
-    border-radius: 999px;
-    padding: 2px 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  .vai-tag.mine {
-    background: var(--r-accent-soft);
-    color: var(--r-accent);
-    border-color: transparent;
-  }
-  [data-theme="dark"] .extern-tag,
-  [data-theme="dark"] .vai-tag {
-    background: rgba(249,115,22,.12);
-    border-color: rgba(249,115,22,.3);
-  }
-
-  /* Chips */
-  .extern-moebel-row,
-  .vai-moebel-row {
-    padding: 0 18px 12px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .extern-m-chip,
-  .vai-m-chip {
-    font-size: 11.5px;
-    background: var(--surface2);
-    color: var(--text-2);
-    border-radius: 8px;
-    padding: 3px 9px;
-    border: 1px solid var(--border);
-  }
+  .vai-hdr { display:flex; align-items:center; gap:8px; padding:11px 18px; background:var(--surface2); border-bottom:1px solid var(--border); cursor:pointer; user-select:none; }
+  .vai-hdr h2 { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2); display:flex; align-items:center; gap:6px; margin:0; flex:1; }
+  .vai-count-badge { font-size:10px; font-weight:700; background:var(--surface3); color:var(--text-2); border-radius:20px; padding:1px 8px; }
+  .vai-count-badge.has-pending { background: var(--danger); color:#fff; }
+  .vai-chevron { color:var(--text-3); transition: transform var(--transition); }
+  .vai-list { padding:8px 12px; display:flex; flex-direction:column; gap:8px; }
+  .vai-empty { font-size:13px; color:var(--text-3); padding:14px 6px; }
+  .vai-card { border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; background:var(--surface); position:relative; }
+  .vai-card.pending { border-left:3px solid var(--danger); }
+  .vai-card.claimed { border-left:3px solid var(--accent); background:var(--surface2); }
+  .vai-card.flash   { animation: vaiFlash 1.4s ease 0s 3; }
+  @keyframes vaiFlash { 0%,100% { box-shadow:0 0 0 0 rgba(0,113,227,0); } 50% { box-shadow:0 0 0 4px rgba(0,113,227,0.35); } }
+  .vai-card-top { display:flex; align-items:center; gap:10px; padding:10px 14px; flex-wrap:wrap; }
+  .vai-name { font-size:13px; font-weight:700; color:var(--text); flex:1; }
+  .vai-abt { font-size:11px; color:var(--text-3); }
+  .vai-mail { font-size:11px; font-weight:500; color:var(--text-2); background:var(--surface2); border:1px solid var(--border); padding:2px 8px; border-radius:11px; text-decoration:none; transition:0.12s; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .vai-mail:hover { color:var(--accent); border-color:var(--accent); background:var(--accent-light); }
+  .vai-termin { background:var(--assil-c); color:#fff; border-radius:6px; padding:2px 8px; font-size:11px; font-weight:700; }
+  .vai-time-ago { font-size:10px; color:var(--text-3); }
+  .vai-tag { font-size:10px; font-weight:700; background:#fff7ed; color:#f97316; border:1px solid #fed7aa; border-radius:20px; padding:1px 7px; text-transform:uppercase; letter-spacing:0.4px; }
+  .vai-tag.mine { background:var(--accent-light); color:var(--accent); border-color: transparent; }
+  .vai-moebel-row { padding:0 14px 8px; display:flex; flex-wrap:wrap; gap:5px; }
+  .vai-m-chip { font-size:11px; background:var(--surface2); color:var(--text-2); border-radius:4px; padding:2px 7px; border:1px solid var(--border); }
   .vai-card.claimed .vai-m-chip { background: var(--surface); }
-
-  .extern-bem-row,
-  .vai-bem {
-    padding: 0 18px 12px;
-    font-size: 12.5px;
-    color: var(--text-3);
-    font-style: italic;
-    line-height: 1.5;
-  }
-
-  .vai-proposal-line {
-    margin: 0 18px 12px;
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-size: 11.5px;
-    font-weight: 600;
-    line-height: 1.45;
-  }
+  .vai-bem { padding:0 14px 8px; font-size:12px; color:var(--text-3); font-style:italic; }
+  .vai-proposal-line { margin:0 14px 8px; padding:6px 10px; border-radius:6px; font-size:11px; font-weight:600; line-height:1.4; }
   .vai-proposal-line.pending  { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
   .vai-proposal-line.accepted { background:#dcfce7; color:#166534; border:1px solid #86efac; }
   .vai-proposal-line.rejected { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
-  [data-theme="dark"] .vai-proposal-line.pending  { background:rgba(252,211,77,.12); color:#fcd34d; border-color:rgba(252,211,77,.3); }
-  [data-theme="dark"] .vai-proposal-line.accepted { background:rgba(134,239,172,.12); color:#86efac; border-color:rgba(134,239,172,.3); }
-  [data-theme="dark"] .vai-proposal-line.rejected { background:rgba(252,165,165,.12); color:#fca5a5; border-color:rgba(252,165,165,.3); }
-
-  .extern-card-footer,
-  .vai-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 12px 18px;
-    border-top: 1px solid var(--border);
-    background: var(--surface2);
-    flex-wrap: wrap;
-  }
-
-  .vai-pulse {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--danger);
-    box-shadow: 0 0 0 0 rgba(217,48,37,.6);
-    animation: pulse 1.6s infinite;
-  }
-  @keyframes pulse {
-    0%   { transform: scale(1);   opacity: 1;   box-shadow: 0 0 0 0    rgba(217,48,37,.6); }
-    70%  { transform: scale(1.4); opacity: .4;  box-shadow: 0 0 0 8px  rgba(217,48,37,0);  }
-    100% { transform: scale(1);   opacity: 1;   box-shadow: 0 0 0 0    rgba(217,48,37,0);  }
-  }
-
-  .vai-btn-reject {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-3);
-  }
-  .vai-btn-reject:hover {
-    color: var(--danger);
-    border-color: var(--danger);
-    background: var(--danger-light);
-  }
-
-  .vai-termin-modal-row {
-    display: flex;
-    gap: 10px;
-    margin: 14px 0;
-  }
-  .vai-termin-modal-row input {
-    flex: 1;
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--r-radius-sm);
-    font-family: var(--r-font);
-    font-size: 14px;
-    background: var(--surface);
-    color: var(--text);
-    transition: border-color .2s var(--r-ease), box-shadow .2s var(--r-ease);
-  }
-  .vai-termin-modal-row input:focus {
-    outline: none;
-    border-color: var(--r-accent);
-    box-shadow: 0 0 0 4px var(--r-accent-soft);
-  }
-
-  /* ── Claim modal: premium ── */
-  .claim-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.5);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: claimFade .25s var(--r-ease);
-  }
-  @keyframes claimFade { from { opacity: 0; } to { opacity: 1; } }
-  .claim-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    box-shadow: 0 24px 72px rgba(0,0,0,.24);
-    max-width: 460px;
-    width: 92%;
-    padding: 28px;
-    animation: claimRise .35s var(--r-ease);
-  }
-  @keyframes claimRise {
-    from { opacity: 0; transform: translateY(12px) scale(.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .claim-box h3 {
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    margin-bottom: 18px;
-    color: var(--text);
-  }
-  .claim-detail { font-size: 13.5px; color: var(--text); margin-bottom: 6px; }
-  .claim-detail strong { color: var(--text-2); font-weight: 500; }
-  .claim-moebel { margin: 14px 0; display: flex; flex-direction: column; gap: 6px; }
-  .claim-moebel-item {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    font-size: 13.5px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 12px;
-  }
-  .claim-qty {
-    font-weight: 700;
-    color: var(--r-accent);
-    min-width: 28px;
-  }
-  .claim-stock-banner {
-    background: var(--r-accent-soft);
-    border: 1px solid rgba(26,122,54,.25);
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin: 18px 0 0;
-    font-size: 13px;
-    color: var(--r-accent);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  [data-theme="dark"] .claim-stock-banner { color: #86efac; }
-  .claim-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 18px;
-  }
-
-  /* ── Empty state polish (if shown) ── */
-  .empty-state {
-    padding: 64px 24px;
-    text-align: center;
-    color: var(--text-3);
-  }
-  .empty-state svg { opacity: .6; margin-bottom: 12px; }
-  .empty-state p { font-size: 15px; font-weight: 500; }
-
-  /* ── Reduced motion ── */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: .01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: .01ms !important;
-    }
-  }
+  .vai-footer { display:flex; justify-content:flex-end; gap:6px; padding:8px 14px; border-top:1px solid var(--border); background:var(--surface2); flex-wrap:wrap; }
+  .vai-pulse { position:absolute; top:10px; right:10px; width:7px; height:7px; border-radius:50%; background:var(--danger); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100% { transform:scale(1); opacity:1 } 50% { transform:scale(1.5); opacity:.6 } }
+  .vai-btn-reject { background:transparent; border:1px solid var(--border); color:var(--text-3); }
+  .vai-btn-reject:hover { color:var(--danger); border-color:var(--danger); }
+  .vai-termin-modal-row { display:flex; gap:8px; margin:12px 0; }
+  .vai-termin-modal-row input { flex:1; padding:8px 10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font); font-size:13px; background:var(--surface); color:var(--text); }
 </style>
-<script src="../../auth.js"></script>
+<script src="/stollberg/auth.js"></script>
+<script>
+// Load employee info dynamically
+const _ownerId = new URLSearchParams(window.location.search).get('user') || '';
+if (!_ownerId) {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;"><div style="text-align:center;"><h2>Kein Mitarbeiter angegeben</h2><p style="color:#6e6e73;margin-top:8px;">Bitte über das <a href="/stollberg/index.html">Dashboard</a> öffnen.</p></div></div>';
+  });
+}
+</script>
 </head>
 <body>
 
@@ -503,13 +97,13 @@
 
 <nav>
   <div class="nav-brand">
-    <a href="../../index.html" class="back-btn">
+    <a href="/stollberg/index.html" class="back-btn">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
       Übersicht
     </a>
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
     Anfragen Manager
-    <span class="owner-tag">Rohat</span>
+    <span class="owner-tag" id="ownerTag">…</span>
   </div>
   <div class="nav-actions">
     <div class="sync-indicator" id="syncIndicator"><div class="dot"></div><span id="syncText">Verbinden…</span></div>
@@ -530,13 +124,15 @@
 </div>
 
 <main>
+  <!-- ⚠️ Wird ausgeblendet sobald Firebase konfiguriert ist -->
   <div class="setup-banner" id="setupBanner">
     <h3>Firebase noch nicht konfiguriert</h3>
-    <p>Trage deine Firebase-Konfiguration im <code>FIREBASE_CONFIG</code>-Block ein. Gleiche Config wie Louis.html verwenden!</p>
+    <p>Öffne diese Datei in VS Code und trage deine Firebase-Konfiguration im <code>&lt;script&gt;</code>-Block ein (suche nach <code>FIREBASE_CONFIG</code>).<br>
+    Anleitung: <strong>console.firebase.google.com</strong> → Projekt → Projekteinstellungen → Deine Apps → Config kopieren.</p>
   </div>
 
   <div class="new-session-card">
-    <h2>Neuer Termin — Rohat</h2>
+    <h2>Neuer Termin — <span id="newTerminOwnerName">…</span></h2>
     <div class="new-session-row">
       <div class="input-group"><label>Datum</label><input type="text" id="newDatum" class="new-datum" placeholder="TT.MM.JJJJ" /></div>
       <div class="input-group"><label>Uhrzeit</label><input type="text" id="newUhrzeit" class="new-uhrzeit" placeholder="z.B. 11:15 Uhr" /></div>
@@ -573,6 +169,7 @@
   </div>
 
   <div class="day-overview" id="dayOverview"></div>
+
   <div class="sessions-list" id="sessionsList">
     <div class="empty-state" id="emptyState" style="display:none">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
@@ -604,12 +201,14 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Firebase SDK (compat version – funktioniert direkt in HTML ohne Build-Tool) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
 // ════════════════════════════════════════════════════════════════
-// 🔧 GLEICHE FIREBASE-KONFIGURATION WIE IN LOUIS.HTML EINTRAGEN
+// 🔧 HIER DEINE FIREBASE-KONFIGURATION EINTRAGEN
+//    → firebase.google.com → Projekt → Einstellungen → Config
 // ════════════════════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
@@ -622,8 +221,10 @@ const FIREBASE_CONFIG = {
 };
 // ════════════════════════════════════════════════════════════════
 
-const OWNER       = 'rohat';
-const DB_PATH     = 'sessions';
+const _urlParams  = new URLSearchParams(window.location.search);
+const OWNER_ID    = _urlParams.get('user') || '';
+let   OWNER       = OWNER_ID; // filled in after Firebase load
+const DB_PATH     = 'stollbergSessions'; // Root-Pfad in Firebase
 const STATUS_OPTS = ['Offen','Reservierung','Abholung','Abgeschlossen'];
 const FB_MOEBEL   = 'https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app';
 
@@ -631,17 +232,17 @@ const FB_MOEBEL   = 'https://manager-3cf2b-default-rtdb.europe-west1.firebasedat
 function writeLog(aktion, details) {
   if (!db) return;
   const entry = {
-    ts:      Date.now(),
-    datum:   new Date().toLocaleDateString('de-DE'),
+    ts:     Date.now(),
+    datum:  new Date().toLocaleDateString('de-DE'),
     uhrzeit: new Date().toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' }),
-    user:    'Rohat',
+    user:   OWNER || OWNER_ID || 'Stollberg',
     aktion,
     details: details || ''
   };
-  db.ref('logs/' + entry.ts + '_' + Math.random().toString(36).slice(2,5)).set(entry);
+  db.ref('stollbergLogs/' + entry.ts + '_' + Math.random().toString(36).slice(2,5)).set(entry);
 }
 
-/* ── Möbel-Katalog (identisch mit moebel.html) ── */
+/* ── Möbel-Katalog — wird dynamisch aus Firebase geladen (Fallback: hardcodiert) ── */
 let MOEBEL_KATALOG = [
   { id:'schreibtisch_160', label:'Schreibtisch 160×80', subs:[
     { id:'weiss', label:'Weiß' }, { id:'grau', label:'Grau' },
@@ -695,39 +296,21 @@ let MOEBEL_KATALOG = [
 ];
 const JN_OPTS     = ['Nein','Ja'];
 
-// Rohat's bestehende Daten (aus Screenshot) – werden einmalig hochgeladen wenn Firebase leer
-const INITIAL_DATA = [
-  { id: 1742206800001, datum: '17.03.', uhrzeit: '11 Uhr', collapsed: false, owner: 'rohat', personen: [
-    { name: 'Kaprolat, Sina',    status: 'Reservierung', fe: 'Nein', fw: 'Nein', tische: 0, stuehle: 2, bem: 'Carola vermerkt',          abh_datum: '', abh_zeit: '' },
-    { name: 'Anja Leue',         status: 'Reservierung', fe: 'Nein', fw: 'Nein', tische: 0, stuehle: 1, bem: 'Carola vermerkt',          abh_datum: '', abh_zeit: '' },
-    { name: 'Thomas Edelberg',   status: 'Reservierung', fe: 'Nein', fw: 'Nein', tische: 0, stuehle: 2, bem: 'Ab hier nicht mehr!',      abh_datum: '', abh_zeit: '' },
-    { name: 'Bastian Müller',    status: 'Reservierung', fe: 'Nein', fw: 'Nein', tische: 1, stuehle: 0, bem: '',                        abh_datum: '', abh_zeit: '' },
-    { name: 'Rendy Hintze',      status: 'Reservierung', fe: 'Nein', fw: 'Nein', tische: 1, stuehle: 2, bem: '',                        abh_datum: '', abh_zeit: '' }
-  ]},
-  { id: 1742206800002, datum: '18.03.', uhrzeit: '11 Uhr', collapsed: false, owner: 'rohat', personen: [
-    { name: 'Dr. Johannes Werfel', status: 'Reservierung',  fe: 'Nein', fw: 'Nein', tische: 0, stuehle: 1, bem: '',                              abh_datum: '', abh_zeit: '' },
-    { name: 'Joachim Spitta',      status: 'Reservierung',  fe: 'Nein', fw: 'Nein', tische: 1, stuehle: 1, bem: '',                              abh_datum: '', abh_zeit: '' },
-    { name: 'Rohat Turgut',        status: 'Abgeschlossen', fe: 'Nein', fw: 'Nein', tische: 0, stuehle: 3, bem: '',                              abh_datum: '', abh_zeit: '' },
-    { name: 'Ina Wendicke',        status: 'Reservierung',  fe: 'Nein', fw: 'Nein', tische: 4, stuehle: 3, bem: '2 HV Tische, 2 manuelverstellba', abh_datum: '', abh_zeit: '' }
-  ]},
-  { id: 1742206800003, datum: '19.03', uhrzeit: '11 Uhr', collapsed: false, owner: 'rohat', personen: [
-    { name: 'Mathias Barton', status: 'Abgeschlossen', fe: 'Nein', fw: 'Nein', tische: 0, stuehle: 1, bem: '(ist schon raus aus der Bestand:', abh_datum: '', abh_zeit: '' },
-    { name: 'Tobias Kutzner', status: 'Abgeschlossen', fe: 'Nein', fw: 'Nein', tische: 0, stuehle: 2, bem: '',                                  abh_datum: '', abh_zeit: '' },
-    { name: 'Jens Ritter',   status: 'Reservierung',  fe: 'Nein', fw: 'Nein', tische: 0, stuehle: 2, bem: '(Ausnahme: Wurde abgeholt, Be',    abh_datum: '', abh_zeit: '' }
-  ]}
-];
+const INITIAL_DATA = [];
 
 let sessions = [];
-let db = null, dbRef = null, saveTimers = {}, isConfigured = false;
+let db        = null;
+let dbRef     = null;
+let isConfigured = false;
 let _dirtyIds = new Set();
 
 // ── Externe Verkäufe ─────────────────────────────────────────────
-let externSales     = [];
+let externSales    = [];
 let _pendingClaimId = null;
 
 function startExternListener() {
   if (!db) return;
-  db.ref('extern_verkauf').on('value', snap => {
+  db.ref('stollbergExtern').on('value', snap => {
     const raw = snap.val();
     externSales = raw ? Object.values(raw).filter(e => e.status === 'offen') : [];
     renderExternSales();
@@ -810,7 +393,7 @@ function confirmClaimExtern() {
   sessions.push(newSession);
   _dirtyIds.add(String(newId));
   const updates = {};
-  updates['sessions/' + newId] = { ...newSession };
+  updates['stollbergSessions/' + newId] = { ...newSession };
   updates['extern_verkauf/' + e.id + '/status']    = 'übernommen';
   updates['extern_verkauf/' + e.id + '/claimedBy'] = OWNER;
   firebase.database().ref().update(updates)
@@ -826,11 +409,12 @@ let _vaiClaimIdFromUrl = null;
 
 function startVaiListener() {
   if (!db) return;
-  db.ref('verkaufAnfragen').on('value', snap => {
+  db.ref('stollbergVerkaufAnfragen').on('value', snap => {
     const raw = snap.val();
     vaiAnfragen = raw ? Object.values(raw) : [];
     renderVai();
     if (_vaiClaimIdFromUrl) {
+      // Nach Render: Karte highlighten
       setTimeout(() => vaiHighlight(_vaiClaimIdFromUrl), 80);
     }
   });
@@ -866,6 +450,7 @@ function renderVai() {
     return;
   }
   section.style.display = '';
+  // Default offen wenn ≥1 pending oder claimedByMe (und User noch nicht manuell zu hat)
   if (!section.dataset.userToggled) section.classList.remove('closed');
 
   list.innerHTML = items.map(e => {
@@ -879,6 +464,7 @@ function renderVai() {
     const terminTxt = (wt.datum||'') + (wt.uhrzeit ? ' · ' + wt.uhrzeit : '');
     const idEsc = esc(e.id);
 
+    // Vorschlag / Antwort des Käufers
     const pt = e.proposedTermin;
     const cr = e.customerResponse;
     let proposalLine = '';
@@ -920,7 +506,7 @@ function renderVai() {
 
 function vaiClaim(id) {
   if (!db) return;
-  db.ref('verkaufAnfragen/' + id).update({ status: 'claimed', claimedBy: OWNER })
+  db.ref('stollbergVerkaufAnfragen/' + id).update({ status: 'claimed', claimedBy: OWNER })
     .then(() => toast('&#220;bernommen ✓'))
     .catch(err => toast('Fehler: ' + err.message));
 }
@@ -928,10 +514,10 @@ function vaiReject(id) {
   if (!db) return;
   if (!confirm('Anfrage wirklich ablehnen?')) return;
   const reason = prompt('Warum wird die Anfrage abgelehnt?\n(Kurzer Grund — wird dem Käufer per Mail mitgeteilt)\n\nLeer lassen, um ohne Begründung abzulehnen.', '') || '';
-  db.ref('verkaufAnfragen/' + id).update({ status: 'rejected', rejectReason: reason })
+  db.ref('stollbergVerkaufAnfragen/' + id).update({ status: 'rejected', rejectReason: reason })
     .then(() => {
       toast('Anfrage abgelehnt');
-      fetch('/api/sendNotification', {
+      fetch('/api/stollberg/sendNotification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ anfrageId: id, type: 'rejected', reason })
@@ -942,7 +528,7 @@ function vaiReject(id) {
 }
 function vaiRelease(id) {
   if (!db) return;
-  db.ref('verkaufAnfragen/' + id).update({ status: 'pending', claimedBy: null })
+  db.ref('stollbergVerkaufAnfragen/' + id).update({ status: 'pending', claimedBy: null })
     .then(() => toast('Freigegeben'))
     .catch(err => toast('Fehler: ' + err.message));
 }
@@ -968,6 +554,7 @@ function vaiInsertIntoTable(id) {
     quelle:    'verkauf'
   };
 
+  // Suche bestehende Session mit gleichem Datum/Uhrzeit
   const existing = sessions.find(s =>
     s.owner === OWNER &&
     (s.datum||'') === (wt.datum||'') &&
@@ -981,7 +568,7 @@ function vaiInsertIntoTable(id) {
     existing.personen.push(newPerson);
     targetSid = existing.id;
     _dirtyIds.add(String(targetSid));
-    updates['sessions/' + targetSid] = { ...existing, owner: OWNER };
+    updates['stollbergSessions/' + targetSid] = { ...existing, owner: OWNER };
   } else {
     const newId = Date.now();
     const newSession = {
@@ -995,17 +582,18 @@ function vaiInsertIntoTable(id) {
     sessions.push(newSession);
     targetSid = newId;
     _dirtyIds.add(String(targetSid));
-    updates['sessions/' + targetSid] = { ...newSession };
+    updates['stollbergSessions/' + targetSid] = { ...newSession };
   }
-  updates['verkaufAnfragen/' + e.id + '/status']        = 'integrated';
-  updates['verkaufAnfragen/' + e.id + '/integratedAt']  = Date.now();
-  updates['verkaufAnfragen/' + e.id + '/claimedBy']     = OWNER;
+  updates['stollbergVerkaufAnfragen/' + e.id + '/status']        = 'integrated';
+  updates['stollbergVerkaufAnfragen/' + e.id + '/integratedAt']  = Date.now();
+  updates['stollbergVerkaufAnfragen/' + e.id + '/claimedBy']     = OWNER;
 
   firebase.database().ref().update(updates)
     .then(() => {
       toast('In Tabelle eingef&#252;gt ✓');
       _dirtyIds.delete(String(targetSid));
       renderAll();
+      // Scrollen zur Person-Zeile
       setTimeout(() => {
         const inputs = document.querySelectorAll('td input[type=text]');
         for (let i = 0; i < inputs.length; i++) {
@@ -1014,7 +602,7 @@ function vaiInsertIntoTable(id) {
             if (tr) {
               tr.scrollIntoView({ behavior:'smooth', block:'center' });
               tr.style.transition = 'background 0.3s';
-              tr.style.background = 'rgba(26,122,54,0.18)';
+              tr.style.background = 'rgba(0,113,227,0.18)';
               setTimeout(() => { tr.style.background = ''; }, 4000);
             }
             return;
@@ -1062,14 +650,14 @@ function vaiSaveTermin(id) {
   const newT = datum + ' · ' + uhrzeit + ' Uhr';
   const ok = confirm('Es wird automatisch eine Mail an ' + name + ' geschickt mit dem neuen Vorschlag (' + newT + '). Der K&#228;ufer kann direkt im Status-Bereich auf Ja/Nein klicken. Fortfahren?');
   if (!ok) return;
-  db.ref('verkaufAnfragen/' + id).update({
-    proposedTermin:    { datum: datum, uhrzeit: uhrzeit, by: 'Rohat Turgut', at: Date.now() },
+  db.ref('stollbergVerkaufAnfragen/' + id).update({
+    proposedTermin:    { datum: datum, uhrzeit: uhrzeit, by: OWNER, at: Date.now() },
     customerResponse:  null,
     customerResponseAt: null
   })
     .then(() => {
       toast('Vorschlag gespeichert ✓ – Mail geht raus');
-      fetch('/api/sendNotification', {
+      fetch('/api/stollberg/sendNotification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ anfrageId: id, type: 'termin', oldTermin: oldT, newTermin: newT })
@@ -1088,31 +676,34 @@ function vaiHighlight(id) {
   card.scrollIntoView({ behavior:'smooth', block:'center' });
   card.classList.add('flash');
   setTimeout(() => card.classList.remove('flash'), 4500);
-  _vaiClaimIdFromUrl = null;
+  _vaiClaimIdFromUrl = null; // einmalig
+  // URL-Parameter entfernen
   try { history.replaceState(null, '', window.location.pathname); } catch(_) {}
 }
 
+// ── Firebase initialisieren ──────────────────────────────────────
 function initFirebase() {
   if (FIREBASE_CONFIG.apiKey === 'DEIN_API_KEY') {
     document.getElementById('setupBanner').classList.add('visible');
-    setSyncStatus('error', 'Nicht konfiguriert');
-    sessions = JSON.parse(localStorage.getItem('anfragen_rohat') || '[]');
+    setSyncStatus('error', 'Nicht konfiguriert – Offline-Modus');
+    sessions = JSON.parse(localStorage.getItem('anfragen_stollberg_' + (_ownerId || 'unknown')) || 'null') || [];
     renderAll(); return;
   }
   try {
     const app = firebase.initializeApp(FIREBASE_CONFIG);
-    db = firebase.database(app);
+    db    = firebase.database(app);
     dbRef = db.ref(DB_PATH);
     isConfigured = true;
     setSyncStatus('syncing', 'Verbinde…');
 
-    // Katalog zuerst laden, dann Session-Listener starten
-    db.ref('moebelDropdownKatalog').once('value', snapKat => {
+    // Zuerst Dropdown-Katalog aus Firebase laden (von moebel.html gepflegt)
+    db.ref('stollbergMoebelDropdownKatalog').once('value', snapKat => {
       const fbKat = snapKat.val();
       if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
         MOEBEL_KATALOG.length = 0;
         fbKat.forEach(k => MOEBEL_KATALOG.push(k));
       }
+      // Danach Session-Daten live hören
       startSessionListener();
       startExternListener();
       startVaiListener();
@@ -1123,97 +714,93 @@ function initFirebase() {
       startVaiListener();
     });
 
-    // Live-Updates wenn Katalog in moebel.html geändert wird
-    db.ref('moebelDropdownKatalog').on('value', snapKat => {
+    // Live-Update wenn Katalog in moebel.html geändert wird
+    db.ref('stollbergMoebelDropdownKatalog').on('value', snapKat => {
       const fbKat = snapKat.val();
       if (fbKat && Array.isArray(fbKat) && fbKat.length > 0) {
         MOEBEL_KATALOG.length = 0;
         fbKat.forEach(k => MOEBEL_KATALOG.push(k));
-        renderAll();
+        renderAll(); // Cards neu aufbauen mit aktuellem Katalog
       }
     });
 
     // Notifications starten
     initNotifications();
-  } catch(e) { setSyncStatus('error', 'Init-Fehler'); console.error(e); }
+  } catch(e) {
+    setSyncStatus('error', 'Init-Fehler');
+    console.error(e);
+  }
 }
 
 function startSessionListener() {
-  dbRef.on('value', snapshot => {
-    const raw = snapshot.val();
-    const all = raw ? Object.values(raw) : [];
-    const rohatSessions = all.filter(s => s.owner === OWNER);
-    // Einmalig Initialdaten hochladen wenn noch keine Rohat-Sessions vorhanden
-    if (rohatSessions.length === 0 && INITIAL_DATA.length > 0) {
-      const updates = {};
-      INITIAL_DATA.forEach(s => { updates[DB_PATH + '/' + s.id] = s; });
-      firebase.database().ref().update(updates);
-      sessions = INITIAL_DATA;
-      renderAll();
-    } else {
-      // Für jede Session: lokale Version behalten wenn sie dirty ist
+    dbRef.on('value', snapshot => {
+      const raw = snapshot.val();
+      if (!raw) { renderAll(); setSyncStatus('synced', 'Synchronisiert'); return; }
+      const all = Object.values(raw).filter(s => s.owner === OWNER);
+      // Nur externe Änderungen übernehmen, dirty Sessions behalten
       let needsRender = false;
-      rohatSessions.forEach(incoming => {
+      all.forEach(incoming => {
         const sid = String(incoming.id);
-        if (_dirtyIds.has(sid)) return; // Lokale Änderung noch nicht gespeichert → ignorieren
-        const existing = sessions.find(s => String(s.id) === sid);
-        if (JSON.stringify(existing) !== JSON.stringify(incoming)) {
-          // Externe Änderung → übernehmen
-          const idx = sessions.findIndex(s => String(s.id) === sid);
-          if (idx >= 0) sessions[idx] = incoming; else sessions.push(incoming);
-          needsRender = true;
-        }
+        if (_dirtyIds.has(sid)) return;
+        const idx = sessions.findIndex(s => String(s.id) === sid);
+        if (idx < 0) { sessions.push(incoming); needsRender = true; }
+        else if (JSON.stringify(sessions[idx]) !== JSON.stringify(incoming)) { sessions[idx] = incoming; needsRender = true; }
       });
-      // Neu hinzugekommene Sessions
-      rohatSessions.forEach(incoming => {
-        if (!sessions.find(s => String(s.id) === String(incoming.id))) {
-          sessions.push(incoming);
-          needsRender = true;
-        }
-      });
-      // Gelöschte Sessions
-      const incomingIds = rohatSessions.map(s => String(s.id));
+      const incomingIds = all.map(s => String(s.id));
       const before = sessions.length;
       sessions = sessions.filter(s => incomingIds.includes(String(s.id)) || _dirtyIds.has(String(s.id)));
       if (sessions.length !== before) needsRender = true;
-      if (needsRender) { renderAll(); }
-    }
-    setSyncStatus('synced', 'Synchronisiert');
-  }, err => setSyncStatus('error', 'Fehler: ' + err.message));
+      if (needsRender) renderAll();
+      setSyncStatus('synced', 'Synchronisiert');
+    }, err => setSyncStatus('error', 'Fehler: ' + err.message));
 }
 
-function saveSid(sid) {
-  if (!isConfigured || !db) return;
-  const s = sessions.find(x => String(x.id) === String(sid)); if (!s) return;
-  setSyncStatus('syncing', 'Speichern…');
-  db.ref(DB_PATH + '/' + sid).set({...s, owner: OWNER})
-    .then(() => { setSyncStatus('synced', 'Gespeichert ✓'); setTimeout(() => { _dirtyIds.delete(String(sid)); }, 2000); })
-    .catch(() => setSyncStatus('error', 'Sync-Fehler'));
+function uploadInitialData() {
+  if (!db) return;
+  const updates = {};
+  INITIAL_DATA.forEach(s => { updates[DB_PATH + '/' + s.id] = {...s, owner: OWNER}; });
+  firebase.database().ref().update(updates);
+  toast('Daten hochgeladen ✓');
 }
+
+// ── Speichern ────────────────────────────────────────────────────
 function save() {
   if (isConfigured && db) {
     const updates = {};
     sessions.forEach(s => { updates[DB_PATH + '/' + s.id] = {...s, owner: OWNER}; });
     firebase.database().ref().update(updates)
       .then(() => { setSyncStatus('synced', 'Gespeichert ✓'); setTimeout(() => { _dirtyIds.clear(); }, 2000); })
-      .catch(() => setSyncStatus('error', 'Sync-Fehler'));
+      .catch(e => setSyncStatus('error', 'Sync-Fehler'));
   } else {
-    localStorage.setItem('anfragen_rohat', JSON.stringify(sessions));
+    localStorage.setItem('anfragen_stollberg_' + (_ownerId || 'unknown'), JSON.stringify(sessions));
     setSyncStatus('synced', 'Lokal gespeichert');
   }
 }
+
 function scheduleSave() {
   setSyncStatus('syncing', 'Speichern…');
   clearTimeout(scheduleSave._t);
   scheduleSave._t = setTimeout(save, 900);
 }
-function setSyncStatus(type, text) { document.getElementById('syncIndicator').className = 'sync-indicator ' + type; document.getElementById('syncText').textContent = text; }
+
+function setSyncStatus(type, text) {
+  const ind = document.getElementById('syncIndicator');
+  const txt = document.getElementById('syncText');
+  ind.className = 'sync-indicator ' + type;
+  txt.textContent = text;
+}
+
+// ── Hilfsfunktionen ──────────────────────────────────────────────
 function esc(v) { return String(v ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 function isoToDE(iso) { if (!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}.${m}.${y}`; }
-function deToISO(de) { if (!de) return ''; const p = de.split('.'); if (p.length!==3) return ''; return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; }
-function fmtTime(t) { return t ? t + ' Uhr' : ''; }
-function dot(s) { const c = {'Offen':'#b07800','Reservierung':'#0071e3','Abgeschlossen':'#1a7a36','Abholung':'#7c3aed'}[s]||'#b07800'; return `<svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="${c}"/></svg>`; }
+function deToISO(de)  { if (!de) return ''; const p = de.split('.'); if (p.length!==3) return ''; return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; }
+function fmtTime(t)   { return t ? t + ' Uhr' : ''; }
+function dot(s) {
+  const c = {'Offen':'#b07800','Reservierung':'#0071e3','Abgeschlossen':'#1a7a36','Abholung':'#7c3aed'}[s]||'#b07800';
+  return `<svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="${c}"/></svg>`;
+}
 
+// ── Render ───────────────────────────────────────────────────────
 // Datum "TT.MM.JJJJ" → Zahl für korrekte Sortierung
 function datumToSort(d) {
   if (!d) return Infinity;
@@ -1221,15 +808,23 @@ function datumToSort(d) {
   return parseInt(p[2])*10000 + parseInt(p[1])*100 + parseInt(p[0]);
 }
 function renderAll() {
-  const list = document.getElementById('sessionsList'), empty = document.getElementById('emptyState');
+  const list  = document.getElementById('sessionsList');
+  const empty = document.getElementById('emptyState');
   [...list.querySelectorAll('.session-card')].forEach(el => el.remove());
   const sorted = [...sessions].sort((a,b) => datumToSort(a.datum) - datumToSort(b.datum));
-  if (!sorted.length) { empty.style.display = ''; } else { empty.style.display = 'none'; sorted.forEach(s => list.appendChild(buildCard(s))); }
+  if (!sorted.length) { empty.style.display = ''; }
+  else { empty.style.display = 'none'; sorted.forEach(s => list.appendChild(buildCard(s))); }
   renderDayOverview();
 }
+
 function renderDayOverview() {
-  const box = document.getElementById('dayOverview'); if (!box) return;
-  const abhMitDatum = {}, abhOhneDatum = [], offenMap = {};
+  const box = document.getElementById('dayOverview');
+  if (!box) return;
+
+  const abhMitDatum  = {};
+  const abhOhneDatum = [];
+  const offenMap     = {};
+
   sessions.forEach(s => {
     s.personen.forEach((p, pIdx) => {
       if (!p.name?.trim()) return;
@@ -1247,63 +842,193 @@ function renderDayOverview() {
       }
     });
   });
-  const sortedAbhDaten = Object.keys(abhMitDatum).sort((a,b) => deToISO(a).localeCompare(deToISO(b)));
+
+  const sortedAbhDaten   = Object.keys(abhMitDatum).sort((a,b) => deToISO(a).localeCompare(deToISO(b)));
   const sortedOffenDaten = Object.keys(offenMap).sort((a,b) => deToISO(a).localeCompare(deToISO(b)));
-  const totalAbh = sortedAbhDaten.reduce((n,k) => n + abhMitDatum[k].length, 0) + abhOhneDatum.length;
+  const totalAbh   = sortedAbhDaten.reduce((n,k) => n + abhMitDatum[k].length, 0) + abhOhneDatum.length;
   const totalOffen = sortedOffenDaten.reduce((n,k) => n + offenMap[k].length, 0);
+
   const wasCollapsed = box.classList.contains('ov-collapsed');
 
   if (!totalAbh && !totalOffen) {
-    box.innerHTML = `<div class="day-ov-hdr" onclick="this.closest('.day-overview').classList.toggle('ov-collapsed')"><h2><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Tagesübersicht</h2><svg class="ov-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="day-ov-body"><p class="overview-empty">Keine offenen Einträge oder Abholungen.</p></div>`;
-    if (wasCollapsed) box.classList.add('ov-collapsed'); return;
+    box.innerHTML = `
+      <div class="day-ov-hdr" onclick="this.closest('.day-overview').classList.toggle('ov-collapsed')">
+        <h2><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Tagesübersicht</h2>
+        <svg class="ov-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="day-ov-body"><p class="overview-empty">Keine offenen Einträge oder Abholungen.</p></div>`;
+    if (wasCollapsed) box.classList.add('ov-collapsed');
+    return;
   }
 
   let body = '';
+
   if (totalAbh) {
-    body += `<div class="abh-block" id="ovAbhBlock"><div class="abh-block-hdr" onclick="document.getElementById('ovAbhBlock').classList.toggle('blk-collapsed')"><svg class="blk-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg><span class="abh-block-title">� Abholungen</span><span class="tag-count-abholung">${totalAbh}</span></div><div class="abh-block-body">`;
+    body += `<div class="abh-block" id="ovAbhBlock">
+      <div class="abh-block-hdr" onclick="document.getElementById('ovAbhBlock').classList.toggle('blk-collapsed')">
+        <svg class="blk-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <span class="abh-block-title">🚚 Abholungen</span>
+        <span class="tag-count-abholung">${totalAbh}</span>
+      </div>
+      <div class="abh-block-body">`;
+
     sortedAbhDaten.forEach(datum => {
       const items = [...abhMitDatum[datum]].sort((a,b) => (a.zeit||'').localeCompare(b.zeit||''));
-      body += `<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:8px 0 5px;text-transform:uppercase;letter-spacing:0.4px;">📅 ${esc(datum)}</div><div class="abholung-list">`;
-      items.forEach(a => { body += `<div class="abholung-item"><span class="zeit-badge">${esc(a.zeit ? fmtTime(a.zeit) : '–')}</span><span class="item-name" onclick="scrollToRow(${a.sid},${a.pIdx})">${esc(a.name)}</span><span class="termin-info">Termin: ${esc(a.termin)}</span></div>`; });
+      body += `<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:8px 0 5px;text-transform:uppercase;letter-spacing:0.4px;">📅 ${esc(datum)}</div>`;
+      body += '<div class="abholung-list">';
+      items.forEach(a => {
+        body += `<div class="abholung-item">
+          <span class="zeit-badge">${esc(a.zeit ? fmtTime(a.zeit) : '–')}</span>
+          <span class="item-name" onclick="scrollToRow(${a.sid},${a.pIdx})">${esc(a.name)}</span>
+          <span class="termin-info">Termin: ${esc(a.termin)}</span>
+        </div>`;
+      });
       body += '</div>';
     });
+
     if (abhOhneDatum.length) {
-      body += `<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:8px 0 5px;text-transform:uppercase;letter-spacing:0.4px;">📅 Datum noch offen</div><div class="abholung-list">`;
-      [...abhOhneDatum].sort((a,b) => a.name.localeCompare(b.name)).forEach(a => { body += `<div class="abholung-item"><span class="kein-datum-badge">– Datum offen –</span><span class="item-name" onclick="scrollToRow(${a.sid},${a.pIdx})">${esc(a.name)}</span><span class="termin-info">Termin: ${esc(a.termin)}</span></div>`; });
+      const sortedOhne = [...abhOhneDatum].sort((a,b) => a.name.localeCompare(b.name));
+      body += `<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:8px 0 5px;text-transform:uppercase;letter-spacing:0.4px;">📅 Datum noch offen</div>`;
+      body += '<div class="abholung-list">';
+      sortedOhne.forEach(a => {
+        body += `<div class="abholung-item">
+          <span class="kein-datum-badge">– Datum offen –</span>
+          <span class="item-name" onclick="scrollToRow(${a.sid},${a.pIdx})">${esc(a.name)}</span>
+          <span class="termin-info">Termin: ${esc(a.termin)}</span>
+        </div>`;
+      });
       body += '</div>';
     }
-    body += '</div></div>';
+
+    body += `</div></div>`;
   }
+
   if (totalAbh && totalOffen) body += '<hr class="day-divider">';
+
   if (totalOffen) {
-    body += `<div class="offen-block" id="ovOffenBlock"><div class="offen-block-hdr" onclick="document.getElementById('ovOffenBlock').classList.toggle('blk-collapsed')"><svg class="blk-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg><span class="offen-block-title">📋 Noch offen</span><span class="tag-count-offen">${totalOffen}</span></div><div class="offen-block-body">`;
+    body += `<div class="offen-block" id="ovOffenBlock">
+      <div class="offen-block-hdr" onclick="document.getElementById('ovOffenBlock').classList.toggle('blk-collapsed')">
+        <svg class="blk-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <span class="offen-block-title">📋 Noch offen</span>
+        <span class="tag-count-offen">${totalOffen}</span>
+      </div>
+      <div class="offen-block-body">`;
+
     sortedOffenDaten.forEach(datum => {
-      body += `<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:8px 0 5px;text-transform:uppercase;letter-spacing:0.4px;">📅 ${esc(datum)}</div><div class="offen-list">`;
-      offenMap[datum].forEach(o => { body += `<div class="offen-item"><span class="owner-dot" style="background:var(--owner-color)"></span><span class="item-name" onclick="scrollToRow(${o.sid},${o.pIdx})">${esc(o.name)}</span><span class="termin-info">${esc(o.termin)}</span></div>`; });
+      const items = offenMap[datum];
+      body += `<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:8px 0 5px;text-transform:uppercase;letter-spacing:0.4px;">📅 ${esc(datum)}</div>`;
+      body += '<div class="offen-list">';
+      items.forEach(o => {
+        body += `<div class="offen-item">
+          <span class="owner-dot" style="background:var(--owner-color)"></span>
+          <span class="item-name" onclick="scrollToRow(${o.sid},${o.pIdx})">${esc(o.name)}</span>
+          <span class="termin-info">${esc(o.termin)}</span>
+        </div>`;
+      });
       body += '</div>';
     });
-    body += '</div></div>';
+
+    body += `</div></div>`;
   }
-  box.innerHTML = `<div class="day-ov-hdr" onclick="this.closest('.day-overview').classList.toggle('ov-collapsed')"><h2><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>&nbsp;Tagesübersicht</h2><svg class="ov-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="day-ov-body">${body}</div>`;
+
+  box.innerHTML = `
+    <div class="day-ov-hdr" onclick="this.closest('.day-overview').classList.toggle('ov-collapsed')">
+      <h2><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>&nbsp;Tagesübersicht</h2>
+      <svg class="ov-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="day-ov-body">${body}</div>`;
   if (wasCollapsed) box.classList.add('ov-collapsed');
 }
 
 function scrollToRow(sid, pIdx) {
   const card = document.querySelector(`.session-card[data-id="${sid}"]`);
-  if (card && card.classList.contains('collapsed')) { const s = sessions.find(x => x.id === sid); if (s) { s.collapsed = false; card.classList.remove('collapsed'); scheduleSave(); } }
+  if (card && card.classList.contains('collapsed')) {
+    const s = sessions.find(x => x.id === sid);
+    if (s) { s.collapsed = false; card.classList.remove('collapsed'); scheduleSave(); }
+  }
   setTimeout(() => {
-    const tbody = document.getElementById('tbody-' + sid); if (!tbody) return;
+    const tbody = document.getElementById('tbody-' + sid);
+    if (!tbody) return;
     const row = tbody.querySelector(`tr[data-idx="${pIdx}"]`);
-    if (row) { row.scrollIntoView({ behavior: 'smooth', block: 'center' }); row.style.transition = 'background 0.3s'; row.style.background = '#e8f1fb'; setTimeout(() => { row.style.background = ''; }, 1200); }
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      row.style.transition = 'background 0.3s';
+      row.style.background = '#e8f1fb';
+      setTimeout(() => { row.style.background = ''; }, 1200);
+    }
   }, 80);
+}
+
+function buildCard(s) {
+  const card = document.createElement('div');
+  card.className = 'session-card' + (s.collapsed ? ' collapsed' : '');
+  card.dataset.id = s.id;
+  const cnt = s.personen.filter(p => p.name.trim()).length;
+  card.innerHTML = `
+    <div class="session-header" onclick="toggleCollapse(${s.id},event)">
+      <div class="session-meta">
+        <div class="session-header-inputs" onclick="event.stopPropagation()">
+          <input type="text" class="hdr-datum" value="${esc(s.datum)}" placeholder="TT.MM.JJJJ" onchange="updateSession(${s.id},'datum',this.value)" oninput="scheduleSave()" />
+          <input type="text" class="hdr-uhrzeit" value="${esc(s.uhrzeit)}" placeholder="z.B. 11:15 Uhr" onchange="updateSession(${s.id},'uhrzeit',this.value)" oninput="scheduleSave()" />
+        </div>
+        <span class="session-count" id="cnt-${s.id}">${cnt} Person${cnt!==1?'en':''}</span>
+      </div>
+      <div class="session-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-danger" onclick="deleteSession(${s.id})">Löschen</button>
+        <div class="collapse-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th class="td-name">Name</th><th class="td-status">Status</th>
+        <th class="td-sm">Formular<br><span style="font-weight:400;font-size:10px">erhalten</span></th>
+        <th class="td-sm">Formular<br><span style="font-weight:400;font-size:10px">weiterg.</span></th>
+        <th class="td-moebel">Möbel<br><span style="font-weight:400;font-size:10px;color:var(--text-tertiary)">Auswahl + Anzahl</span></th>
+        <th class="td-abh" style="color:var(--purple)">Abholung<br><span style="font-weight:400;font-size:10px;color:#a78bdb">Datum + Uhrzeit</span></th>
+        <th class="td-bem">Bemerkung</th><th class="td-action"></th>
+      </tr></thead>
+      <tbody id="tbody-${s.id}">${s.personen.map((p,i) => buildRow(s.id,p,i)).join('')}</tbody>
+    </table></div>
+    <div class="session-footer">
+      <button class="add-person-btn" onclick="addPerson(${s.id})">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Person hinzufügen
+      </button>
+      <span style="font-size:11px;color:var(--text-tertiary)">${esc(s.datum)} · ${esc(s.uhrzeit)}</span>
+    </div>`;
+  return card;
 }
 
 function buildJnCell(sid, idx, field, val) {
   const isJa = val === 'Ja';
-  return `<td class="td-sm jn-cell"><button class="jn-trigger ${isJa?'ja':'nein'}" onclick="toggleJnDd(this,event)" type="button"><span class="jn-dot" style="background:${isJa?'#34c759':'#aeaeb2'}"></span>${val}<svg class="jn-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10"><polyline points="6 9 12 15 18 9"/></svg></button><div class="jn-dropdown"><div class="jn-opt${val==='Nein'?' active':''}" onclick="setJn('${sid}',${idx},'${field}','Nein',this)"><span class="jn-dot" style="background:#aeaeb2"></span>Nein</div><div class="jn-opt${val==='Ja'?' active':''}" onclick="setJn('${sid}',${idx},'${field}','Ja',this)"><span class="jn-dot" style="background:#34c759"></span>Ja</div></div></td>`;
+  return `<td class="td-sm jn-cell">
+    <button class="jn-trigger ${isJa?'ja':'nein'}" onclick="toggleJnDd(this,event)" type="button">
+      <span class="jn-dot" style="background:${isJa?'#34c759':'#aeaeb2'}"></span>
+      ${val}<svg class="jn-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="jn-dropdown">
+      <div class="jn-opt${val==='Nein'?' active':''}" onclick="setJn('${sid}',${idx},'${field}','Nein',this)"><span class="jn-dot" style="background:#aeaeb2"></span>Nein</div>
+      <div class="jn-opt${val==='Ja'?' active':''}" onclick="setJn('${sid}',${idx},'${field}','Ja',this)"><span class="jn-dot" style="background:#34c759"></span>Ja</div>
+    </div>
+  </td>`;
 }
-function toggleJnDd(btn, e) { e.stopPropagation(); const dd = btn.nextElementSibling; const isOpen = dd.classList.contains('open'); document.querySelectorAll('.jn-dropdown.open').forEach(d => d.classList.remove('open')); if (isOpen) return; const rect = btn.getBoundingClientRect(); dd.style.top = (rect.bottom+4)+'px'; dd.style.left = rect.left+'px'; dd.classList.add('open'); }
-function setJn(sid, idx, field, val, optEl) { optEl.closest('.jn-dropdown').classList.remove('open'); const cell = optEl.closest('.jn-cell'); up(sid, idx, field, val); if (cell) cell.outerHTML = buildJnCell(sid, idx, field, val); }
+function toggleJnDd(btn, e) {
+  e.stopPropagation();
+  const dd = btn.nextElementSibling;
+  const isOpen = dd.classList.contains('open');
+  document.querySelectorAll('.jn-dropdown.open').forEach(d => d.classList.remove('open'));
+  if (isOpen) return;
+  const rect = btn.getBoundingClientRect();
+  dd.style.top = (rect.bottom + 4) + 'px';
+  dd.style.left = rect.left + 'px';
+  dd.classList.add('open');
+}
+function setJn(sid, idx, field, val, optEl) {
+  optEl.closest('.jn-dropdown').classList.remove('open');
+  const cell = optEl.closest('.jn-cell');
+  up(sid, idx, field, val);
+  if (cell) cell.outerHTML = buildJnCell(sid, idx, field, val);
+}
 
 function buildMoebelCell(sid, idx, p) {
   const moebel = Array.isArray(p.moebel) ? p.moebel : [];
@@ -1344,22 +1069,31 @@ function mpickOpen(e, sid, idx, mi, focusCol) {
   e.stopPropagation();
   const panel = document.getElementById('mpickPanel');
   const trigger = e.currentTarget;
+
+  // Schon offen für denselben? → schließen
   if (panel.classList.contains('open') &&
       _mpick.sid===sid && _mpick.idx===idx && _mpick.mi===mi && _mpick.focusCol===focusCol) {
     mpickClose(); return;
   }
+
   _mpick = { sid, idx, mi, focusCol };
+
   const s = sessions.find(x => String(x.id) === String(sid));
   if (!s || !s.personen[idx]) return;
   const m = s.personen[idx].moebel[mi];
   if (!m) return;
+
   mpickRenderKat(m);
   mpickRenderSub(m);
+
+  // Position berechnen
   const rect = trigger.getBoundingClientRect();
   panel.style.left = Math.min(rect.left, window.innerWidth - 390) + 'px';
   const below = rect.bottom + 290 < window.innerHeight;
   panel.style.top = below ? (rect.bottom + 4) + 'px' : (rect.top - 290) + 'px';
   panel.classList.add('open');
+
+  // Aktive Kat/Sub sichtbar scrollen
   setTimeout(() => {
     const activeKat = panel.querySelector('.mpick-kat-item.active');
     if (activeKat) activeKat.scrollIntoView({ block: 'nearest' });
@@ -1394,9 +1128,13 @@ function mpickSelectKat(katId) {
   s.personen[idx].moebel[mi].kat = katId;
   s.personen[idx].moebel[mi].sub = (katObj && Array.isArray(katObj.subs) && katObj.subs.length) ? katObj.subs[0].id : '';
   _dirtyIds.add(String(sid)); scheduleSave();
+
+  // Panel-Inhalt neu rendern (Kategorie markieren, Subs aktualisieren)
   const m = s.personen[idx].moebel[mi];
   mpickRenderKat(m);
   mpickRenderSub(m);
+
+  // Trigger-Texte im Posten aktualisieren (ohne ganzen renderCard)
   const posten = document.getElementById(`mp-${sid}-${idx}-${mi}`);
   if (posten) {
     const subObj = (katObj && Array.isArray(katObj.subs) && katObj.subs.length) ? katObj.subs[0] : null;
@@ -1411,6 +1149,8 @@ function mpickSelectSub(subId) {
   if (!s || !s.personen[idx] || !s.personen[idx].moebel[mi]) return;
   s.personen[idx].moebel[mi].sub = subId;
   _dirtyIds.add(String(sid)); scheduleSave();
+
+  // Trigger-Text aktualisieren
   const m = s.personen[idx].moebel[mi];
   const posten = document.getElementById(`mp-${sid}-${idx}-${mi}`);
   if (posten) {
@@ -1423,26 +1163,84 @@ function mpickSelectSub(subId) {
 
 function mpickClose() {
   const panel = document.getElementById('mpickPanel');
-  if (panel) panel.classList.remove('open');
+  panel.classList.remove('open');
   _mpick = { sid:null, idx:null, mi:null, focusCol:null };
 }
 
 function buildRow(sid, p, idx) {
-  const cls={'Offen':'status-offen','Reservierung':'status-reservierung','Abgeschlossen':'status-abgeschlossen','Abholung':'status-abholung'}[p.status]||'status-offen';
-  const isAbh=p.status==='Abholung', abhISO=p.abh_datum?deToISO(p.abh_datum):'', abhVis=isAbh?'':'style="visibility:hidden;pointer-events:none"';
-  return `<tr data-idx="${idx}"><td class="td-name"><div style="display:flex;align-items:center;gap:4px"><input type="text" value="${esc(p.name)}" placeholder="Name, Vorname" style="font-weight:500;flex:1;min-width:0" oninput="up(${sid},${idx},'name',this.value)" /><button class="transfer-btn" onclick="openTransfer(${sid},${idx})" title="Zu Louis verschieben">→ L</button></div></td><td class="td-status status-cell"><span class="status-badge ${cls}" id="sbadge-${sid}-${idx}">${dot(p.status)} ${esc(p.status)}</span><select style="opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer;border:none;background:transparent" onchange="statusChanged(${sid},${idx},this.value)">${STATUS_OPTS.map(o=>`<option value="${o}"${p.status===o?' selected':''}>${o}</option>`).join('')}</select></td>${buildJnCell(sid, idx, 'fe', p.fe||'Nein')}${buildJnCell(sid, idx, 'fw', p.fw||'Nein')}${buildMoebelCell(sid,idx,p)}<td class="td-abh"><div class="abh-wrap" id="abh-${sid}-${idx}" ${abhVis}><input class="abh-input abh-date" type="text" inputmode="numeric" placeholder="TT.MM.JJ" maxlength="10" value="${esc(p.abh_datum)}" oninput="up(${sid},${idx},'abh_datum',this.value)" onblur="fmtAbhDatum(this,${sid},${idx})" /><input class="abh-input abh-time" type="text" inputmode="numeric" placeholder="HH:MM" maxlength="5" value="${esc(p.abh_zeit)}" oninput="up(${sid},${idx},'abh_zeit',this.value)" onblur="fmtAbhZeit(this,${sid},${idx})" /></div></td><td class="td-bem"><input type="text" value="${esc(p.bem)}" placeholder="—" class="bem-input" title="${esc(p.bem)}" style="width:100%" oninput="up(${sid},${idx},'bem',this.value);this.title=this.value" /></td><td class="td-action"><button class="rm-btn" onclick="removePerson(${sid},${idx})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td></tr>`;
+  const cls    = {'Offen':'status-offen','Reservierung':'status-reservierung','Abgeschlossen':'status-abgeschlossen','Abholung':'status-abholung'}[p.status]||'status-offen';
+  const isAbh  = p.status === 'Abholung';
+  const abhISO = p.abh_datum ? deToISO(p.abh_datum) : '';
+  const abhVis = isAbh ? '' : 'style="visibility:hidden;pointer-events:none"';
+  return `<tr data-idx="${idx}">
+    <td class="td-name"><div style="display:flex;align-items:center;gap:4px"><input type="text" value="${esc(p.name)}" placeholder="Name, Vorname" style="font-weight:500;flex:1;min-width:0" oninput="up(${sid},${idx},'name',this.value)" /><button class="transfer-btn" onclick="openTransfer(${sid},${idx})" title="Zu anderem MA">→ Transfer</button></div></td>
+    <td class="td-status status-cell">
+      <span class="status-badge ${cls}" id="sbadge-${sid}-${idx}">${dot(p.status)} ${esc(p.status)}</span>
+      <select style="opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer;border:none;background:transparent"
+        onchange="statusChanged(${sid},${idx},this.value)">
+        ${STATUS_OPTS.map(o=>`<option value="${o}"${p.status===o?' selected':''}>${o}</option>`).join('')}
+      </select>
+    </td>
+    ${buildJnCell(sid, idx, 'fe', p.fe||'Nein')}
+    ${buildJnCell(sid, idx, 'fw', p.fw||'Nein')}
+    ${buildMoebelCell(sid, idx, p)}
+    <td class="td-abh"><div class="abh-wrap" id="abh-${sid}-${idx}" ${abhVis}>
+      <input class="abh-input abh-date" type="text" inputmode="numeric" placeholder="TT.MM.JJ" maxlength="10"
+        value="${esc(p.abh_datum)}"
+        oninput="upAbhDatum(${sid},${idx},this.value)"
+        onblur="fmtAbhDatum(this,${sid},${idx})" />
+      <input class="abh-input abh-time" type="text" inputmode="numeric" placeholder="HH:MM" maxlength="5"
+        value="${esc(p.abh_zeit)}"
+        oninput="upAbhZeit(${sid},${idx},this.value)"
+        onblur="fmtAbhZeit(this,${sid},${idx})" />
+    </div></td>
+    <td class="td-bem"><input type="text" value="${esc(p.bem)}" placeholder="—" class="bem-input" title="${esc(p.bem)}" style="width:100%" oninput="up(${sid},${idx},'bem',this.value);this.title=this.value" /></td>
+    <td class="td-action"><button class="rm-btn" onclick="removePerson(${sid},${idx})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>
+  </tr>`;
 }
 
-function buildCard(s) {
-  const card = document.createElement('div'); card.className='session-card'+(s.collapsed?' collapsed':''); card.dataset.id=s.id;
-  const cnt = s.personen.filter(p=>p.name.trim()).length;
-  card.innerHTML=`<div class="session-header" onclick="toggleCollapse(${s.id},event)"><div class="session-meta"><div class="session-header-inputs" onclick="event.stopPropagation()"><input type="text" class="hdr-datum" value="${esc(s.datum)}" placeholder="TT.MM.JJJJ" onchange="updateSession(${s.id},'datum',this.value)" oninput="scheduleSave()" /><input type="text" class="hdr-uhrzeit" value="${esc(s.uhrzeit)}" placeholder="z.B. 11:15 Uhr" onchange="updateSession(${s.id},'uhrzeit',this.value)" oninput="scheduleSave()" /></div><span class="session-count" id="cnt-${s.id}">${cnt} Person${cnt!==1?'en':''}</span></div><div class="session-actions" onclick="event.stopPropagation()"><button class="btn btn-danger" onclick="deleteSession(${s.id})">Löschen</button><div class="collapse-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div></div></div><div class="table-wrap"><table><thead><tr><th class="td-name">Name</th><th class="td-status">Status</th><th class="td-sm">Formular<br><span style="font-weight:400;font-size:10px">erhalten</span></th><th class="td-sm">Formular<br><span style="font-weight:400;font-size:10px">weiterg.</span></th><th class="td-moebel">Möbel<br><span style="font-weight:400;font-size:10px;color:var(--text-tertiary)">Auswahl + Anzahl</span></th><th class="td-abh" style="color:var(--purple)">Abholung<br><span style="font-weight:400;font-size:10px;color:#a78bdb">Datum + Uhrzeit</span></th><th class="td-bem">Bemerkung</th><th class="td-action"></th></tr></thead><tbody id="tbody-${s.id}">${s.personen.map((p,i)=>buildRow(s.id,p,i)).join('')}</tbody></table></div><div class="session-footer"><button class="add-person-btn" onclick="addPerson(${s.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Person hinzufügen</button><span style="font-size:11px;color:var(--text-tertiary)">${esc(s.datum)} · ${esc(s.uhrzeit)}</span></div>`;
-  return card;
+// ── Aktionen ────────────────────────────────────────────────────
+function up(sid, idx, field, val) {
+  const s = sessions.find(x => String(x.id) === String(sid));
+  if (s && s.personen[idx]) { s.personen[idx][field] = val; _dirtyIds.add(String(sid)); scheduleSave(); }
 }
 
-function up(sid,idx,field,val){const s=sessions.find(x=>String(x.id)===String(sid));if(s&&s.personen[idx]){s.personen[idx][field]=val;_dirtyIds.add(String(sid));scheduleSave();}}
-function fmtAbhDatum(el,sid,idx){let v=el.value.trim().replace(/[^0-9.]/g,'');const m=v.replace(/\./g,'');if(m.length>=4){const dd=m.slice(0,2),mm=m.slice(2,4);let yy=m.slice(4);if(!yy)yy=new Date().getFullYear().toString();else if(yy.length===2)yy='20'+yy;v=`${dd}.${mm}.${yy}`;}el.value=v;up(sid,idx,'abh_datum',v);renderDayOverview();}
-function fmtAbhZeit(el,sid,idx){let v=el.value.trim().replace(/[^0-9:]/g,'');const d=v.replace(/:/g,'');if(d.length>=3)v=d.slice(0,2)+':'+d.slice(2,4);else if(d.length===2&&!v.includes(':'))v=d+':00';el.value=v;up(sid,idx,'abh_zeit',v);renderDayOverview();}
+// ── Abholung Datum/Zeit Helpers ──────────────────────────────────
+function upAbhDatum(sid, idx, raw) {
+  // Autofill dots: 2 → 02., 2303 → 23.03., etc.
+  up(sid, idx, 'abh_datum', raw);
+}
+function fmtAbhDatum(el, sid, idx) {
+  let v = el.value.trim().replace(/[^0-9.]/g,'');
+  // Try to parse DD.MM.YYYY or DD.MM.YY or DDMMYYYY
+  const m = v.replace(/\./g,'');
+  if (m.length >= 4) {
+    const dd = m.slice(0,2), mm = m.slice(2,4);
+    let yy = m.slice(4);
+    if (!yy) yy = new Date().getFullYear().toString();
+    else if (yy.length === 2) yy = '20' + yy;
+    v = `${dd}.${mm}.${yy}`;
+  }
+  el.value = v;
+  up(sid, idx, 'abh_datum', v);
+  renderDayOverview();
+}
+function upAbhZeit(sid, idx, raw) {
+  up(sid, idx, 'abh_zeit', raw);
+}
+function fmtAbhZeit(el, sid, idx) {
+  let v = el.value.trim().replace(/[^0-9:]/g,'');
+  const digits = v.replace(/:/g,'');
+  if (digits.length >= 3) {
+    v = digits.slice(0,2) + ':' + digits.slice(2,4);
+  } else if (digits.length === 2 && !v.includes(':')) {
+    // just hours — add :00
+    v = digits + ':00';
+  }
+  el.value = v;
+  up(sid, idx, 'abh_zeit', v);
+  renderDayOverview();
+}
 
 /* ── Status-Änderung mit Bestandsabzug + Firebase-Archiv ── */
 function statusChanged(sid, idx, newStatus) {
@@ -1482,7 +1280,7 @@ function statusChanged(sid, idx, newStatus) {
       abh_datum:    p.abh_datum || '',
       abh_zeit:     p.abh_zeit  || ''
     };
-    db.ref('archiv/' + archivEntry.id).set(archivEntry)
+    db.ref('stollbergArchiv/' + archivEntry.id).set(archivEntry)
       .then(() => {
         s.personen.splice(idx, 1);
         if (!s.personen.length)
@@ -1519,7 +1317,9 @@ function moebelAdd(sid, idx) {
   const firstSub = (kat && Array.isArray(kat.subs) && kat.subs.length > 0) ? kat.subs[0].id : '';
   s.personen[idx].moebel.push({ kat: kat ? kat.id : '', sub: firstSub, qty: 1 });
   writeLog('Möbel hinzugefügt', `${s.personen[idx].name||'–'}: +1× ${kat?.label||'?'} – ${kat?.subs?.[0]?.label||'?'}`);
-  _dirtyIds.add(String(sid)); scheduleSave(); renderCard(sid);
+  _dirtyIds.add(String(sid));
+  scheduleSave();
+  renderCard(sid);
 }
 function moebelRemove(sid, idx, mi) {
   const s = sessions.find(x => String(x.id) === String(sid));
@@ -1530,7 +1330,9 @@ function moebelRemove(sid, idx, mi) {
   const _mLbl = m ? `${m.qty}× ${_katO?.label||m.kat||'?'} – ${_subO?.label||m.sub||'?'}` : '?';
   s.personen[idx].moebel.splice(mi, 1);
   writeLog('Möbel entfernt', `${s.personen[idx].name||'–'}: −${_mLbl}`);
-  _dirtyIds.add(String(sid)); scheduleSave(); renderCard(sid);
+  _dirtyIds.add(String(sid));
+  scheduleSave();
+  renderCard(sid);
 }
 function moebelKatChange(sid, idx, mi, newKat) {
   const s = sessions.find(x => String(x.id) === String(sid));
@@ -1538,35 +1340,110 @@ function moebelKatChange(sid, idx, mi, newKat) {
   const katObj = MOEBEL_KATALOG.find(k => k.id === newKat);
   s.personen[idx].moebel[mi].kat = newKat;
   s.personen[idx].moebel[mi].sub = katObj ? katObj.subs[0].id : '';
-  _dirtyIds.add(String(sid)); scheduleSave(); renderCard(sid);
+  _dirtyIds.add(String(sid));
+  scheduleSave();
+  renderCard(sid);
 }
 function moebelSubChange(sid, idx, mi, newSub) {
   const s = sessions.find(x => String(x.id) === String(sid));
   if (!s || !s.personen[idx] || !s.personen[idx].moebel[mi]) return;
   s.personen[idx].moebel[mi].sub = newSub;
-  _dirtyIds.add(String(sid)); scheduleSave();
+  _dirtyIds.add(String(sid));
+  scheduleSave();
 }
 function moebelQtyChange(sid, idx, mi, qty) {
   const s = sessions.find(x => String(x.id) === String(sid));
   if (!s || !s.personen[idx] || !s.personen[idx].moebel[mi]) return;
   s.personen[idx].moebel[mi].qty = Math.max(1, qty);
-  _dirtyIds.add(String(sid)); scheduleSave();
+  _dirtyIds.add(String(sid));
+  scheduleSave();
 }
 
-function toggleCollapse(id){const s=sessions.find(x=>String(x.id)===String(id));if(!s)return;s.collapsed=!s.collapsed;_dirtyIds.add(String(id));document.querySelector(`.session-card[data-id="${id}"]`)?.classList.toggle('collapsed',s.collapsed);scheduleSave();}
-function updateSession(id,field,val){const s=sessions.find(x=>String(x.id)===String(id));if(!s)return;s[field]=val;_dirtyIds.add(String(id));scheduleSave();const cnt=s.personen.filter(p=>p.name.trim()).length;const badge=document.getElementById('cnt-'+id);if(badge)badge.textContent=cnt+' Person'+(cnt!==1?'en':'');renderDayOverview();}
+function toggleCollapse(id) {
+  const s = sessions.find(x => String(x.id) === String(id)); if (!s) return;
+  s.collapsed = !s.collapsed;
+  _dirtyIds.add(String(id));
+  document.querySelector(`.session-card[data-id="${id}"]`)?.classList.toggle('collapsed', s.collapsed);
+  scheduleSave();
+}
+function updateSession(id, field, val) {
+  const s = sessions.find(x => String(x.id) === String(id)); if (!s) return;
+  s[field] = val; _dirtyIds.add(String(id)); scheduleSave();
+  const cnt = s.personen.filter(p => p.name.trim()).length;
+  const badge = document.getElementById('cnt-' + id);
+  if (badge) badge.textContent = cnt + ' Person' + (cnt!==1?'en':'');
+  renderDayOverview();
+}
 function renderCard(sid) {
   const s = sessions.find(x => String(x.id) === String(sid)); if (!s) return;
   const tbody = document.getElementById('tbody-' + sid);
-  if (tbody) tbody.innerHTML = s.personen.map((p,i) => buildRow(sid,p,i)).join('');
+  if (tbody) {
+    tbody.innerHTML = s.personen.map((p,i) => buildRow(sid,p,i)).join('');
+  }
   const cnt = s.personen.filter(p => p.name.trim()).length;
   const badge = document.getElementById('cnt-' + sid);
   if (badge) badge.textContent = cnt + ' Person' + (cnt!==1?'en':'');
 }
-function addPerson(sid){const s=sessions.find(x=>x.id===sid);if(!s)return;s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''});renderCard(sid);updateSession(sid,'datum',s.datum);scheduleSave();setTimeout(()=>document.querySelector('#tbody-'+sid+' tr:last-child input[type=text]')?.focus(),50);}
-function removePerson(sid,idx){const s=sessions.find(x=>x.id===sid);if(!s)return;s.personen.splice(idx,1);if(!s.personen.length)s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''});renderCard(sid);updateSession(sid,'datum',s.datum);scheduleSave();renderDayOverview();}
-function addSession(){const datum=document.getElementById('newDatum').value.trim(),uhrzeit=document.getElementById('newUhrzeit').value.trim();if(!datum||!uhrzeit){toast('Bitte Datum und Uhrzeit eingeben.');return;}const newS={id:Date.now(),datum,uhrzeit,collapsed:false,owner:OWNER,personen:[{name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''}]};sessions.push(newS);document.getElementById('newDatum').value='';document.getElementById('newUhrzeit').value='';writeLog('Termin erstellt',datum+' · '+uhrzeit);renderAll();save();toast('Neuer Termin erstellt ✓');}
-function deleteSession(id){if(!confirm('Termin in den Papierkorb verschieben?'))return;const s=sessions.find(x=>x.id===id);if(isConfigured&&db&&s){const trashId='trash_'+id;firebase.database().ref('trash/'+trashId).set({...s,_trashedAt:Date.now(),_trashedBy:'Rohat',_trashId:trashId}).then(()=>{db.ref(DB_PATH+'/'+id).remove();});}writeLog('Termin gelöscht (Papierkorb)',s?s.datum+' · '+s.uhrzeit:String(id));sessions=sessions.filter(x=>x.id!==id);renderAll();toast('In Papierkorb verschoben');}
+function addPerson(sid) {
+  const s = sessions.find(x => x.id === sid); if (!s) return;
+  s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''});
+  renderCard(sid); updateSession(sid,'datum',s.datum); scheduleSave();
+  setTimeout(() => document.querySelector('#tbody-'+sid+' tr:last-child input[type=text]')?.focus(), 50);
+}
+function removePerson(sid, idx) {
+  const s = sessions.find(x => x.id === sid); if (!s) return;
+  s.personen.splice(idx, 1);
+  if (!s.personen.length) s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''});
+  renderCard(sid); updateSession(sid,'datum',s.datum); scheduleSave(); renderDayOverview();
+}
+function addSession() {
+  const datum = document.getElementById('newDatum').value.trim();
+  const uhrzeit = document.getElementById('newUhrzeit').value.trim();
+  if (!datum || !uhrzeit) { toast('Bitte Datum und Uhrzeit eingeben.'); return; }
+  const newS = {id:Date.now(), datum, uhrzeit, collapsed:false, owner:OWNER, personen:[{name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''}]};
+  sessions.push(newS);
+  document.getElementById('newDatum').value = '';
+  document.getElementById('newUhrzeit').value = '';
+  writeLog('Termin erstellt', `${datum} · ${uhrzeit}`);
+  renderAll(); save(); toast('Neuer Termin erstellt ✓');
+}
+function deleteSession(id) {
+  if (!confirm('Termin in den Papierkorb verschieben?')) return;
+  const s = sessions.find(x => x.id === id);
+  if (isConfigured && db && s) {
+    const trashId = 'trash_' + id;
+    firebase.database().ref('stollbergTrash/' + trashId).set({
+      ...s, _trashedAt: Date.now(), _trashedBy: OWNER, _trashId: trashId
+    }).then(() => {
+      firebase.database().ref(DB_PATH + '/' + id).remove();
+    });
+  }
+  writeLog('Termin gelöscht (Papierkorb)', s ? `${s.datum} · ${s.uhrzeit}` : String(id));
+  sessions = sessions.filter(s => s.id !== id);
+  renderAll(); toast('In Papierkorb verschoben – wiederherstellbar unter anfragen-manager.vercel.app/trash');
+}
+function exportCSV() {
+  const bom = '\uFEFF', lines = ['Anfragen Export – Stollberg\n'];
+  sessions.forEach(s => {
+    lines.push('Datum: ' + s.datum + ' | Uhrzeit: ' + s.uhrzeit);
+    lines.push('Name,Status,Abholdatum,Abholzeit,Formular erhalten,Formular weitergeleitet,Tische,Stühle,Bemerkung');
+    s.personen.filter(p => p.name.trim()).forEach(p => {
+      lines.push([p.name,p.status,p.abh_datum||'',p.abh_zeit?fmtTime(p.abh_zeit):'',p.fe,p.fw,p.tische||0,p.stuehle||0,p.bem].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+    });
+    lines.push('');
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([bom+lines.join('\n')],{type:'text/csv;charset=utf-8;'}));
+  a.download = 'Anfragen_Stollberg.csv'; a.click();
+  toast('CSV exportiert ✓');
+}
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
 
 // ── Person verschieben ──────────────────────────────────────────
 let _transferSid = null, _transferIdx = null;
@@ -1576,51 +1453,67 @@ function openTransfer(sid, idx) {
   _transferSid = sid; _transferIdx = idx;
   const existing = document.getElementById('transferModal');
   if (existing) existing.remove();
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay open'; overlay.id = 'transferModal';
-  overlay.innerHTML = `<div class="modal-box">
-    <h3>👤 Person verschieben</h3>
-    <p><strong>${esc(p.name)}</strong> zu Louis verschieben?<br>
-    Die Person wird aus diesem Termin entfernt und bei Louis als neuer Eintrag in einem neuen Termin (gleiches Datum) angelegt.</p>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="document.getElementById('transferModal').remove()">Abbrechen</button>
-      <button class="btn btn-transfer" onclick="confirmTransfer()">→ Zu Louis verschieben</button>
-    </div>
-  </div>`;
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
-  document.body.appendChild(overlay);
+
+  // Load stollberg employees to build dropdown
+  const empRef = (typeof firebase !== 'undefined' && db) ? db.ref('stollbergMitarbeiter') : null;
+  const buildModal = (employees) => {
+    const others = Object.values(employees || {}).filter(e => e.id !== OWNER_ID);
+    const optionsHtml = others.length
+      ? others.map(e => `<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('')
+      : '<option value="" disabled>Keine anderen Mitarbeiter vorhanden</option>';
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay open'; overlay.id = 'transferModal';
+    overlay.innerHTML = `<div class="modal-box">
+      <h3>👤 Person verschieben</h3>
+      <p style="margin-bottom:12px;"><strong>${esc(p.name)}</strong> zu welchem Mitarbeiter verschieben?</p>
+      <select id="transferTarget" style="width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border,#e0e0e0);font-size:14px;font-family:inherit;margin-bottom:4px;">
+        <option value="">— Mitarbeiter wählen —</option>
+        ${optionsHtml}
+      </select>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn btn-ghost" onclick="document.getElementById('transferModal').remove()">Abbrechen</button>
+        <button class="btn btn-transfer" onclick="confirmTransfer()">→ Verschieben</button>
+      </div>
+    </div>`;
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+  };
+
+  if (empRef) {
+    empRef.once('value').then(snap => buildModal(snap.val() || {}));
+  } else {
+    buildModal({});
+  }
 }
 function confirmTransfer() {
+  const targetEmpId = (document.getElementById('transferTarget')?.value || '').trim();
+  if (!targetEmpId) { toast('Bitte Mitarbeiter auswählen'); return; }
   const modal = document.getElementById('transferModal'); if (modal) modal.remove();
   const s = sessions.find(x => x.id === _transferSid); if (!s) return;
   const p = s.personen[_transferIdx]; if (!p) return;
-  // Person aus Rohat-Session entfernen
   const personCopy = {...p};
   s.personen.splice(_transferIdx, 1);
-  if (!s.personen.length) s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',tische:0,stuehle:0,bem:'',abh_datum:'',abh_zeit:''});
-  // Als neue Session bei Louis anlegen
-  if (isConfigured && db) {
+  if (!s.personen.length) s.personen.push({name:'',status:'Offen',fe:'Nein',fw:'Nein',moebel:[],bem:'',abh_datum:'',abh_zeit:''});
+  if (db) {
     const newId = Date.now();
-    const newSession = { id: newId, datum: s.datum, uhrzeit: s.uhrzeit, collapsed: false, owner: 'louis', personen: [personCopy] };
-    firebase.database().ref('sessions/' + newId).set(newSession);
-    firebase.database().ref('sessions/' + _transferSid).set({...s, owner: OWNER});
-    // Notification für Louis schreiben
+    const newSession = { id: newId, datum: s.datum, uhrzeit: s.uhrzeit, collapsed: false, owner: targetEmpId, personen: [personCopy] };
+    db.ref('stollbergSessions/' + newId).set(newSession);
+    db.ref('stollbergSessions/' + _transferSid).set({...s, owner: OWNER_ID});
     const notifId = newId + '_n';
-    firebase.database().ref('notifications/louis/' + notifId).set({
-      id: notifId, from: 'Rohat', personName: personCopy.name,
+    db.ref('stollbergNotifications/' + targetEmpId + '/' + notifId).set({
+      id: notifId, from: OWNER || OWNER_ID, personName: personCopy.name,
       sessionId: newId, datum: s.datum, uhrzeit: s.uhrzeit,
       ts: Date.now(), gelesen: false
     });
   }
-  writeLog('Person verschoben', `${personCopy.name} → Louis`);
+  writeLog('Person verschoben', `${personCopy.name} → ${targetEmpId}`);
   renderAll(); save();
-  toast(`${personCopy.name} → Louis verschoben ✓`);
+  toast(`${personCopy.name} → übertragen ✓`);
 }
 
-// ── Notifications ──────────────────────────────────────────────
 function initNotifications() {
-  if (!db) return;
-  db.ref('notifications/rohat').on('value', snap => {
+  if (!db || !OWNER_ID) return;
+  db.ref('stollbergNotifications/' + OWNER_ID).on('value', snap => {
     const raw = snap.val();
     const bar  = document.getElementById('notifBar');
     const list = document.getElementById('notifList');
@@ -1642,6 +1535,7 @@ function initNotifications() {
 }
 function notifJump(notifId, sessionId) {
   notifDismissById(notifId);
+  // Warten bis sessions geladen, dann zum Termin springen
   const sid = Number(sessionId) || sessionId;
   const tryJump = (attempts) => {
     const s = sessions.find(x => String(x.id) === String(sid));
@@ -1657,15 +1551,16 @@ function notifJump(notifId, sessionId) {
 }
 function notifDismiss(e, notifId) { e.stopPropagation(); notifDismissById(notifId); }
 function notifDismissById(notifId) {
-  if (db) db.ref('notifications/rohat/' + notifId).update({ gelesen: true });
+  if (db) db.ref('stollbergNotifications/' + _ownerId + '/' + notifId).update({ gelesen: true });
 }
-function deleteSession(id){if(!confirm('Termin in den Papierkorb verschieben?'))return;const s=sessions.find(x=>x.id===id);if(isConfigured&&db&&s){const trashId='trash_'+id;firebase.database().ref('trash/'+trashId).set({...s,_trashedAt:Date.now(),_trashedBy:'Rohat',_trashId:trashId}).then(()=>{firebase.database().ref(DB_PATH+'/'+id).remove();});}writeLog('Termin gelöscht (Papierkorb)',s?s.datum+' · '+s.uhrzeit:String(id));sessions=sessions.filter(x=>x.id!==id);renderAll();toast('In Papierkorb verschoben');}
-function exportCSV(){const bom='\uFEFF',lines=['Anfragen Export – Rohat\n'];sessions.forEach(s=>{lines.push('Datum: '+s.datum+' | Uhrzeit: '+s.uhrzeit);lines.push('Name,Status,Abholdatum,Abholzeit,Formular erhalten,Formular weitergeleitet,Tische,Stühle,Bemerkung');s.personen.filter(p=>p.name.trim()).forEach(p=>{lines.push([p.name,p.status,p.abh_datum||'',p.abh_zeit?fmtTime(p.abh_zeit):'',p.fe,p.fw,p.tische||0,p.stuehle||0,p.bem].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));});lines.push('');});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bom+lines.join('\n')],{type:'text/csv;charset=utf-8;'}));a.download='Anfragen_Rohat.csv';a.click();toast('CSV exportiert ✓');}
-let toastTimer;
-function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2400);}
+
 document.addEventListener('click', e => {
-  if (!e.target.closest('.jn-cell')) document.querySelectorAll('.jn-dropdown.open').forEach(d => d.classList.remove('open'));
-  if (!e.target.closest('.mpick-panel') && !e.target.closest('.mpick-trigger')) mpickClose();
+  if (!e.target.closest('.jn-cell')) {
+    document.querySelectorAll('.jn-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+  if (!e.target.closest('.mpick-panel') && !e.target.closest('.mpick-trigger')) {
+    mpickClose();
+  }
 });
 window.addEventListener('scroll', e => {
   document.querySelectorAll('.jn-dropdown.open').forEach(d => d.classList.remove('open'));
@@ -1674,8 +1569,9 @@ window.addEventListener('scroll', e => {
     mpickClose();
   }
 }, true);
-document.getElementById('newUhrzeit').addEventListener('keydown',e=>{if(e.key==='Enter')addSession();});
-document.getElementById('newDatum').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('newUhrzeit').focus();});
+
+document.getElementById('newUhrzeit').addEventListener('keydown', e => { if (e.key==='Enter') addSession(); });
+document.getElementById('newDatum').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('newUhrzeit').focus(); });
 
 // ── URL-Parameter ?claimVerkauf=<id> (von index.html „Integrieren") ──
 (function readVaiClaimParam() {
@@ -1686,7 +1582,7 @@ document.getElementById('newDatum').addEventListener('keydown',e=>{if(e.key==='E
   } catch(_) {}
 })();
 
-// Manuelles Toggle merken
+// Manuelles Toggle merken, damit Default-Open nicht überschrieben wird
 document.addEventListener('click', ev => {
   const hdr = ev.target.closest('#vaiSection .vai-hdr');
   if (hdr) { document.getElementById('vaiSection').dataset.userToggled = '1'; }
@@ -1701,37 +1597,69 @@ initFirebase();
   const targetName = hash.replace('#highlight=', '').trim().toLowerCase();
   if (!targetName) return;
 
+  // Warten bis Firebase geladen hat, dann Zeile suchen und markieren
   let attempts = 0;
   const tryHighlight = setInterval(function() {
     attempts++;
+    // Alle Name-Inputs durchsuchen
     const inputs = document.querySelectorAll('td input[type=text]');
     for (var i = 0; i < inputs.length; i++) {
       if ((inputs[i].value || '').trim().toLowerCase() === targetName) {
         clearInterval(tryHighlight);
+        const row = inputs[i].closest('tr');
         const card = inputs[i].closest('.session-card');
+        // Session aufklappen falls collapsed
         if (card && card.classList.contains('collapsed')) {
           const sid = parseInt(card.dataset.id);
           if (sid) toggleCollapse(sid);
         }
+        // Scrollen
         setTimeout(function() {
           inputs[i].closest('tr').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Highlight-Animation
           const tr = inputs[i].closest('tr');
           tr.style.transition = 'background 0.3s';
-          tr.style.background = 'rgba(52,199,89,0.18)';
-          tr.style.outline = '2px solid #34c759';
+          tr.style.background = 'rgba(0,113,227,0.18)';
+          tr.style.outline = '2px solid #0071e3';
           tr.style.borderRadius = '6px';
+          // Nach 5 Sekunden zurücksetzen
           setTimeout(function() {
             tr.style.background = '';
             tr.style.outline = '';
           }, 5000);
+          // Hash entfernen damit Reload nicht wieder highlightet
           history.replaceState(null, '', window.location.pathname);
         }, 300);
         return;
       }
     }
-    if (attempts > 20) clearInterval(tryHighlight);
+    if (attempts > 20) clearInterval(tryHighlight); // max 2s warten
   }, 100);
 })();
+</script>
+
+<script>
+// Override OWNER with dynamic data and update UI
+if (_ownerId) {
+  firebase.database().ref('stollbergMitarbeiter/' + _ownerId).once('value').then(snap => {
+    const emp = snap.val();
+    if (emp) {
+      OWNER = _ownerId;
+      const tag = document.getElementById('ownerTag');
+      if (tag) tag.textContent = emp.name || _ownerId;
+      const nameSpan = document.getElementById('newTerminOwnerName');
+      if (nameSpan) nameSpan.textContent = emp.name || _ownerId;
+      document.title = 'Anfragen · ' + (emp.name || _ownerId);
+      if (emp.color) {
+        document.documentElement.style.setProperty('--owner-color', emp.color);
+        const ownerTagEl = document.getElementById('ownerTag');
+        if (ownerTagEl) ownerTagEl.style.background = emp.color;
+      }
+    } else {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;"><div style="text-align:center;"><h2>Mitarbeiter nicht gefunden</h2><p style="color:#6e6e73;margin-top:8px;">Zurück zum <a href="/stollberg/index.html">Dashboard</a></p></div></div>';
+    }
+  }).catch(e => console.error('Employee load error:', e));
+}
 </script>
 </body>
 </html>

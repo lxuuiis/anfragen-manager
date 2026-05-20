@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>IAV Möbelmarkt Stollberg</title>
+<link rel="stylesheet" href="../shared.css"/>
+<style>
+  :root { --accent:#0071e3; --accent-light:#e8f1fd; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg,#f5f5f7);color:var(--ink,#1c1c1e);min-height:100vh;}
+  header{background:var(--bg,#fff);border-bottom:1px solid var(--border,#e0e0e0);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+  .logo{font-size:16px;font-weight:700;color:var(--ink,#1c1c1e);}
+  .logo span{color:var(--accent);}
+  .header-right{display:flex;align-items:center;gap:10px;}
+  .btn-sm{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-ghost{background:transparent;border:1.5px solid var(--border,#e0e0e0);color:var(--ink,#1c1c1e);}
+  .btn-primary:hover{opacity:.88;} .btn-ghost:hover{background:var(--bg-2,#f5f5f7);}
+  main{max-width:1060px;margin:0 auto;padding:32px 24px;}
+  .page-title{font-size:22px;font-weight:700;margin-bottom:4px;}
+  .page-sub{font-size:13px;color:var(--ink-3,#6e6e73);margin-bottom:28px;}
+  /* ── Quick Links ── */
+  .quick-links{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:36px;}
+  .ql-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;border:1.5px solid var(--border,#e0e0e0);background:var(--bg,#fff);color:var(--ink,#1c1c1e);transition:box-shadow .15s;}
+  .ql-btn:hover{box-shadow:0 2px 10px rgba(0,0,0,.1);}
+  .ql-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+  /* ── Employees ── */
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .section-title{font-size:15px;font-weight:700;}
+  .employee-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:40px;}
+  .emp-card{background:var(--bg,#fff);border:1px solid var(--border,#e0e0e0);border-radius:14px;padding:22px 20px;position:relative;transition:box-shadow .15s;}
+  .emp-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);}
+  .emp-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;margin-bottom:14px;flex-shrink:0;}
+  .emp-name{font-size:16px;font-weight:700;margin-bottom:4px;}
+  .emp-email{font-size:12px;color:var(--ink-3,#6e6e73);margin-bottom:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .emp-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .emp-link{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;background:var(--accent-light);color:var(--accent);transition:opacity .15s;}
+  .emp-link:hover{opacity:.8;}
+  .emp-del{position:absolute;top:12px;right:12px;background:none;border:none;cursor:pointer;color:var(--ink-3,#6e6e73);padding:4px;border-radius:6px;display:flex;align-items:center;}
+  .emp-del:hover{background:#fee2e2;color:#dc2626;}
+  .emp-add-card{border:2px dashed var(--border,#e0e0e0);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:140px;color:var(--ink-3,#6e6e73);font-size:13px;font-weight:500;transition:border-color .15s,color .15s;}
+  .emp-add-card:hover{border-color:var(--accent);color:var(--accent);}
+  .emp-add-card svg{opacity:.6;}
+  .emp-count-badge{font-size:11px;color:var(--ink-3,#6e6e73);font-weight:500;margin-left:8px;}
+  /* ── Abholungen ── */
+  .abh-section{margin-bottom:40px;}
+  .abh-empty{color:var(--ink-3,#6e6e73);font-size:13px;padding:16px 0;}
+  .abh-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .abh-table th{text-align:left;padding:8px 12px;color:var(--ink-3,#6e6e73);font-weight:600;border-bottom:1px solid var(--border,#e0e0e0);white-space:nowrap;}
+  .abh-table td{padding:9px 12px;border-bottom:1px solid var(--border,#e0e0e0);}
+  .abh-table tr:last-child td{border-bottom:none;}
+  .status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;flex-shrink:0;}
+  /* ── Archiv ── */
+  .archiv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .arch-card{background:var(--bg,#fff);border:1px solid var(--border,#e0e0e0);border-radius:12px;padding:14px 16px;font-size:13px;display:flex;flex-direction:column;gap:6px;}
+  .arch-owner{font-size:11px;color:var(--ink-3,#6e6e73);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
+  .arch-name{font-weight:600;font-size:14px;}
+  .arch-date{font-size:12px;color:var(--ink-3,#6e6e73);}
+  .arch-moebel{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;}
+  .arch-chip{background:var(--chip-bg,#f2f2f7);color:var(--ink-2,#3c3c43);border-radius:8px;padding:3px 8px;font-size:11px;font-weight:500;}
+  .arch-bem{font-size:11px;color:var(--ink-3,#6e6e73);font-style:italic;margin-top:2px;border-top:1px solid var(--border,#e0e0e0);padding-top:6px;}
+  .arch-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .arch-pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border,#e0e0e0);background:transparent;color:var(--ink,#1c1c1e);}
+  .arch-pill.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  /* ── Modal ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .modal-overlay.open{opacity:1;pointer-events:all;}
+  .modal-box{background:var(--bg,#fff);border-radius:16px;padding:30px;max-width:380px;width:90%;box-shadow:0 16px 60px rgba(0,0,0,.2);transform:scale(.96);transition:transform .2s;}
+  .modal-overlay.open .modal-box{transform:scale(1);}
+  .modal-title{font-size:16px;font-weight:700;margin-bottom:20px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--ink-3,#6e6e73);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .field input,.field select{width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid var(--border,#e0e0e0);font-size:14px;font-family:inherit;background:var(--bg,#fff);color:var(--ink,#1c1c1e);outline:none;}
+  .field input:focus,.field select:focus{border-color:var(--accent);}
+  .color-options{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .color-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s;}
+  .color-swatch.selected{border-color:var(--ink,#1c1c1e);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+  .tag-limit{font-size:12px;color:#f59e0b;margin-top:8px;display:none;}
+
+  /* ── Verkaufsanfragen ── */
+  .va-section{margin-bottom:36px;}
+  .va-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .va-count{font-size:11px;font-weight:700;background:var(--surface3,#e5e5ea);color:var(--ink-3,#6e6e73);border-radius:20px;padding:2px 9px;margin-left:8px;}
+  .va-count.has-pending{background:linear-gradient(135deg,#5B2FE5,#7C3AED);color:#fff;box-shadow:0 2px 8px rgba(91,47,229,.35);}
+  .va-empty{font-size:13px;color:var(--ink-3,#6e6e73);padding:20px 0;text-align:center;}
+  .va-card{display:flex;align-items:stretch;gap:14px;padding:14px 16px;border:1px solid var(--border,#e0e0e0);border-radius:12px;background:var(--bg,#fff);margin-bottom:10px;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s,border-color .15s;}
+  .va-card:last-child{margin-bottom:0;}
+  .va-card:hover{transform:translateY(-1px);box-shadow:0 8px 24px -12px rgba(91,47,229,.25);border-color:rgba(91,47,229,.35);}
+  .va-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#5B2FE5,#7C3AED);}
+  .va-card.claimed::before{background:var(--accent,#0071e3);}
+  .va-card.claimed{background:var(--surface2,#f5f5f7);}
+  .va-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#5B2FE5,#7C3AED);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px -4px rgba(91,47,229,.5);}
+  .va-card.claimed .va-avatar{background:var(--accent,#0071e3);box-shadow:none;opacity:.85;}
+  .va-card-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
+  .va-card-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .va-card-name{font-size:14px;font-weight:700;color:var(--ink,#1c1c1e);}
+  .va-card-mail{font-size:11.5px;color:var(--ink-3,#6e6e73);background:var(--surface2,#f5f5f7);border:1px solid var(--border,#e0e0e0);padding:2px 8px;border-radius:12px;text-decoration:none;}
+  .va-card-time{font-size:11px;color:var(--ink-3,#6e6e73);margin-left:auto;display:inline-flex;align-items:center;gap:4px;}
+  .va-termin-badge{background:linear-gradient(135deg,#5B2FE5,#7C3AED);color:#fff;border-radius:8px;padding:3px 10px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+  .va-moebel{display:flex;flex-wrap:wrap;gap:5px;}
+  .va-m-chip{font-size:11px;background:var(--surface2,#f5f5f7);color:var(--ink-2,#3c3c43);border-radius:6px;padding:3px 9px;border:1px solid var(--border,#e0e0e0);font-weight:500;}
+  .va-notiz{font-size:12px;color:var(--ink-2,#3c3c43);font-style:italic;padding:5px 10px;background:var(--surface2,#f5f5f7);border-radius:6px;border-left:2px solid var(--border,#e0e0e0);}
+  .va-proposal-line{margin-top:6px;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;}
+  .va-proposal-line.pending{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;}
+  .va-proposal-line.accepted{background:#dcfce7;color:#166534;border:1px solid #86efac;}
+  .va-proposal-line.rejected{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;}
+  .va-actions{display:flex;flex-direction:column;gap:6px;align-items:stretch;flex-shrink:0;min-width:140px;}
+  .va-btn{padding:7px 12px;border-radius:7px;border:1px solid var(--border,#e0e0e0);background:var(--bg,#fff);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.15s;color:var(--ink,#1c1c1e);}
+  .va-btn:hover{border-color:var(--accent,#0071e3);color:var(--accent,#0071e3);}
+  .va-btn.primary{background:linear-gradient(135deg,#5B2FE5,#7C3AED);border-color:transparent;color:#fff;}
+  .va-btn.primary:hover{opacity:.92;color:#fff;}
+  .va-btn.ghost{color:var(--ink-3,#6e6e73);background:transparent;border-color:transparent;font-size:11px;padding:4px 8px;}
+  .va-btn.ghost:hover{color:#dc2626;background:var(--surface2,#f5f5f7);}
+  .va-pulse{position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:50%;background:#5B2FE5;box-shadow:0 0 0 0 rgba(91,47,229,.6);animation:vapulse 1.6s infinite;}
+  .va-card.claimed .va-pulse{display:none;}
+  @keyframes vapulse{0%,100%{box-shadow:0 0 0 0 rgba(91,47,229,.6)}70%{box-shadow:0 0 0 7px rgba(91,47,229,0)}}
+  .va-claimed-by{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--accent-light,#e8f1fd);color:var(--accent,#0071e3);}
+  @media(max-width:600px){.va-card{flex-wrap:wrap;}.va-actions{width:100%;flex-direction:row;flex-wrap:wrap;}.va-actions .va-btn{flex:1;}}
+</style>
+</head>
+<body>
+<script src="/stollberg/auth.js"></script>
+<script>if(typeof theme!=='undefined')theme.apply?.();if(typeof window.applyTheme==='function')applyTheme();</script>
+<script src="../theme.js"></script>
+
+<header>
+  <div class="logo">IAV Möbelmarkt <span>Stollberg</span></div>
+  <div class="header-right">
+    <button class="btn-sm btn-ghost" id="themeToggle">🌙</button>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub" id="datumSub">Heute lädt…</div>
+
+  <div class="quick-links">
+    <a href="/stollberg/moebel.html" class="ql-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      Möbel-Übersicht
+    </a>
+    <a href="/stollberg/verkauf.html" class="ql-btn primary" target="_blank" rel="noopener">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      Zur Verkaufs-Seite
+    </a>
+  </div>
+
+  <!-- Employees -->
+  <div class="section-head">
+    <div>
+      <span class="section-title">Mitarbeiter</span>
+      <span class="emp-count-badge" id="empCountBadge"></span>
+    </div>
+    <button class="btn-sm btn-primary" id="addEmpBtn" onclick="openAddModal()">+ Hinzufügen</button>
+  </div>
+  <div class="tag-limit" id="limitMsg">Maximal 3 Mitarbeiter erlaubt.</div>
+  <div class="employee-grid" id="empGrid">
+    <div class="emp-card" style="display:flex;align-items:center;justify-content:center;min-height:140px;font-size:13px;color:var(--ink-3,#6e6e73);">Lädt…</div>
+  </div>
+
+  <!-- Verkaufsanfragen -->
+  <div class="va-section">
+    <div class="va-head">
+      <span class="section-title">
+        Eingehende Verkaufsanfragen
+        <span class="va-count" id="vaCount">0</span>
+      </span>
+    </div>
+    <div id="vaList"><p class="va-empty">Lädt…</p></div>
+  </div>
+
+  <!-- Abholungen -->
+  <div class="abh-section">
+    <div class="section-head">
+      <span class="section-title">Bevorstehende Abholungen</span>
+    </div>
+    <div id="abhSection"></div>
+  </div>
+
+  <!-- Archiv -->
+  <div>
+    <div class="section-head"><span class="section-title">Archiv</span></div>
+    <div class="arch-filter" id="archFilter"></div>
+    <div id="archivSection"></div>
+  </div>
+</main>
+
+<!-- Add Employee Modal -->
+<div class="modal-overlay" id="empModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-title">Mitarbeiter hinzufügen</div>
+    <div class="field">
+      <label>Name *</label>
+      <input type="text" id="empNameInput" placeholder="z.B. Anna Müller" maxlength="40"/>
+    </div>
+    <div class="field">
+      <label>E-Mail (optional)</label>
+      <input type="email" id="empMailInput" placeholder="anna@iav.de"/>
+    </div>
+    <div class="field">
+      <label>Farbe</label>
+      <div class="color-options" id="colorOptions"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm btn-ghost" onclick="closeModal()">Abbrechen</button>
+      <button class="btn-sm btn-primary" onclick="saveEmployee()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1c1c1e;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9999;"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const FB_CFG = {
+  apiKey:            "AIzaSyB1-Jz8C2-Ef_4XhToct78K-YM_JFVAxmA",
+  authDomain:        "manager-3cf2b.firebaseapp.com",
+  databaseURL:       "https://manager-3cf2b-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "manager-3cf2b",
+  storageBucket:     "manager-3cf2b.firebasestorage.app",
+  messagingSenderId: "55315892331",
+  appId:             "1:55315892331:web:9889b92c74e535a85a892e"
+};
+const COLORS = ['#0071e3','#34c759','#ff3b30','#ff9500','#af52de','#00bcd4','#795548','#607d8b'];
+let _db = null;
+let _employees = {}; // {id: {name,color,email,createdAt}}
+let _sessions  = {}; // stollbergSessions flat
+let _archiv    = {}; // stollbergArchiv
+let _verkaufAnfragen = [];
+let _selectedColor = COLORS[0];
+let _archFilter = 'all';
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+let _toastTimer;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>el.style.opacity='0',2300);
+}
+
+// Theme toggle
+(function(){
+  const btn=document.getElementById('themeToggle');
+  if(!btn)return;
+  const update=()=>{const d=document.documentElement.getAttribute('data-theme')==='dark';btn.textContent=d?'☀️':'🌙';};
+  update();
+  btn.onclick=()=>{const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'light':'dark');localStorage.setItem('theme',d?'light':'dark');update();};
+  const stored=localStorage.getItem('theme');
+  if(stored){document.documentElement.setAttribute('data-theme',stored);update();}
+})();
+
+// Date display
+(function(){
+  const el=document.getElementById('datumSub');
+  if(!el)return;
+  const d=new Date();
+  el.textContent=d.toLocaleDateString('de-DE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+})();
+
+// Firebase init
+try {
+  const app = firebase.initializeApp(FB_CFG);
+  _db = firebase.database(app);
+
+  _db.ref('stollbergMitarbeiter').on('value', snap => {
+    _employees = snap.val() || {};
+    renderEmployees();
+  });
+
+  _db.ref('stollbergSessions').on('value', snap => {
+    _sessions = snap.val() || {};
+    renderAbholungen();
+  });
+
+  _db.ref('stollbergArchiv').on('value', snap => {
+    _archiv = snap.val() || {};
+    renderArchiv();
+  });
+
+  _db.ref('stollbergVerkaufAnfragen').on('value', snap => {
+    _verkaufAnfragen = snap.val() ? Object.values(snap.val()) : [];
+    renderVerkaufAnfragen();
+  });
+} catch(e) { console.error('Firebase error:', e); }
+
+/* ── Color Swatches ── */
+function buildColorOptions(){
+  const wrap=document.getElementById('colorOptions');
+  if(!wrap)return;
+  wrap.innerHTML=COLORS.map(c=>`<div class="color-swatch${c===_selectedColor?' selected':''}" style="background:${esc(c)}" onclick="selectColor('${esc(c)}')" title="${esc(c)}"></div>`).join('');
+}
+function selectColor(c){
+  _selectedColor=c;
+  document.querySelectorAll('.color-swatch').forEach(el=>{
+    el.classList.toggle('selected',el.style.background===c||el.title===c);
+  });
+}
+
+/* ── Employee Modal ── */
+function openAddModal(){
+  const count = Object.keys(_employees).length;
+  if(count>=3){toast('Maximal 3 Mitarbeiter erlaubt.');document.getElementById('limitMsg').style.display='block';return;}
+  document.getElementById('limitMsg').style.display='none';
+  document.getElementById('empNameInput').value='';
+  document.getElementById('empMailInput').value='';
+  _selectedColor=COLORS[Object.keys(_employees).length % COLORS.length];
+  buildColorOptions();
+  document.getElementById('empModal').classList.add('open');
+  setTimeout(()=>document.getElementById('empNameInput').focus(),100);
+}
+function closeModal(){
+  document.getElementById('empModal').classList.remove('open');
+}
+function saveEmployee(){
+  const name=(document.getElementById('empNameInput').value||'').trim();
+  const mail=(document.getElementById('empMailInput').value||'').trim();
+  if(!name){document.getElementById('empNameInput').focus();toast('Bitte Namen eingeben');return;}
+  const count=Object.keys(_employees).length;
+  if(count>=3){toast('Maximal 3 Mitarbeiter erlaubt.');return;}
+  if(!_db){toast('Keine Firebase-Verbindung');return;}
+  const id='emp_'+Date.now();
+  _db.ref('stollbergMitarbeiter/'+id).set({id,name,color:_selectedColor,email:mail,createdAt:Date.now()})
+    .then(()=>{closeModal();toast(name+' hinzugefügt ✓');})
+    .catch(e=>{console.error(e);toast('Fehler beim Speichern');});
+}
+function deleteEmployee(id){
+  const emp=_employees[id];
+  if(!emp)return;
+  if(!confirm(`${emp.name} wirklich löschen? Dieser Mitarbeiter und alle zugehörigen Sitzungsdaten werden NICHT gelöscht.`))return;
+  _db.ref('stollbergMitarbeiter/'+id).remove()
+    .then(()=>toast(emp.name+' entfernt'))
+    .catch(e=>{console.error(e);toast('Fehler');});
+}
+
+/* ── Render Employees ── */
+function renderEmployees(){
+  const grid=document.getElementById('empGrid');
+  const badge=document.getElementById('empCountBadge');
+  const btn=document.getElementById('addEmpBtn');
+  const list=Object.values(_employees).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  badge.textContent=`(${list.length}/3)`;
+  btn.style.display=list.length>=3?'none':'';
+
+  if(!list.length){
+    grid.innerHTML=`<div class="emp-add-card" onclick="openAddModal()">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Ersten Mitarbeiter hinzufügen
+    </div>`;
+    return;
+  }
+
+  let html = list.map(emp=>{
+    const initials=(emp.name||'?').split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    const email=emp.email?`<div class="emp-email">${esc(emp.email)}</div>`:`<div class="emp-email" style="color:var(--border,#e0e0e0);">–</div>`;
+    return `<div class="emp-card">
+      <button class="emp-del" onclick="deleteEmployee('${esc(emp.id)}')" title="Entfernen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="emp-avatar" style="background:${esc(emp.color||'#0071e3')}">${esc(initials)}</div>
+      <div class="emp-name">${esc(emp.name)}</div>
+      ${email}
+      <div class="emp-actions">
+        <a href="/stollberg/desktop.html?user=${esc(emp.id)}" class="emp-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Desktop öffnen
+        </a>
+      </div>
+    </div>`;
+  });
+
+  if(list.length < 3){
+    html.push(`<div class="emp-card emp-add-card" onclick="openAddModal()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Mitarbeiter hinzufügen
+    </div>`);
+  }
+
+  grid.innerHTML = html.join('');
+}
+
+/* ── Render Abholungen ── */
+function renderAbholungen(){
+  const wrap=document.getElementById('abhSection');
+  const today=new Date().toISOString().split('T')[0];
+  const rows=[];
+  Object.values(_sessions).forEach(sess=>{
+    if(!sess||!sess.personen)return;
+    sess.personen.forEach(p=>{
+      if(!p||!['Abholung','Reservierung'].includes(p.status))return;
+      if(!p.abh_datum)return;
+      rows.push({name:p.name||'–',status:p.status,datum:p.abh_datum,uhrzeit:p.abh_zeit||'–',owner:sess.owner||'–',sid:sess.id});
+    });
+  });
+  rows.sort((a,b)=>(a.datum+a.uhrzeit).localeCompare(b.datum+b.uhrzeit));
+  const upcoming=rows.filter(r=>r.datum>=today);
+
+  if(!upcoming.length){
+    wrap.innerHTML='<div class="abh-empty">Keine bevorstehenden Abholungen.</div>';
+    return;
+  }
+
+  const empMap={};Object.values(_employees).forEach(e=>empMap[e.id]=e);
+  const colDot={'Abholung':'#22c55e','Reservierung':'#f59e0b'};
+
+  wrap.innerHTML=`<table class="abh-table">
+    <thead><tr>
+      <th>Name</th><th>Datum</th><th>Uhrzeit</th><th>Status</th><th>Mitarbeiter</th>
+    </tr></thead>
+    <tbody>
+      ${upcoming.map(r=>{
+        const emp=empMap[r.owner];
+        const empHtml=emp?`<span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:${esc(emp.color||'#aaa')};display:inline-block;"></span>${esc(emp.name)}</span>`:esc(r.owner);
+        return `<tr>
+          <td><strong>${esc(r.name)}</strong></td>
+          <td>${esc(r.datum)}</td>
+          <td>${esc(r.uhrzeit)}</td>
+          <td><span class="status-dot" style="background:${esc(colDot[r.status]||'#aaa')}"></span>${esc(r.status)}</td>
+          <td>${empHtml}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+
+/* ── Render Archiv ── */
+function renderArchiv(){
+  const wrap=document.getElementById('archivSection');
+  const filterWrap=document.getElementById('archFilter');
+  const all=Object.values(_archiv).sort((a,b)=>(b.abh_datum||'').localeCompare(a.abh_datum||''));
+
+  // filter pills
+  const owners=['all',...new Set(all.map(a=>a.owner||'').filter(Boolean))];
+  const empMap={};Object.values(_employees).forEach(e=>empMap[e.id]=e);
+  filterWrap.innerHTML=owners.map(o=>{
+    const lbl=o==='all'?'Alle':(empMap[o]?.name||o);
+    return `<button class="arch-pill${_archFilter===o?' active':''}" onclick="setArchFilter('${esc(o)}')">${esc(lbl)}</button>`;
+  }).join('');
+
+  const filtered=_archFilter==='all'?all:all.filter(a=>a.owner===_archFilter);
+  if(!filtered.length){
+    wrap.innerHTML='<div class="abh-empty">Noch keine Einträge im Archiv.</div>';
+    return;
+  }
+  wrap.innerHTML=`<div class="archiv-grid">${filtered.map(a=>{
+    const emp=empMap[a.owner];
+    const empColor=emp?.color||'#aaa';
+    const empName=emp?.name||a.owner||'–';
+    const moebelList = Array.isArray(a.moebel) ? a.moebel : [];
+    const moebelChips = moebelList.map(m=>{
+      const label = m.subLabel || m.katLabel || m.sub || m.kat || 'Möbel';
+      const qty = m.qty && m.qty>1 ? ` ×${m.qty}` : '';
+      return `<span class="arch-chip">${esc(label)}${esc(qty)}</span>`;
+    }).join('');
+    const dateLine = a.abh_datum ? `${esc(a.abh_datum)}${a.abh_zeit?' · '+esc(a.abh_zeit):''}` :
+                     (a.archiviertAm ? `Archiviert am ${esc(a.archiviertAm)}` : '–');
+    return `<div class="arch-card">
+      <div class="arch-owner" style="color:${esc(empColor)}">${esc(empName)}</div>
+      <div class="arch-name">${esc(a.name||'–')}</div>
+      <div class="arch-date">${dateLine}</div>
+      ${moebelChips?`<div class="arch-moebel">${moebelChips}</div>`:''}
+      ${a.bem?`<div class="arch-bem">${esc(a.bem)}</div>`:''}
+    </div>`;
+  }).join('')}</div>`;
+}
+function setArchFilter(o){
+  _archFilter=o;
+  renderArchiv();
+}
+
+// Enter in modal
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('empModal').classList.contains('open'))saveEmployee();
+  if(e.key==='Escape'&&document.getElementById('empModal').classList.contains('open'))closeModal();
+});
+
+/* ── Verkaufsanfragen ── */
+function vaTimeAgo(ts) {
+  if (!ts) return '';
+  const diff = Math.floor((Date.now() - ts) / 60000);
+  if (diff < 1) return 'Gerade eben';
+  if (diff < 60) return diff + ' Min.';
+  const h = Math.floor(diff / 60);
+  if (h < 24) return h + ' Std.';
+  return Math.floor(h / 24) + ' Tage';
+}
+
+function renderVerkaufAnfragen() {
+  const list  = document.getElementById('vaList');
+  const count = document.getElementById('vaCount');
+  if (!list || !count) return;
+
+  const items = _verkaufAnfragen
+    .filter(x => x && (x.status === 'pending' || x.status === 'claimed'))
+    .sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+
+  const pendingCount = items.filter(x => x.status === 'pending').length;
+  count.textContent = items.length;
+  count.className = 'va-count' + (pendingCount > 0 ? ' has-pending' : '');
+
+  if (!items.length) {
+    list.innerHTML = '<p class="va-empty">Keine offenen Verkaufsanfragen.</p>';
+    return;
+  }
+
+  const empList = Object.values(_employees).sort((a,b) => (a.createdAt||0)-(b.createdAt||0));
+
+  list.innerHTML = items.map(e => {
+    const isPending = e.status === 'pending';
+    const claimedBy = e.claimedBy || '';
+    const buyer = e.buyer || {};
+    const wt    = e.wunschTermin || {};
+    const moebelChips = (e.moebel || []).map(m =>
+      '<span class="va-m-chip"><b>' + (m.qty||1) + '×</b> ' + esc(m.katLabel||m.kat||'') +
+      (m.subLabel ? ' ' + esc(m.subLabel) : '') + '</span>'
+    ).join('');
+    const initials = (buyer.name||'?').trim().split(/\s+/).slice(0,2).map(s=>s[0]||'').join('').toUpperCase() || '?';
+    const terminTxt = (wt.datum||'') + (wt.uhrzeit ? ' · ' + wt.uhrzeit : '');
+
+    let actions = '';
+    if (isPending) {
+      const claimBtns = empList.map(emp =>
+        '<button class="va-btn" style="background:' + esc(emp.color||'#0071e3') + ';border-color:' + esc(emp.color||'#0071e3') + ';color:#fff;" ' +
+        'onclick="vaClaim(\'' + esc(e.id) + '\',\'' + esc(emp.id) + '\')">' + esc(emp.name) + ' übernimmt</button>'
+      ).join('');
+      actions = claimBtns + '<button class="va-btn ghost" onclick="vaReject(\'' + esc(e.id) + '\')">Ablehnen</button>';
+    } else {
+      const claimedEmp = _employees[claimedBy];
+      const empName = claimedEmp ? claimedEmp.name : claimedBy;
+      const empColor = claimedEmp ? claimedEmp.color : '#0071e3';
+      actions =
+        '<span class="va-claimed-by" style="background:' + esc(empColor) + '1a;color:' + esc(empColor) + '">' + esc(empName) + '</span>' +
+        '<button class="va-btn primary" onclick="vaIntegrate(\'' + esc(e.id) + '\',\'' + esc(claimedBy) + '\')">Integrieren →</button>' +
+        '<button class="va-btn ghost" onclick="vaRelease(\'' + esc(e.id) + '\')">Freigeben</button>';
+    }
+
+    const pt = e.proposedTermin;
+    const cr = e.customerResponse;
+    let proposalLine = '';
+    if (pt && pt.datum) {
+      const ptStr = esc(pt.datum + (pt.uhrzeit ? ' · ' + pt.uhrzeit : ''));
+      if (cr === 'accepted') {
+        proposalLine = '<div class="va-proposal-line accepted">✓ Käufer hat neuen Termin (' + ptStr + ') <b>bestätigt</b></div>';
+      } else if (cr === 'rejected') {
+        proposalLine = '<div class="va-proposal-line rejected">✗ Käufer hat Vorschlag (' + ptStr + ') <b>abgelehnt</b></div>';
+      } else {
+        proposalLine = '<div class="va-proposal-line pending">⏳ Vorschlag (' + ptStr + ') wartet auf Käufer-Antwort</div>';
+      }
+    }
+
+    return '<div class="va-card ' + (isPending ? 'pending' : 'claimed') + '">' +
+      (isPending ? '<div class="va-pulse"></div>' : '') +
+      '<div class="va-avatar">' + esc(initials) + '</div>' +
+      '<div class="va-card-body">' +
+        '<div class="va-card-head">' +
+          '<span class="va-card-name">' + esc(buyer.name||'–') + '</span>' +
+          (buyer.email ? '<a class="va-card-mail" href="mailto:' + esc(buyer.email) + '">' + esc(buyer.email) + '</a>' : '') +
+          (terminTxt ? '<span class="va-termin-badge">' + esc(terminTxt) + '</span>' : '') +
+          '<span class="va-card-time">' + vaTimeAgo(e.createdAt) + '</span>' +
+        '</div>' +
+        (moebelChips ? '<div class="va-moebel">' + moebelChips + '</div>' : '') +
+        (e.notiz ? '<div class="va-notiz">„' + esc(e.notiz) + '"</div>' : '') +
+        proposalLine +
+      '</div>' +
+      '<div class="va-actions">' + actions + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function vaClaim(id, empId) {
+  if (!_db) return;
+  _db.ref('stollbergVerkaufAnfragen/' + id).update({ status: 'claimed', claimedBy: empId })
+    .then(() => {
+      const emp = _employees[empId];
+      toast((emp ? emp.name : empId) + ' übernimmt ✓');
+    })
+    .catch(err => toast('Fehler: ' + err.message));
+}
+function vaReject(id) {
+  if (!_db) return;
+  const reason = prompt('Warum wird die Anfrage abgelehnt?\n(Kurzer Grund — wird dem Käufer per Mail mitgeteilt)\n\nLeer lassen, um ohne Begründung abzulehnen.', '');
+  if (reason === null) return;
+  _db.ref('stollbergVerkaufAnfragen/' + id).update({ status: 'rejected', rejectReason: reason || '' })
+    .then(() => {
+      toast('Anfrage abgelehnt');
+      fetch('/api/stollberg/sendNotification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ anfrageId: id, type: 'rejected', reason: reason || '' })
+      }).catch(err => console.warn('Reject mail failed:', err));
+    })
+    .catch(err => toast('Fehler: ' + err.message));
+}
+function vaRelease(id) {
+  if (!_db) return;
+  _db.ref('stollbergVerkaufAnfragen/' + id).update({ status: 'pending', claimedBy: null })
+    .then(() => toast('Freigegeben'))
+    .catch(err => toast('Fehler: ' + err.message));
+}
+function vaIntegrate(id, empId) {
+  if (!empId) { toast('Fehler: Kein Mitarbeiter zugewiesen'); return; }
+  window.location.href = '/stollberg/desktop.html?user=' + encodeURIComponent(empId) + '&claimVerkauf=' + encodeURIComponent(id);
+}
+</script>
+</body>
+</html>
